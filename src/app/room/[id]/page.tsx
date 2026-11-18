@@ -8,7 +8,7 @@ import { Fog } from "@/components/hotel/Fog";
 import { StatusWindow } from "@/components/hotel/StatusWindow";
 import { Acts } from "@/components/hotel/Acts";
 
-const ROOMS = rooms as Room[];
+const ROOMS = rooms as unknown as Room[];
 
 export function generateStaticParams() {
   return ROOMS.map((r) => ({ id: r.id }));

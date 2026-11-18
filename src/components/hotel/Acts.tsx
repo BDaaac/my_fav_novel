@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { motion, useScroll, useSpring } from "motion/react";
 import { Fog } from "./Fog";
 
-type Act = { title: string; text: string; ch: [number, number] };
+type Act = { title: string; text: string; ch: number[] };
 
 /** Ход событий по актам, вдоль латунной «трассирующей» линии. */
 export function Acts({ acts, accent }: { acts: Act[]; accent: string }) {
