@@ -1,58 +1,16 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
+import { useArt } from "./artfiles";
 import { AnimatePresence, motion } from "motion/react";
 import { FAMILY_PHOTOS, RUN1, nameOf } from "./data";
-import { FamilyPortrait, Wallpaper } from "./art";
-import { Ch, STAGE, stageOf, useInfection } from "./infection";
-import { Mad, MadTitle } from "./mad";
+import { Wallpaper } from "./art";
+import { Ch, stageOf, useInfection } from "./infection";
+import { Mad } from "./mad";
 import { cn } from "@/lib/utils";
 
-/** Прихожая: обои, портрет семьи над комодом, ключ 101 на гвозде. */
-export function Hero() {
-  const { level, add } = useInfection();
-  return (
-    <section className="relative flex min-h-screen flex-col overflow-hidden bg-[var(--paper)] text-[var(--ink)] transition-colors duration-1000">
-      <Wallpaper />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_35%,transparent_30%,rgba(60,30,10,0.45))]" />
-      <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col items-center px-6 pb-16 pt-24">
-        <div className="font-system text-[12px] tracking-[0.3em] text-[var(--accent)]">КОМНАТА ПРОКЛЯТИЙ · 1-Й ЭТАЖ · №101</div>
-        <MadTitle text="Странная семья" alt="Наш дом" className="mt-4 text-[var(--ink)]" />
-        <Mad as="div" text="{Комната,|Дом,} где тебя всегда ждут к ужину" className="mt-1 font-hand text-3xl text-[var(--accent)] md:text-4xl" />
-
-        <div className="mt-10 grid w-full items-end gap-10 md:grid-cols-[1fr_340px_1fr]">
-          <Mad
-            className="font-display text-[19px] leading-relaxed md:text-right"
-            text="Каждый гость просыпается в своей семье. Мама будит к завтраку, сестрёнка зовёт гулять, и всё было бы хорошо, только родные ведут себя всё {безумнее.|заботливее.} Чем дольше рядом с ними, тем легче принять это за норму и забыть отель."
-          />
-          <div className="relative mx-auto aspect-[4/5] w-[280px] md:w-[340px]">
-            <FamilyPortrait onLook={() => add(2)} />
-          </div>
-          <KeyTag />
-        </div>
-        {/* комод */}
-        <div className="relative mt-[-6px] h-20 w-full max-w-3xl rounded-t-md bg-gradient-to-b from-[#6b4526] to-[#3d2512] shadow-[0_20px_40px_rgba(40,20,5,0.5)]">
-          <div className="absolute inset-x-6 top-4 grid grid-cols-3 gap-4">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="flex h-10 items-center justify-center rounded-sm border border-[#2a170a]/60 bg-[#5a3a1e]">
-                <span className="h-2 w-8 rounded-full bg-[#c9a227]/80" />
-              </div>
-            ))}
-          </div>
-        </div>
-        <motion.div
-          className="mt-14 font-system text-[11px] tracking-[0.25em] text-[var(--accent)]"
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 2.4, repeat: Infinity }}
-        >
-          {level >= STAGE.critical ? "НЕ УХОДИ" : "ЛИСТАЙТЕ ВНИЗ · ЗАХОД 1"}
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
 /** Ключ на гвозде: бирка с двумя сторонами — «Угроза» и «Итог». */
-function KeyTag() {
+export function KeyTag() {
   const [side, setSide] = useState<"threat" | "result">("threat");
   const rows: [string, React.ReactNode][] =
     side === "threat"
@@ -142,6 +100,9 @@ function Polaroid({ p, tilt }: { p: (typeof FAMILY_PHOTOS)[number]; tilt: number
   const [flipped, setFlipped] = useState(false);
   const { level, add } = useInfection();
   const s = stageOf(level);
+  const art = useArt();
+  const front = art(`album-${p.who}`);
+  const back = art(`album-${p.who}-truth`);
   return (
     <button
       onClick={() => {
@@ -155,24 +116,41 @@ function Polaroid({ p, tilt }: { p: (typeof FAMILY_PHOTOS)[number]; tilt: number
       <motion.div animate={{ rotateY: flipped ? 180 : 0 }} transition={{ duration: 0.6 }} className="relative h-full w-full [transform-style:preserve-3d]">
         <div className="absolute inset-0 flex flex-col bg-[#fbf6ea] p-3 pb-2 shadow-[0_8px_22px_rgba(60,30,10,0.4)] [backface-visibility:hidden]">
           <div className="relative flex-1 overflow-hidden">
-            <PhotoScene count={p.family} stage={s} escaped={p.escaped} seed={tilt} />
+            {front ? (
+              <>
+                <Image src={front} alt={p.caption} fill sizes="(min-width: 768px) 33vw, 50vw" className="object-cover transition-[filter] duration-1000" style={{ filter: PHOTO_FILTER[s] }} />
+                {/* правда просвечивает сквозь фото при высоком заражении */}
+                {back && s >= 2 && <Image src={back} alt="" fill sizes="(min-width: 768px) 33vw, 50vw" className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-60" />}
+              </>
+            ) : (
+              <PhotoScene count={p.family} stage={s} escaped={p.escaped} seed={tilt} />
+            )}
           </div>
           <div className="pt-2 text-left font-hand text-xl leading-tight text-[#3b2a1e]">
             {s >= 2 ? (p.escaped ? "Сын опять не с нами" : "Мы всегда будем вместе ♥") : p.caption}
           </div>
           <div className="text-left font-system text-[10px] text-[#8a6e52]">{nameOf(p.who)}</div>
         </div>
-        <div className="absolute inset-0 flex flex-col justify-between bg-[#efe3c8] p-4 text-left shadow-[0_8px_22px_rgba(60,30,10,0.4)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
-          <div>
+        <div className="absolute inset-0 flex flex-col justify-between overflow-hidden bg-[#efe3c8] p-4 text-left shadow-[0_8px_22px_rgba(60,30,10,0.4)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
+          {back && (
+            <>
+              <Image src={back} alt="" fill sizes="(min-width: 768px) 33vw, 50vw" className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#efe3c8] via-[#efe3c8]/85 to-[#efe3c8]/10" />
+            </>
+          )}
+          <div className={cn("relative", back && "mt-auto")}>
             <div className={cn("font-system text-[11px] uppercase tracking-widest", p.escaped ? "text-[#2f6b3a]" : "text-[#8c1c24]")}>{p.escaped ? "Побег" : "Провал"}</div>
             <p className="mt-2 font-hand text-[22px] leading-tight text-[#2a1d14]">{p.truth}</p>
           </div>
-          <div className="font-system text-[10px] text-[#8a6e52]">{p.ch}</div>
+          <div className="relative font-system text-[10px] text-[#8a6e52]">{p.ch}</div>
         </div>
       </motion.div>
     </button>
   );
 }
+
+/** Фото выцветает и краснеет вместе с заражением. */
+const PHOTO_FILTER = ["none", "saturate(1.15)", "sepia(0.3) saturate(1.4) hue-rotate(-10deg)", "sepia(0.5) saturate(1.8) hue-rotate(-20deg) contrast(1.2)", "sepia(0.7) saturate(2.4) hue-rotate(-28deg) contrast(1.4)"];
 
 function PhotoScene({ count, stage, escaped, seed }: { count: number; stage: number; escaped?: boolean; seed: number }) {
   const xs = Array.from({ length: count + 1 }, (_, i) => 30 + (i * 140) / count);
