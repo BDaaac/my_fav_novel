@@ -5,11 +5,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { Ch, stageOf, useInfection } from "./infection";
 import { Mad, MadTitle } from "./mad";
 import { useArt } from "./artfiles";
-import { KeyTag } from "./Home";
 import { cn } from "@/lib/utils";
 
 /**
- * Дом Хан Гаина (гл. 6). Тёплая комната; тронешь вещь — на секунду видно, как всё на самом деле.
+ * Дом Хан Гаина (гл. 6). Тёплая комната без подсказок; тронешь вещь — на секунду видно, как всё на самом деле.
  * Найди все странности — это и есть путь к побегу: заметить безумие.
  * at — точка на временной картинке гостиной, home — на hero-home.png из docs/art-prompts-101.md.
  */
@@ -70,7 +69,7 @@ export function Hero() {
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-80 bg-gradient-to-t from-[#140d08] via-[#140d08]/80 to-transparent" />
 
       {ODDITIES.map((o) => (
-        <Hotspot key={o.id} o={o} pos={home ? o.home : o.at} found={found.has(o.id)} open={open === o.id} stage={s} onClick={() => reveal(o)} />
+        <Hotspot key={o.id} o={o} pos={home ? o.home : o.at} open={open === o.id} stage={s} onClick={() => reveal(o)} />
       ))}
 
       <div className="pointer-events-none absolute left-6 top-8 md:left-12">
@@ -79,23 +78,13 @@ export function Hero() {
         <Mad as="div" text="{Комната,|Дом,} где тебя всегда ждут к ужину" className="font-hand text-3xl text-[#e6b980]" />
       </div>
 
-      <div className="absolute inset-x-6 bottom-8 grid items-end gap-8 md:inset-x-12 md:grid-cols-[1fr_auto]">
+      <div className="pointer-events-none absolute inset-x-6 bottom-10 md:inset-x-12">
         <div className="max-w-xl">
           <Mad
             className="font-display text-[19px] leading-relaxed text-[#efe2c8]"
             text="Каждый гость просыпается в своей семье. Хан Гаина будит мама, сестрёнка Хиган зовёт «оппой», отец ворчит с дивана. Всё было бы хорошо, только родные ведут себя всё {безумнее,|заботливее,} а отель понемногу выветривается из памяти."
           />
-          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 font-system text-[11px] tracking-wider">
-            <span className="text-[#e6b980]">ОСМОТРИТЕ ДОМ · ЖМИТЕ НА ТОЧКИ</span>
-            <span className="flex items-center gap-1.5 text-[#f6ead2]">
-              странности
-              {ODDITIES.map((o) => (
-                <span key={o.id} className={cn("h-2 w-2 rounded-full border border-[#e6b980]", found.has(o.id) && "border-[#c0333d] bg-[#c0333d]")} />
-              ))}
-            </span>
-          </div>
         </div>
-        <KeyTag />
       </div>
 
       <AnimatePresence>
@@ -122,25 +111,19 @@ export function Hero() {
   );
 }
 
-function Hotspot({ o, pos, found, open, stage, onClick }: { o: Oddity; pos: [number, number]; found: boolean; open: boolean; stage: number; onClick: () => void }) {
+function Hotspot({ o, pos, open, stage, onClick }: { o: Oddity; pos: [number, number]; open: boolean; stage: number; onClick: () => void }) {
   const left = pos[0] > 60;
   const up = pos[1] > 62;
   return (
     <div className={cn("absolute", open ? "z-20" : "z-10")} style={{ left: `${pos[0]}%`, top: `${pos[1]}%` }}>
-      <button onClick={onClick} aria-label={o.label} className="group relative block h-6 w-6 -translate-x-1/2 -translate-y-1/2">
-        <span className={cn("absolute inset-0 animate-ping rounded-full", found ? "bg-[#c0333d]/40" : "bg-[#f6ead2]/50")} />
-        <span className={cn("relative block h-6 w-6 rounded-full border-2 shadow-[0_0_12px_rgba(0,0,0,0.6)] transition-transform group-hover:scale-125", found ? "border-[#ffb4b4] bg-[#c0333d]" : "border-[#140d08]/60 bg-[#f6ead2]")} />
-        <span className="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap font-system text-[10px] tracking-wider text-[#f6ead2] opacity-0 transition-opacity [text-shadow:0_1px_6px_#000] group-hover:opacity-100">
-          {o.label}
-        </span>
-      </button>
+      <button onClick={onClick} aria-label={o.label} className="block h-36 w-36 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full" />
       <AnimatePresence>
         {open && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1, rotate: left ? 1.5 : -1.5 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className={cn("absolute w-64 bg-[#fbf3e1] p-3 text-[#2a1d14] shadow-[0_12px_30px_rgba(0,0,0,0.55)]", left ? "right-3" : "left-3", up ? "bottom-5" : "top-5")}
+            className={cn("absolute w-64 bg-[#fbf3e1] p-3 text-[#2a1d14] shadow-[0_12px_30px_rgba(0,0,0,0.55)]", left ? "right-0" : "left-0", up ? "bottom-0" : "top-0")}
           >
             <div className="flex items-baseline justify-between">
               <span className="font-system text-[10px] uppercase tracking-widest text-[#8a6e52]">{o.label}</span>

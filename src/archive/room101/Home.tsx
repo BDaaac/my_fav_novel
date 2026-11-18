@@ -1,55 +1,10 @@
 "use client";
-import { useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { RUN1 } from "./data";
 import { FamilyChat } from "./FamilyChat";
 import { Wallpaper } from "./art";
-import { Ch } from "./infection";
 import { Mad } from "./mad";
 import { cn } from "@/lib/utils";
-
-/** Сводка комнаты как окно статуса отеля: «Угроза» и «Итог». */
-export function KeyTag() {
-  const [side, setSide] = useState<"threat" | "result">("threat");
-  const rows: [string, React.ReactNode][] =
-    side === "threat"
-      ? [
-          ["Угроза", <>ментальное заражение: кто перейдёт черту, погибает внутри<Ch n={7} /></>],
-          ["Выход", <>заметить безумие и сбежать — или уничтожить Источник Проклятий<Ch n={7} /></>],
-          ["Под ним", <>Корея, сходящая с ума через эфир, и больница «Новый Мир»<Ch n="64–67" /></>],
-          ["Бог", <>Главврач «Учитель»<Ch n={78} /></>],
-        ]
-      : [
-          ["Заходы", "3 · гл. 5–11, 62–66, 67–76"],
-          ["Решатель", "Ча Джинчхоль"],
-          ["Наследие", "Осколок Звезды Иномирья"],
-          ["Статус", <>решена · пусто<Ch n={76} /></>],
-        ];
-  return (
-    <div className="w-[330px] border border-[#7fd4ff]/50 bg-[#06141c]/85 p-4 font-system text-[#7fd4ff] shadow-[0_0_30px_-10px_#7fd4ff] backdrop-blur">
-      <div className="flex items-center justify-between text-[12px]">
-        <span>[Номер 101 · сводка]</span>
-        <div className="flex text-[11px]">
-          {(["threat", "result"] as const).map((s) => (
-            <button key={s} onClick={() => setSide(s)} className={cn("border border-[#7fd4ff]/60 px-2 py-0.5 first:border-r-0", side === s ? "bg-[#7fd4ff] text-[#06141c]" : "hover:bg-[#7fd4ff]/15")}>
-              {s === "threat" ? "Угроза" : "Итог"}
-            </button>
-          ))}
-        </div>
-      </div>
-      <AnimatePresence mode="wait">
-        <motion.dl key={side} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="mt-3 space-y-2">
-          {rows.map(([k, v]) => (
-            <div key={k} className="grid grid-cols-[78px_1fr] gap-2 text-[12.5px] leading-snug">
-              <dt className="pt-px text-[10px] uppercase tracking-wider opacity-60">{k}</dt>
-              <dd className="text-[#d7f1ff]">{v}</dd>
-            </div>
-          ))}
-        </motion.dl>
-      </AnimatePresence>
-    </div>
-  );
-}
 
 /** Заход 1: семейные чаты шести домов, дальше — страницы дневника. */
 export function AlbumRun() {
