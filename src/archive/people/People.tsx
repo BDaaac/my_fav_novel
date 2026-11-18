@@ -30,11 +30,10 @@ const shortName = (c: Character) => c.name.split(" (")[0];
 
 export function People({ art }: { art: string[] }) {
   const [open, setOpen] = useState<string | null>(null);
-  const [ring, setRing] = useState(0);
   const has = (id: string) => (art.includes(`${id}.png`) ? `/art/people/${id}.png` : null);
   return (
     <main className="min-h-screen overflow-x-clip bg-[#0b0a09] pb-32 text-[#e9e1d0] [background-image:repeating-linear-gradient(90deg,transparent_0_118px,rgba(255,255,255,0.018)_118px_120px),radial-gradient(ellipse_at_50%_0%,#2a1410_0%,#0b0a09_60%)]">
-      {/* стойка регистрации: лампа, латунная табличка и звонок */}
+      {/* стойка регистрации: лампа, латунная табличка, указатель этажа и ключи */}
       <header className="relative mx-auto max-w-6xl px-6 pt-14 text-center">
         <div className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[720px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,214,140,0.22),transparent_65%)]" />
         <div className="relative mx-auto w-fit rounded-[3px] border border-[#3a2c12] bg-gradient-to-b from-[#d9b65a] via-[#b08a2e] to-[#7a5c16] px-10 py-4 shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.45)]">
@@ -46,25 +45,9 @@ export function People({ art }: { art: string[] }) {
           <div className="font-system text-[10px] tracking-[0.4em] text-[#3a2c12]">СТОЙКА РЕГИСТРАЦИИ</div>
         </div>
 
-        <div className="relative mx-auto mt-7 flex w-fit flex-wrap items-center justify-center gap-x-8 gap-y-4">
-          <dl className="flex gap-6 font-system text-[11px] tracking-widest text-[#e9e1d0]/70">
-            {[
-              ["заселено", String(GUESTS.length)],
-              ["этаж", "1"],
-            ].map(([k, v]) => (
-              <div key={k} className="text-left">
-                <dt className="text-[9px] uppercase opacity-60">{k}</dt>
-                <dd className="font-display text-2xl tracking-normal text-[#c9a227]">{v}</dd>
-              </div>
-            ))}
-          </dl>
-          {/* звонок на стойке: позвонишь — все пропуска качнутся */}
-          <button onClick={() => setRing((r) => r + 1)} aria-label="Позвонить в звонок" className="group relative h-16 w-24">
-            <motion.span key={ring} initial={{ y: 0 }} animate={ring ? { y: [0, 5, 0] } : {}} transition={{ duration: 0.25 }} className="absolute left-1/2 top-0 h-3 w-3 -translate-x-1/2 rounded-full bg-gradient-to-b from-[#f3d98a] to-[#8a6420]" />
-            <span className="absolute left-1/2 top-2.5 h-9 w-[72px] -translate-x-1/2 rounded-t-full bg-gradient-to-b from-[#f3d98a] via-[#b08a2e] to-[#6a4e14] shadow-[inset_8px_4px_10px_rgba(255,255,255,0.35)] transition group-hover:brightness-110" />
-            <span className="absolute bottom-1 left-1/2 h-2.5 w-24 -translate-x-1/2 rounded-sm bg-gradient-to-b from-[#3a2c12] to-[#1a1408]" />
-            {ring > 0 && <motion.span key={`w${ring}`} className="pointer-events-none absolute left-1/2 top-6 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#f3d98a]" initial={{ scale: 0.6, opacity: 0.8 }} animate={{ scale: 5, opacity: 0 }} transition={{ duration: 0.9 }} />}
-          </button>
+        <div className="relative mx-auto mt-8 flex w-fit flex-wrap items-end justify-center gap-x-12 gap-y-6">
+          <FloorDial />
+          <KeyRack onOpen={setOpen} />
         </div>
       </header>
 
@@ -74,7 +57,7 @@ export function People({ art }: { art: string[] }) {
           <div className="h-3 rounded-full bg-gradient-to-b from-[#6a5a3a] to-[#2a2216] shadow-[0_6px_14px_rgba(0,0,0,0.6)]" />
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 md:gap-x-10">
             {row.map((m, i) => (
-              <Badge key={m.id} m={m} c={byId(m.id)} src={has(m.id)} i={r * 4 + i} ring={ring} onOpen={() => setOpen(m.id)} />
+              <Badge key={m.id} m={m} c={byId(m.id)} src={has(m.id)} i={r * 4 + i} onOpen={() => setOpen(m.id)} />
             ))}
           </div>
         </section>
@@ -85,8 +68,71 @@ export function People({ art }: { art: string[] }) {
   );
 }
 
+/** Указатель лифта: стрелка стоит на первом этаже, остальные пока закрыты. */
+function FloorDial() {
+  const [set, setSet] = useState(false);
+  useEffect(() => {
+    const id = setTimeout(() => setSet(true), 400);
+    return () => clearTimeout(id);
+  }, []);
+  return (
+    <div className="text-center">
+      <svg viewBox="0 0 120 70" className="h-[70px] w-[120px]" aria-hidden>
+        <path d="M10 62 A50 50 0 0 1 110 62" fill="none" stroke="#c9a227" strokeWidth="2" />
+        {[
+          { n: "1", a: -60, on: true },
+          { n: "2", a: 0, on: false },
+          { n: "3", a: 60, on: false },
+        ].map((f) => (
+          <g key={f.n} transform={`rotate(${f.a} 60 62)`} opacity={f.on ? 1 : 0.3}>
+            <line x1="60" y1="12" x2="60" y2="19" stroke="#c9a227" strokeWidth="2" />
+            <text x="60" y="32" textAnchor="middle" fontSize="13" fill="#e9e1d0" fontFamily="serif" transform={`rotate(${-f.a} 60 28)`}>
+              {f.n}
+            </text>
+          </g>
+        ))}
+        {/* стрелка съезжает с третьего этажа на первый */}
+        <g style={{ transformBox: "view-box", transformOrigin: "60px 62px", transform: `rotate(${set ? -60 : 60}deg)`, transition: "transform 1.6s cubic-bezier(0.3, 1.3, 0.5, 1)" }}>
+          <line x1="60" y1="62" x2="60" y2="20" stroke="#f3d98a" strokeWidth="2.5" strokeLinecap="round" />
+        </g>
+        <circle cx="60" cy="62" r="5" fill="#c9a227" />
+      </svg>
+      <div className="mt-1 font-system text-[10px] tracking-[0.35em] text-[#e9e1d0]/60">1-Й ЭТАЖ</div>
+    </div>
+  );
+}
+
+/** Доска с ключами: по ключу на гостя. Ключ открывает досье. */
+function KeyRack({ onOpen }: { onOpen: (id: string) => void }) {
+  return (
+    <div className="text-center">
+      <div className="relative flex gap-2.5 border-t-[3px] border-[#6a5a3a] px-1 pt-0">
+        {GUESTS.map((g, i) => (
+          <motion.button
+            key={g.id}
+            onClick={() => onOpen(g.id)}
+            aria-label={`Ключ: ${shortName(byId(g.id))}`}
+            title={shortName(byId(g.id))}
+            className="group relative block h-[62px] w-4 origin-top"
+            animate={{ rotate: [-(3 + (i % 3)), 3 + (i % 3)] }}
+            transition={{ duration: 2 + (i % 4) * 0.3, repeat: Infinity, repeatType: "mirror", ease: "easeInOut", delay: i * 0.15 }}
+            whileHover={{ rotate: 10 }}
+          >
+            <span className="absolute left-1/2 top-0 h-3 w-px -translate-x-1/2 bg-[#8a7a5a]" />
+            <span className="absolute left-1/2 top-3 h-4 w-4 -translate-x-1/2 rounded-full border-[3px]" style={{ borderColor: g.ink }} />
+            <span className="absolute left-1/2 top-[26px] h-7 w-[3px] -translate-x-1/2" style={{ background: g.ink }} />
+            <span className="absolute left-1/2 top-[44px] h-[3px] w-2" style={{ background: g.ink }} />
+            <span className="absolute left-1/2 top-[50px] h-[3px] w-1.5" style={{ background: g.ink }} />
+          </motion.button>
+        ))}
+      </div>
+      <div className="mt-1 font-system text-[10px] tracking-[0.35em] text-[#e9e1d0]/60">{GUESTS.length} ГОСТЕЙ</div>
+    </div>
+  );
+}
+
 /** Пропуск на клипсе: маятник. Тянешь — раскачивается от скорости руки, отпускаешь — возвращается. */
-function Badge({ m, c, src, i, ring, onOpen }: { m: Meta; c: Character; src: string | null; i: number; ring: number; onOpen: () => void }) {
+function Badge({ m, c, src, i, onOpen }: { m: Meta; c: Character; src: string | null; i: number; onOpen: () => void }) {
   const x = useMotionValue(0);
   const idle = useMotionValue(0);
   const v = useVelocity(x);
@@ -99,14 +145,6 @@ function Badge({ m, c, src, i, ring, onOpen }: { m: Meta; c: Character; src: str
     const ctl = animate(idle, [-(1.2 + (i % 3) * 0.5), 1.2 + (i % 3) * 0.5], { duration: 2.6 + (i % 4) * 0.45, repeat: Infinity, repeatType: "mirror", ease: "easeInOut", delay: i * 0.2 });
     return () => ctl.stop();
   }, [idle, i]);
-
-  // звонок на стойке: все пропуска качнулись, каждый по-своему
-  useEffect(() => {
-    if (!ring) return;
-    const k = (i % 2 ? -1 : 1) * (10 + (i % 3) * 4);
-    const ctl = animate(swing, [swing.get(), k, -k * 0.6, k * 0.3, 0], { duration: 1.6, delay: i * 0.05 });
-    return () => ctl.stop();
-  }, [ring, swing, i]);
 
   return (
     <motion.div
