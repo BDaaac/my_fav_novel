@@ -52,17 +52,9 @@ export function Ward() {
 
   return (
     <section className="relative overflow-hidden bg-[#020606] text-[#cfeee8]">
-      <div className="relative mx-auto max-w-6xl px-6 pt-24 text-center">
-        <div className="font-system text-[12px] tracking-[0.3em] opacity-50">БОЛЬНИЦА «НОВЫЙ МИР» · 4-Й ЭТАЖ · КОНЕЦ КОРИДОРА · ГЛ. 73, 76</div>
-        <Mad
-          className="mx-auto mt-5 max-w-xl font-display text-[19px] leading-relaxed opacity-70"
-          text="Дверь последней палаты открывается в пещеру. Света нет. Что-то огромное бьётся в глубине и зовёт «Учителя». Здесь Гаин и Елена захотели съесть Сонъи."
-        />
-      </div>
-
       <div
         ref={stage}
-        className="relative mt-8 h-[92vh] min-h-[640px] cursor-none"
+        className="relative h-screen min-h-[680px] cursor-none"
         onMouseMove={(e) => {
           pos.current = { x: e.clientX, y: e.clientY };
           if (!raf.current) raf.current = requestAnimationFrame(paint);
@@ -160,6 +152,13 @@ export function Ward() {
 
         {/* свет в руке */}
         {!done && <div ref={dot} className="pointer-events-none absolute left-0 top-0 h-3 w-3 rounded-full bg-[#fff3d6] opacity-0 shadow-[0_0_30px_12px_rgba(255,240,200,0.35)] will-change-transform" />}
+
+        <div className="pointer-events-none absolute inset-x-0 top-10 px-6 text-center">
+          <div className="font-system text-[12px] tracking-[0.3em] opacity-45">ПОСЛЕДНЯЯ ПАЛАТА · ГЛ. 73, 76</div>
+          {!done && (
+            <Mad className="mx-auto mt-3 max-w-xl font-display text-[18px] leading-relaxed opacity-60" text="За дверью пещера. Света нет. Что-то огромное бьётся в глубине и зовёт «Учителя»." />
+          )}
+        </div>
 
         <div className="pointer-events-none absolute inset-x-0 bottom-6 text-center font-system text-[11px] tracking-widest opacity-50">
           {done ? "" : hits === 0 ? "ищите по пульсу · бейте" : `удары Джинчхоля · ${hits}/${HITS}`}
