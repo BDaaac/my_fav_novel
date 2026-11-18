@@ -130,7 +130,7 @@ export function Shard({ size = 1 }: { size?: number }) {
       className="relative h-44 w-44"
     >
       <div className="absolute inset-4 rounded-full bg-[#9ff5e8]/25 blur-2xl" />
-      <Image src="/art/101/shard.png" alt="Осколок Звезды Иномирья" fill sizes="176px" className="object-contain [mask-image:radial-gradient(circle_closest-side,black_55%,transparent_98%)]" />
+      <Image src="/art/101/shard.jpg" alt="Осколок Звезды Иномирья" fill sizes="176px" className="object-contain [mask-image:radial-gradient(circle_closest-side,black_55%,transparent_98%)]" />
     </motion.div>
   );
 }

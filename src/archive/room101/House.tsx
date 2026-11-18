@@ -30,7 +30,7 @@ export function House() {
   return (
     <section className="relative overflow-hidden bg-[#14161d] text-[#d8d2c4]">
       {/* гостиная ночью (ИИ-арт): свет только от телевизора */}
-      <Image src="/art/101/living.png" alt="" fill sizes="100vw" className="pointer-events-none object-cover opacity-35" />
+      <Image src="/art/101/living.jpg" alt="" fill sizes="100vw" className="pointer-events-none object-cover opacity-35" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#14161d]/40 via-[#14161d]/80 to-[#14161d]" />
       <motion.div
         className="pointer-events-none absolute left-1/2 top-40 h-[700px] w-[1100px] -translate-x-1/2 rounded-full bg-[#3a6cff]/25 blur-[120px]"
@@ -109,7 +109,7 @@ function LivingTv() {
             transition={{ type: "spring", stiffness: 40 }}
             style={{ transformOrigin: "52% 38%" }}
           >
-            <Image src="/art/101/host.png" alt="Ведущий ABS улыбается слишком широко" fill sizes="560px" className="object-cover" />
+            <Image src="/art/101/host.jpg" alt="Ведущий ABS улыбается слишком широко" fill sizes="560px" className="object-cover" />
           </motion.div>
           <Noise opacity={0.12} scanlines={0.5} flicker={0.4} />
           {snow && <div className="absolute inset-0 z-10 bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><filter id=%22n%22><feTurbulence baseFrequency=%220.9%22/></filter><rect width=%22120%22 height=%22120%22 filter=%22url(%23n)%22/></svg>')]" />}

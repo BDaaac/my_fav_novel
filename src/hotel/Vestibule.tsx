@@ -44,7 +44,7 @@ export function Vestibule({ rooms }: { rooms: RoomDoor[] }) {
     (href: string | null) => {
       if (!href) return setDenied((d) => d + 1);
       setLeaving(true);
-      setTimeout(() => router.push(href), 450);
+      setTimeout(() => router.push(href), 220);
     },
     [router],
   );
@@ -78,6 +78,10 @@ export function Vestibule({ rooms }: { rooms: RoomDoor[] }) {
     window.addEventListener("keydown", k);
     return () => window.removeEventListener("keydown", k);
   }, [view, sel, door, doors, leaving, pick, go]);
+
+  useEffect(() => {
+    ["/archive/people", "/dining", "/archive/101", "/room/105"].forEach((h) => router.prefetch(h));
+  }, [router]);
 
   const current = MENU[sel].id;
   return (
@@ -135,8 +139,8 @@ export function Vestibule({ rooms }: { rooms: RoomDoor[] }) {
 
         {/* правая часть: сцена выбранного пункта */}
         <div className="relative hidden md:block">
-          <AnimatePresence mode="wait">
-            <motion.div key={view === "menu" ? current : view} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.3 }} className="absolute inset-0 flex items-center justify-center">
+          <AnimatePresence initial={false}>
+            <motion.div key={view === "menu" ? current : view} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, transition: { duration: 0.1 } }} transition={{ duration: 0.18, ease: "easeOut" }} className="absolute inset-0 flex items-center justify-center">
               {view === "rooms" ? (
                 <RoomsStage doors={doors} door={door} setDoor={setDoor} go={go} back={() => setView("menu")} />
               ) : view === "lift" ? (
@@ -160,7 +164,7 @@ export function Vestibule({ rooms }: { rooms: RoomDoor[] }) {
       </div>
 
       {/* уход со сцены */}
-      <motion.div className="pointer-events-none absolute inset-0 z-20 bg-black" animate={{ opacity: leaving ? 1 : 0 }} transition={{ duration: 0.4 }} />
+      <motion.div className="pointer-events-none absolute inset-0 z-20 bg-black" animate={{ opacity: leaving ? 1 : 0 }} transition={{ duration: 0.2 }} />
     </main>
   );
 }
@@ -330,13 +334,12 @@ function GuestsStage() {
     <div className="relative h-[460px] w-[560px]">
       <div className="absolute inset-x-6 top-6 h-3 rounded-full bg-gradient-to-b from-[#6a5a3a] to-[#2a2216] shadow-[0_6px_14px_rgba(0,0,0,0.6)]" />
       {FACES.map((id, i) => (
-        <motion.div
+        <div
           key={id}
-          className="absolute top-8 w-[150px] origin-top"
-          style={{ left: 20 + i * 96, zIndex: i === 2 ? 5 : 3 - Math.abs(i - 2) }}
-          initial={{ rotate: (i - 2) * 9, y: -30, opacity: 0 }}
-          animate={{ rotate: [(i - 2) * 4 - 2, (i - 2) * 4 + 2], y: Math.abs(i - 2) * 14, opacity: 1 }}
-          transition={{ rotate: { duration: 2.4 + i * 0.3, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }, y: { duration: 0.5, delay: i * 0.06 }, opacity: { duration: 0.4, delay: i * 0.06 } }}
+          className="absolute top-8 w-[150px]"
+          style={{ left: 20 + i * 96, top: 32 + Math.abs(i - 2) * 14, zIndex: i === 2 ? 5 : 3 - Math.abs(i - 2), rotate: `${(i - 2) * 4}deg`, transformOrigin: "top center" }}
+        >
+          <div className="sway" style={{ "--sway": "2deg", "--sway-d": `${2.4 + i * 0.3}s`, animationDelay: `${-i * 0.5}s` } as React.CSSProperties}
         >
           <div className="mx-auto h-8 w-2.5 bg-gradient-to-b from-[#1b1712] to-[#3a3226]" />
           <div className="overflow-hidden rounded-md border border-black/60 bg-[#1a1512] shadow-[0_18px_30px_rgba(0,0,0,0.65)]">
@@ -345,7 +348,8 @@ function GuestsStage() {
               <Image src={`/art/people/${id}.jpg`} alt="" fill sizes="150px" unoptimized className="object-cover" />
             </div>
           </div>
-        </motion.div>
+          </div>
+        </div>
       ))}
     </div>
   );

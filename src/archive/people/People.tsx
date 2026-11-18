@@ -108,22 +108,20 @@ function KeyRack({ onOpen }: { onOpen: (id: string) => void }) {
     <div className="text-center">
       <div className="relative flex gap-2.5 border-t-[3px] border-[#6a5a3a] px-1 pt-0">
         {GUESTS.map((g, i) => (
-          <motion.button
+          <button
             key={g.id}
             onClick={() => onOpen(g.id)}
             aria-label={`Ключ: ${shortName(byId(g.id))}`}
             title={shortName(byId(g.id))}
-            className="group relative block h-[62px] w-4 origin-top"
-            animate={{ rotate: [-(3 + (i % 3)), 3 + (i % 3)] }}
-            transition={{ duration: 2 + (i % 4) * 0.3, repeat: Infinity, repeatType: "mirror", ease: "easeInOut", delay: i * 0.15 }}
-            whileHover={{ rotate: 10 }}
+            className="sway group relative block h-[62px] w-4 transition-[filter] hover:brightness-150"
+            style={{ "--sway": `${3 + (i % 3)}deg`, "--sway-d": `${2 + (i % 4) * 0.3}s`, animationDelay: `${-i * 0.4}s` } as React.CSSProperties}
           >
             <span className="absolute left-1/2 top-0 h-3 w-px -translate-x-1/2 bg-[#8a7a5a]" />
             <span className="absolute left-1/2 top-3 h-4 w-4 -translate-x-1/2 rounded-full border-[3px]" style={{ borderColor: g.ink }} />
             <span className="absolute left-1/2 top-[26px] h-7 w-[3px] -translate-x-1/2" style={{ background: g.ink }} />
             <span className="absolute left-1/2 top-[44px] h-[3px] w-2" style={{ background: g.ink }} />
             <span className="absolute left-1/2 top-[50px] h-[3px] w-1.5" style={{ background: g.ink }} />
-          </motion.button>
+          </button>
         ))}
       </div>
       <div className="mt-1 font-system text-[10px] tracking-[0.35em] text-[#e9e1d0]/60">{GUESTS.length} ГОСТЕЙ</div>
@@ -134,23 +132,14 @@ function KeyRack({ onOpen }: { onOpen: (id: string) => void }) {
 /** Пропуск на клипсе: маятник. Тянешь — раскачивается от скорости руки, отпускаешь — возвращается. */
 function Badge({ m, c, src, i, paused, onOpen }: { m: Meta; c: Character; src: string | null; i: number; paused: boolean; onOpen: () => void }) {
   const x = useMotionValue(0);
-  const idle = useMotionValue(0);
   const v = useVelocity(x);
   const swing = useSpring(useTransform(v, [-1500, 1500], [28, -28]), { stiffness: 60, damping: 5, mass: 1.2 });
-  const rotate = useTransform([swing, idle], ([a, b]: number[]) => a + b);
   const [dragged, setDragged] = useState(false);
-
-  // лёгкое собственное покачивание, у каждого в своём ритме
-  useEffect(() => {
-    if (paused) return;
-    const ctl = animate(idle, [-(1.2 + (i % 3) * 0.5), 1.2 + (i % 3) * 0.5], { duration: 2.6 + (i % 4) * 0.45, repeat: Infinity, repeatType: "mirror", ease: "easeInOut", delay: i * 0.2 });
-    return () => ctl.stop();
-  }, [idle, i, paused]);
 
   return (
     <motion.div
-      className="relative mx-auto w-full max-w-[240px] origin-top cursor-grab touch-none select-none pt-10 active:cursor-grabbing"
-      style={{ x, rotate }}
+      className="relative mx-auto w-full max-w-[240px] origin-top cursor-grab touch-none select-none will-change-transform active:cursor-grabbing"
+      style={{ x, rotate: swing }}
       drag="x"
       dragSnapToOrigin
       dragElastic={0.35}
@@ -164,10 +153,11 @@ function Badge({ m, c, src, i, paused, onOpen }: { m: Meta; c: Character; src: s
       aria-label={`Досье: ${shortName(c)}`}
       onKeyDown={(e) => e.key === "Enter" && onOpen()}
     >
+      <div className="sway relative pt-10" style={{ "--sway": `${1.2 + (i % 3) * 0.5}deg`, "--sway-d": `${2.6 + (i % 4) * 0.45}s`, animationDelay: `${-i * 0.7}s`, animationPlayState: paused ? "paused" : "running" } as React.CSSProperties}>
       {/* ремешок и клипса */}
       <div className="absolute left-1/2 top-0 h-10 w-3 -translate-x-1/2 bg-gradient-to-b from-[#1b1712] to-[#3a3226]" />
       <div className="absolute left-1/2 top-8 h-4 w-9 -translate-x-1/2 rounded-sm bg-gradient-to-b from-[#9a8a6a] to-[#4a4030] shadow" />
-      <div className="relative overflow-hidden rounded-md border border-black/60 shadow-[0_18px_30px_rgba(0,0,0,0.65)]" style={{ background: m.color }}>
+      <div className="relative overflow-hidden rounded-md border border-black/60 shadow-[0_10px_18px_rgba(0,0,0,0.6)]" style={{ background: m.color }}>
         <div className="flex items-center justify-between bg-black/45 px-2.5 py-1">
           <span className="font-display text-[13px] font-semibold tracking-[0.25em] text-[#c9a227]">ПИОНЕР</span>
           <span className="font-system text-[9px] tracking-widest opacity-70">ГОСТЬ · 1 ЭТ.</span>
@@ -195,6 +185,7 @@ function Badge({ m, c, src, i, paused, onOpen }: { m: Meta; c: Character; src: s
           </div>
         </div>
       </div>
+      </div>
     </motion.div>
   );
 }
@@ -214,7 +205,7 @@ function Dossier({ m, c, src, onClose }: { m: Meta; c: Character; src: string | 
   }, [onClose]);
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 md:p-6" onClick={onClose}>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 md:p-6" onClick={onClose}>
       <motion.div
         initial={{ opacity: 0, scale: 0.97 }}
         animate={{ opacity: 1, scale: 1 }}

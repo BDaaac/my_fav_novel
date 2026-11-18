@@ -60,7 +60,7 @@ export function Broadcast() {
     >
       {/* студия проступает больницей «Новый Мир» по мере нарушения правил */}
       <Image
-        src="/art/101/studio.png"
+        src="/art/101/studio.jpg"
         alt=""
         fill
         sizes="100vw"

@@ -196,3 +196,15 @@ body {
 }
 .mad-jit { animation: mad-jit 0.9s steps(4) infinite; }
 @media (prefers-reduced-motion: reduce) { .mad-jit { animation: none; } }
+
+/* ===== Маятник: пропуска и ключи качаются силами компоновщика, без JS ===== */
+@keyframes sway {
+  from { transform: rotate(calc(var(--sway, 2deg) * -1)); }
+  to { transform: rotate(var(--sway, 2deg)); }
+}
+.sway {
+  transform-origin: top center;
+  animation: sway var(--sway-d, 3s) ease-in-out infinite alternate;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) { .sway { animation: none; } }
