@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import Noise from "@/components/Noise";
-import { RUN3, nameOf } from "./data";
+import { nameOf } from "./data";
 import { useArt } from "./artfiles";
 import { useInfection } from "./infection";
 import { Mad } from "./mad";
@@ -185,11 +185,21 @@ export function Ward() {
   );
 }
 
+/** История заражения Ким Санмина: записи больницы, пересказ глав 68–78. */
+const RECORD: { title: string; ch: string; text: string }[] = [
+  { title: "Поступление", ch: "71", text: "Ученик старшей школы Синдон. Долгая травля, зачинщиков восемь. Школа не защитила. Семья подала в суд и проиграла: решили, что буянил он сам. После суда направлен к нам." },
+  { title: "Лечение", ch: "71", text: "Пациента ведёт главврач лично. Выслушал и поверил. Больница заявила открыто: до расстройства мальчика довели обидчики. Газеты подхватили." },
+  { title: "Подарок Учителя", ch: "77–78", text: "Пациент зовёт главврача Учителем. Тот дал ему камешек, Осколок. Камень искажает всё рядом: разум, плоть, саму палату. Жалости у Учителя не было. Ему было забавно." },
+  { title: "Исчезновение", ch: "71", text: "Больница пропала целиком, вместе со зданием. Через три дня наступил конец света." },
+  { title: "Одноклассники", ch: "68", text: "Восемь учеников заперты в подвале. Они помнят только, что Санмин вдруг стал монстром. Медсестра приходит к ним каждый день." },
+  { title: "Текущее состояние", ch: "73, 76", text: "Тела больше нет. В палате в конце четвёртого этажа бьётся ком плоти, сама палата стала чужим миром. Когда ему больно, он зовёт Учителя. Больницей он не управляет: для медсестёр он пациент. Управляет главврач." },
+];
+
 /** Злой бог — как история болезни. В темноте лежит папка; открой и листай записи. */
 function Chart() {
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(0);
-  const facts = RUN3.god.facts;
+  const facts = RECORD;
   const pages = facts.length + 1;
   const go = (d: number) => setPage((p) => Math.max(0, Math.min(pages - 1, p + d)));
 
@@ -242,23 +252,23 @@ function Chart() {
                       <dl className="space-y-[10px] font-system text-[14px] leading-[24px]">
                         {[
                           ["Пациент", nameOf("kim-sangmin")],
-                          ["Лечащий врач", "Главврач («Учитель»)"],
+                          ["Школа", "старшая школа Синдон"],
+                          ["Лечащий врач", "главврач, лично"],
                           ["Палата", "4-й этаж, конец коридора"],
-                          ["Статус", "Заключённый 101-го номера"],
                         ].map(([k, v]) => (
                           <div key={k} className="flex gap-3">
                             <dt className="w-32 shrink-0 opacity-60">{k}:</dt>
                             <dd className="font-hand text-[24px] leading-[24px]">{v}</dd>
                           </div>
                         ))}
-                        <div className="pt-8 font-system text-[11px] uppercase tracking-widest text-[#8c1c24]">записи персонала · листайте →</div>
+                        <div className="pt-8 font-system text-[11px] uppercase tracking-widest text-[#8c1c24]">история заражения · листайте →</div>
                       </dl>
                     ) : (
                       <div>
                         <div className="font-system text-[11px] uppercase tracking-widest text-[#8c1c24]">
-                          Запись {page} · гл. {facts[page - 1].ch}
+                          Запись {page} · {facts[page - 1].title} · гл. {facts[page - 1].ch}
                         </div>
-                        <p className="mt-[10px] font-hand text-[28px] leading-[34px]">{facts[page - 1].text}</p>
+                        <p className="mt-[10px] font-hand text-[27px] leading-[34px]">{facts[page - 1].text}</p>
                       </div>
                     )}
                   </motion.div>

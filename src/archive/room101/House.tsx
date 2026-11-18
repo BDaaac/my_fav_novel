@@ -10,6 +10,7 @@ import { RunHeader } from "./Home";
 import { cn } from "@/lib/utils";
 
 const ESCAPED = new Set(["han-gain", "park-seungyeop", "cha-jinchul", "yu-sonyi"]);
+const FEMALE = new Set(["kim-ari", "yu-sonyi", "elena-ivanova", "lee-eunsol"]);
 const STUCK_WHY: Record<string, string> = {
   "lee-eunsol": "дом слишком велик: не пробежать мимо слуг",
   "elena-ivanova": "дом слишком мал: одна комната с сестрой",
@@ -46,7 +47,7 @@ export function House() {
           />
         </div>
 
-        <h4 className="mt-20 font-system text-xs uppercase tracking-[0.3em] text-[#8fb0ff]">Ночь · в каждом окне телевизор · загляните</h4>
+        <h4 className="mt-20 font-system text-xs uppercase tracking-[0.3em] text-[#8fb0ff]">Все восемь проснулись у себя дома · кто сумел уйти от семьи? · нажмите на окно</h4>
         <Windows />
 
         <div className="mt-16 grid gap-6 md:grid-cols-[1.1fr_1fr]">
@@ -167,6 +168,7 @@ function HomeWindow({ id, role, i }: { id: string; role: string; i: number }) {
   const { add } = useInfection();
   const escaped = ESCAPED.has(id);
   const gone = open && escaped; // ушёл — свет погас
+  const left = FEMALE.has(id) ? "вышла" : "вышел";
   return (
     <div>
       <button
@@ -210,7 +212,7 @@ function HomeWindow({ id, role, i }: { id: string; role: string; i: number }) {
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
             <p className="mt-1.5 font-display text-[14px] leading-snug text-[#d8d2c4]">{role}</p>
             <p className={cn("mt-1 font-system text-[10px] uppercase tracking-wider", escaped ? "text-[#7fd4a0]" : "text-[#ff9a9a]")}>
-              {escaped ? "вышел(ла) из дома. свет погас" : `не вышел(ла): ${STUCK_WHY[id] ?? ""}`}
+              {escaped ? `${left} из дома. свет погас` : `не ${left}: ${STUCK_WHY[id] ?? ""}`}
             </p>
           </motion.div>
         )}
