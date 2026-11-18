@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import rooms from "@/data/rooms.json";
 import characters from "@/data/characters.json";
 import type { Character, Room } from "@/data/types";
-import { FLOOR_1, TYPE_COLOR, TYPE_LABEL } from "@/data/floors";
+import { FLOOR_1, TYPE_COLOR, TYPE_LABEL, type RoomType } from "@/data/floors";
 import { Fog } from "@/components/hotel/Fog";
 import { StatusWindow } from "@/components/hotel/StatusWindow";
 import { Acts } from "@/components/hotel/Acts";
@@ -36,8 +36,8 @@ export default async function RoomPage({ params }: { params: Promise<{ id: strin
           <div className="inline-block rounded-sm border border-brass/70 bg-gradient-to-b from-[#d8b54a] to-[#8e6f17] px-6 py-1 font-display text-4xl font-semibold text-[#2a1d05]">
             {room.id}
           </div>
-          <p className="mt-4 font-system text-xs uppercase tracking-[0.35em]" style={{ color: TYPE_COLOR[room.type] }}>
-            {TYPE_LABEL[room.type]}
+          <p className="mt-4 font-system text-xs uppercase tracking-[0.35em]" style={{ color: TYPE_COLOR[room.type as RoomType] }}>
+            {TYPE_LABEL[room.type as RoomType]}
           </p>
           <h1 className="mt-2 font-display text-5xl text-paper md:text-6xl">
             <Fog text={room.title} ch={door.titleCh} />
