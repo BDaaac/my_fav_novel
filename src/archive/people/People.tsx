@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion, useMotionValue, useSpring, useTransform, useVelocity } from "motion/react";
+import { AnimatePresence, animate, motion, useMotionValue, useSpring, useTransform, useVelocity } from "motion/react";
 import characters from "@/data/characters.json";
 import items from "@/data/items.json";
 import type { Character, Item } from "@/data/types";
@@ -134,18 +134,22 @@ function Badge({ m, c, src, i, paused, onOpen }: { m: Meta; c: Character; src: s
   const x = useMotionValue(0);
   const v = useVelocity(x);
   const swing = useSpring(useTransform(v, [-1500, 1500], [28, -28]), { stiffness: 60, damping: 5, mass: 1.2 });
+  // рывок при наведении — отдельным значением, чтобы не спорить с пружиной перетаскивания
+  const kick = useMotionValue(0);
+  const rotate = useTransform([swing, kick], ([a, b]: number[]) => a + b);
   const [dragged, setDragged] = useState(false);
 
   return (
     <motion.div
       className="relative mx-auto w-full max-w-[240px] origin-top cursor-grab touch-none select-none will-change-transform active:cursor-grabbing"
-      style={{ x, rotate: swing }}
+      style={{ x, rotate }}
       drag="x"
       dragSnapToOrigin
       dragElastic={0.35}
       dragConstraints={{ left: 0, right: 0 }}
       onDragStart={() => setDragged(true)}
       onDragEnd={() => setTimeout(() => setDragged(false), 250)}
+      onHoverStart={() => !dragged && !paused && animate(kick, [0, 7, -5, 3, 0], { duration: 1.4, ease: "easeOut" })}
       onTap={() => !dragged && onOpen()}
       role="button"
       tabIndex={0}
