@@ -138,6 +138,11 @@ function Badge({ m, c, src, i, paused, onOpen }: { m: Meta; c: Character; src: s
   const kick = useMotionValue(0);
   const rotate = useTransform([swing, kick], ([a, b]: number[]) => a + b);
   const [dragged, setDragged] = useState(false);
+  useEffect(() => {
+    if (!paused) return;
+    kick.stop();
+    kick.set(0);
+  }, [paused, kick]);
 
   return (
     <motion.div
@@ -208,7 +213,7 @@ function Dossier({ m, c, src, onClose }: { m: Meta; c: Character; src: string | 
   }, [onClose]);
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 md:p-6" onClick={onClose}>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="fixed inset-0 z-50 flex items-center justify-center bg-[#070605]/[0.97] p-3 md:p-6" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative grid h-[min(680px,94vh)] w-[min(1040px,100%)] overflow-hidden rounded-md border border-black bg-[#12100e] shadow-[0_30px_90px_rgba(0,0,0,0.9)] md:grid-cols-[340px_1fr]"
