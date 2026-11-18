@@ -8,7 +8,7 @@ import { Ch } from "./infection";
 import { Mad } from "./mad";
 import { cn } from "@/lib/utils";
 
-/** Ключ на гвозде: бирка с двумя сторонами — «Угроза» и «Итог». */
+/** Сводка комнаты как окно статуса отеля: «Угроза» и «Итог». */
 export function KeyTag() {
   const [side, setSide] = useState<"threat" | "result">("threat");
   const rows: [string, React.ReactNode][] =
@@ -26,37 +26,27 @@ export function KeyTag() {
           ["Статус", <>решена · пусто<Ch n={76} /></>],
         ];
   return (
-    <div className="relative mx-auto w-[270px] md:mx-0">
-      <div className="mx-auto h-3 w-3 rounded-full bg-[#5a3a1e] shadow-inner md:mx-6" />
-      <motion.div
-        className="origin-top"
-        animate={{ rotate: [-2, 2, -2] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <div className="mx-auto h-8 w-px bg-[#5a3a1e] md:mx-[29px]" />
-        <div className="rounded-md border-2 border-[#7a5a22] bg-[#f6eedb] p-4 text-[#2b2018] shadow-[0_10px_20px_rgba(40,20,5,0.35)]">
-          <div className="flex items-center justify-between">
-            <span className="font-display text-3xl font-semibold">101</span>
-            <div className="flex font-system text-[11px]">
-              {(["threat", "result"] as const).map((s) => (
-                <button key={s} onClick={() => setSide(s)} className={cn("border border-[#7a5a22] px-2 py-0.5 first:border-r-0", side === s ? "bg-[#7a5a22] text-[#f6eedb]" : "hover:bg-[#7a5a22]/10")}>
-                  {s === "threat" ? "Угроза" : "Итог"}
-                </button>
-              ))}
-            </div>
-          </div>
-          <AnimatePresence mode="wait">
-            <motion.dl key={side} initial={{ opacity: 0, rotateX: -60 }} animate={{ opacity: 1, rotateX: 0 }} exit={{ opacity: 0 }} className="mt-3 space-y-1.5">
-              {rows.map(([k, v]) => (
-                <div key={k} className="grid grid-cols-[72px_1fr] gap-2 text-[14px] leading-snug">
-                  <dt className="font-system text-[10px] uppercase tracking-wider text-[#8a6a3a]">{k}</dt>
-                  <dd className="font-display">{v}</dd>
-                </div>
-              ))}
-            </motion.dl>
-          </AnimatePresence>
+    <div className="w-[330px] border border-[#7fd4ff]/50 bg-[#06141c]/85 p-4 font-system text-[#7fd4ff] shadow-[0_0_30px_-10px_#7fd4ff] backdrop-blur">
+      <div className="flex items-center justify-between text-[12px]">
+        <span>[Номер 101 · сводка]</span>
+        <div className="flex text-[11px]">
+          {(["threat", "result"] as const).map((s) => (
+            <button key={s} onClick={() => setSide(s)} className={cn("border border-[#7fd4ff]/60 px-2 py-0.5 first:border-r-0", side === s ? "bg-[#7fd4ff] text-[#06141c]" : "hover:bg-[#7fd4ff]/15")}>
+              {s === "threat" ? "Угроза" : "Итог"}
+            </button>
+          ))}
         </div>
-      </motion.div>
+      </div>
+      <AnimatePresence mode="wait">
+        <motion.dl key={side} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="mt-3 space-y-2">
+          {rows.map(([k, v]) => (
+            <div key={k} className="grid grid-cols-[78px_1fr] gap-2 text-[12.5px] leading-snug">
+              <dt className="pt-px text-[10px] uppercase tracking-wider opacity-60">{k}</dt>
+              <dd className="text-[#d7f1ff]">{v}</dd>
+            </div>
+          ))}
+        </motion.dl>
+      </AnimatePresence>
     </div>
   );
 }

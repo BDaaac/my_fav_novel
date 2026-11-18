@@ -1,11 +1,12 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import Noise from "@/components/Noise";
 import { RUN3, nameOf } from "./data";
 import { useArt } from "./artfiles";
-import { Ch, useInfection } from "./infection";
+import { useInfection } from "./infection";
 import { Mad } from "./mad";
 
 /**
@@ -176,7 +177,7 @@ export function Ward() {
           )}
         </AnimatePresence>
 
-        <div className="absolute bottom-10 right-6 w-[280px] opacity-20 transition-opacity duration-700 hover:opacity-100 max-lg:hidden">
+        <div className="absolute bottom-10 right-6">
           <Chart />
         </div>
       </div>
@@ -184,33 +185,108 @@ export function Ward() {
   );
 }
 
-/** Злой бог — как медицинская карта больницы. Лежит в темноте, читается, если поднести свет. */
+/** Злой бог — как история болезни. В темноте лежит папка; открой и листай записи. */
 function Chart() {
+  const [open, setOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const facts = RUN3.god.facts;
+  const pages = facts.length + 1;
+  const go = (d: number) => setPage((p) => Math.max(0, Math.min(pages - 1, p + d)));
+
+  useEffect(() => {
+    if (!open) return;
+    const k = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") go(1);
+      if (e.key === "ArrowLeft") go(-1);
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   return (
-    <div className="rotate-[1deg] bg-[#e9ecdf] p-5 text-left text-[#1d2220] shadow-[0_20px_40px_rgba(0,0,0,0.6)]">
-      <div className="flex items-baseline justify-between border-b-2 border-[#1d2220] pb-1">
-        <span className="font-system text-[11px] font-bold uppercase">История болезни</span>
-        <span className="font-system text-[10px]">«Новый Мир»</span>
-      </div>
-      <dl className="mt-3 space-y-1 font-system text-[12px]">
-        <div className="flex gap-2">
-          <dt className="opacity-60">Пациент:</dt>
-          <dd>{nameOf("kim-sangmin")}</dd>
-        </div>
-        <div className="flex gap-2">
-          <dt className="opacity-60">Лечащий:</dt>
-          <dd>Главврач («Учитель»)</dd>
-        </div>
-      </dl>
-      <ul className="mt-3 space-y-2 border-t border-dashed border-[#1d2220]/40 pt-3">
-        {RUN3.god.facts.map((f, i) => (
-          <li key={i} className="font-hand text-[18px] leading-tight">
-            {f.text}
-            <Ch n={f.ch ?? ""} />
-          </li>
-        ))}
-      </ul>
-    </div>
+    <>
+      <button
+        onClick={() => {
+          setPage(0);
+          setOpen(true);
+        }}
+        className="group relative block w-[210px] rotate-[2deg] cursor-pointer bg-[#b9a87c] p-3 text-left text-[#1d2220] opacity-40 shadow-[0_20px_40px_rgba(0,0,0,0.7)] transition duration-500 hover:rotate-0 hover:opacity-100"
+      >
+        <span className="absolute -top-3 left-4 h-3 w-20 rounded-t-md bg-[#b9a87c]" />
+        <span className="block font-system text-[10px] font-bold uppercase tracking-widest">История болезни</span>
+        <span className="mt-1 block font-hand text-[22px] leading-none">{nameOf("kim-sangmin")}</span>
+        <span className="mt-2 block font-system text-[10px] opacity-70">«Новый Мир» · {facts.length} записей · открыть</span>
+      </button>
+
+      {open &&
+        createPortal(
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-50 flex cursor-auto items-center justify-center bg-black/85 p-4" onClick={() => setOpen(false)}>
+            <motion.div
+              initial={{ y: 40, rotate: -3 }}
+              animate={{ y: 0, rotate: -0.6 }}
+              transition={{ type: "spring", stiffness: 120, damping: 14 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative flex h-[min(620px,88vh)] w-[min(480px,94vw)] flex-col bg-[#e9ecdf] p-7 text-[#1d2220] shadow-[0_30px_80px_rgba(0,0,0,0.8)] [background-image:repeating-linear-gradient(transparent_0_33px,#c9cfbd_33px_34px)]"
+            >
+              <span className="absolute -top-3 left-10 h-9 w-4 rounded-full border-2 border-[#8b8f86] bg-transparent" />
+              <div className="flex items-baseline justify-between border-b-2 border-[#1d2220] bg-[#e9ecdf] pb-1">
+                <span className="font-system text-[12px] font-bold uppercase tracking-wider">История болезни</span>
+                <span className="font-system text-[11px]">Психиатрическая больница «Новый Мир»</span>
+              </div>
+              <div className="relative flex-1 overflow-hidden">
+                <AnimatePresence mode="wait">
+                  <motion.div key={page} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.2 }} className="absolute inset-0 pt-5">
+                    {page === 0 ? (
+                      <dl className="space-y-[10px] font-system text-[14px] leading-[24px]">
+                        {[
+                          ["Пациент", nameOf("kim-sangmin")],
+                          ["Лечащий врач", "Главврач («Учитель»)"],
+                          ["Палата", "4-й этаж, конец коридора"],
+                          ["Статус", "Заключённый 101-го номера"],
+                        ].map(([k, v]) => (
+                          <div key={k} className="flex gap-3">
+                            <dt className="w-32 shrink-0 opacity-60">{k}:</dt>
+                            <dd className="font-hand text-[24px] leading-[24px]">{v}</dd>
+                          </div>
+                        ))}
+                        <div className="pt-8 font-system text-[11px] uppercase tracking-widest text-[#8c1c24]">записи персонала · листайте →</div>
+                      </dl>
+                    ) : (
+                      <div>
+                        <div className="font-system text-[11px] uppercase tracking-widest text-[#8c1c24]">
+                          Запись {page} · гл. {facts[page - 1].ch}
+                        </div>
+                        <p className="mt-[10px] font-hand text-[28px] leading-[34px]">{facts[page - 1].text}</p>
+                      </div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+                <div className="pointer-events-none absolute bottom-4 right-2 rotate-[-12deg] border-2 border-[#8c1c24]/60 px-2 py-0.5 font-system text-[11px] uppercase tracking-widest text-[#8c1c24]/60">Новый Мир</div>
+              </div>
+              <div className="flex items-center justify-between bg-[#e9ecdf] pt-2 font-system text-[12px]">
+                <button onClick={() => go(-1)} disabled={page === 0} className="px-2 py-1 disabled:opacity-25">
+                  ← назад
+                </button>
+                <span className="opacity-60">
+                  лист {page + 1} из {pages}
+                </span>
+                {page < pages - 1 ? (
+                  <button onClick={() => go(1)} className="px-2 py-1">
+                    дальше →
+                  </button>
+                ) : (
+                  <button onClick={() => setOpen(false)} className="px-2 py-1 text-[#8c1c24]">
+                    закрыть папку
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>,
+          document.body,
+        )}
+    </>
   );
 }
 
