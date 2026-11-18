@@ -7,6 +7,7 @@ import { Ward } from "./Ward";
 import { Legacy } from "./Legacy";
 import { InfectionProvider } from "./infection";
 import { ArtProvider } from "./artfiles";
+import { Care } from "./Care";
 
 /**
  * Архив комнаты 101 — не справочник, а сама комната.
@@ -16,6 +17,7 @@ export function Room101({ art }: { art: string[] }) {
   return (
     <ArtProvider files={art}>
       <InfectionProvider>
+        <Care />
         <main className="overflow-x-clip">
           <Hero />
           <AlbumRun />

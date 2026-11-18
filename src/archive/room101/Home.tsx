@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { RUN1 } from "./data";
-import { Darkroom } from "./Darkroom";
+import { FamilyChat } from "./FamilyChat";
 import { Wallpaper } from "./art";
 import { Ch } from "./infection";
 import { Mad } from "./mad";
@@ -61,7 +61,7 @@ export function KeyTag() {
   );
 }
 
-/** Заход 1: фотолаборатория с плёнкой шести семей, дальше — страницы дневника. */
+/** Заход 1: семейные чаты шести домов, дальше — страницы дневника. */
 export function AlbumRun() {
   return (
     <section className="relative overflow-hidden bg-[var(--paper)] text-[var(--ink)] transition-colors duration-1000">
@@ -72,7 +72,7 @@ export function AlbumRun() {
           className="mt-6 max-w-3xl font-display text-[20px] leading-relaxed"
           text="Отель объявил охоту за сокровищами, и команда с тонфой и декоративным кинжалом вошла в 101-й. Шестеро проснулись в шести разных домах. Окно Статуса показывало, как растёт заражение, а «родные» мягко {сводили с ума.|заботились.}"
         />
-        <Darkroom />
+        <FamilyChat />
         <Diary />
       </div>
     </section>
