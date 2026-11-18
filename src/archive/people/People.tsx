@@ -51,7 +51,6 @@ export function People({ art }: { art: string[] }) {
             {[
               ["заселено", String(GUESTS.length)],
               ["этаж", "1"],
-              ["главы", "1–100"],
             ].map(([k, v]) => (
               <div key={k} className="text-left">
                 <dt className="text-[9px] uppercase opacity-60">{k}</dt>
@@ -67,7 +66,6 @@ export function People({ art }: { art: string[] }) {
             {ring > 0 && <motion.span key={`w${ring}`} className="pointer-events-none absolute left-1/2 top-6 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#f3d98a]" initial={{ scale: 0.6, opacity: 0.8 }} animate={{ scale: 5, opacity: 0 }} transition={{ duration: 0.9 }} />}
           </button>
         </div>
-        <p className="relative mx-auto mt-4 max-w-md font-display text-[17px] italic leading-relaxed opacity-60">Позвоните в звонок или снимите пропуск с рейки, чтобы открыть досье.</p>
       </header>
 
       {[GUESTS.slice(0, 4), GUESTS.slice(4)].map((row, r) => (
@@ -119,9 +117,9 @@ function Badge({ m, c, src, i, ring, onOpen }: { m: Meta; c: Character; src: str
       dragElastic={0.35}
       dragConstraints={{ left: 0, right: 0 }}
       onDragStart={() => setDragged(true)}
-      onDragEnd={() => setTimeout(() => setDragged(false), 50)}
+      onDragEnd={() => setTimeout(() => setDragged(false), 250)}
       onHoverStart={() => !dragged && animate(swing, [swing.get(), 7, -5, 3, 0], { duration: 1.4 })}
-      onClick={() => !dragged && onOpen()}
+      onTap={() => !dragged && onOpen()}
       role="button"
       tabIndex={0}
       aria-label={`Досье: ${shortName(c)}`}
@@ -137,7 +135,7 @@ function Badge({ m, c, src, i, ring, onOpen }: { m: Meta; c: Character; src: str
         </div>
         <div className="relative aspect-[3/4] bg-black/40">
           {src ? (
-            <Image src={src} alt={shortName(c)} fill sizes="240px" className="pointer-events-none object-cover" draggable={false} />
+            <Image src={src} alt={shortName(c)} fill sizes="340px" priority className="pointer-events-none object-cover" draggable={false} />
           ) : (
             <div className="flex h-full items-center justify-center font-display text-7xl opacity-30">{shortName(c)[0]}</div>
           )}
@@ -173,22 +171,27 @@ function Dossier({ m, c, src, onClose }: { m: Meta; c: Character; src: string | 
   useEffect(() => {
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", k);
-    return () => window.removeEventListener("keydown", k);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", k);
+      document.body.style.overflow = prev;
+    };
   }, [onClose]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 md:p-6" onClick={onClose}>
       <motion.div
-        initial={{ y: 40, scale: 0.96 }}
-        animate={{ y: 0, scale: 1 }}
-        exit={{ y: 20, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 160, damping: 20 }}
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.98 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
         onClick={(e) => e.stopPropagation()}
         className="relative grid h-[min(680px,94vh)] w-[min(1040px,100%)] overflow-hidden rounded-md border border-black bg-[#12100e] shadow-[0_30px_90px_rgba(0,0,0,0.9)] md:grid-cols-[340px_1fr]"
       >
         {/* портрет */}
         <div className="relative hidden md:block" style={{ background: m.color }}>
-          {src && <Image src={src} alt={shortName(c)} fill sizes="340px" className="object-cover" />}
+          {src && <Image src={src} alt={shortName(c)} fill sizes="340px" priority className="object-cover" />}
           <div className="absolute inset-0 bg-gradient-to-t from-[#12100e] via-transparent to-black/30" />
           <div className="absolute inset-x-0 top-0 bg-black/60 py-1.5 text-center font-system text-[13px] tracking-[0.45em]" style={{ color: m.ink }}>
             {m.word}
