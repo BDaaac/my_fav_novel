@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, animate, motion, useMotionValue, useSpring, useTransform, useVelocity } from "motion/react";
+import { animate, motion, useMotionValue, useSpring, useTransform, useVelocity } from "motion/react";
 import characters from "@/data/characters.json";
 import items from "@/data/items.json";
 import type { Character, Item } from "@/data/types";
@@ -63,7 +63,7 @@ export function People({ art }: { art: string[] }) {
         </section>
       ))}
 
-      <AnimatePresence>{open && <Dossier key={open} m={GUESTS.find((g) => g.id === open)!} c={byId(open)} src={has(open)} onClose={() => setOpen(null)} />}</AnimatePresence>
+      {open && <Dossier key={open} m={GUESTS.find((g) => g.id === open)!} c={byId(open)} src={has(open)} onClose={() => setOpen(null)} />}
     </main>
   );
 }
@@ -213,8 +213,11 @@ function Dossier({ m, c, src, onClose }: { m: Meta; c: Character; src: string | 
   }, [onClose]);
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="fixed inset-0 z-50 flex items-center justify-center bg-[#070605]/[0.97] p-3 md:p-6" onClick={onClose}>
-      <div
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070605] p-3 md:p-6" onClick={onClose}>
+      <motion.div
+        initial={{ y: 14 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
         onClick={(e) => e.stopPropagation()}
         className="relative grid h-[min(680px,94vh)] w-[min(1040px,100%)] overflow-hidden rounded-md border border-black bg-[#12100e] shadow-[0_30px_90px_rgba(0,0,0,0.9)] md:grid-cols-[340px_1fr]"
       >
@@ -304,7 +307,7 @@ function Dossier({ m, c, src, onClose }: { m: Meta; c: Character; src: string | 
             )}
           </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }
