@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, animate, motion, useMotionValue, useSpring, useTransform, useVelocity } from "motion/react";
+import { AnimatePresence, motion, useMotionValue, useSpring, useTransform, useVelocity } from "motion/react";
 import characters from "@/data/characters.json";
 import items from "@/data/items.json";
 import type { Character, Item } from "@/data/types";
@@ -146,7 +146,6 @@ function Badge({ m, c, src, i, paused, onOpen }: { m: Meta; c: Character; src: s
       dragConstraints={{ left: 0, right: 0 }}
       onDragStart={() => setDragged(true)}
       onDragEnd={() => setTimeout(() => setDragged(false), 250)}
-      onHoverStart={() => !dragged && !paused && animate(swing, [swing.get(), 7, -5, 3, 0], { duration: 1.4 })}
       onTap={() => !dragged && onOpen()}
       role="button"
       tabIndex={0}
@@ -206,17 +205,12 @@ function Dossier({ m, c, src, onClose }: { m: Meta; c: Character; src: string | 
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 md:p-6" onClick={onClose}>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.97 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.98 }}
-        transition={{ duration: 0.22, ease: "easeOut" }}
+      <div
         onClick={(e) => e.stopPropagation()}
         className="relative grid h-[min(680px,94vh)] w-[min(1040px,100%)] overflow-hidden rounded-md border border-black bg-[#12100e] shadow-[0_30px_90px_rgba(0,0,0,0.9)] md:grid-cols-[340px_1fr]"
       >
         {/* портрет */}
-        <div className="relative hidden md:block" style={{ background: m.color }}>
-          {src && <Image src={src} alt={shortName(c)} fill sizes="340px" unoptimized priority className="object-cover" />}
+        <div className="relative hidden bg-cover bg-center md:block" role="img" aria-label={shortName(c)} style={{ backgroundColor: m.color, backgroundImage: src ? `url(${src})` : undefined }}>
           <div className="absolute inset-0 bg-gradient-to-t from-[#12100e] via-transparent to-black/30" />
           <div className="absolute inset-x-0 top-0 bg-black/60 py-1.5 text-center font-system text-[13px] tracking-[0.45em]" style={{ color: m.ink }}>
             {m.word}
@@ -301,7 +295,7 @@ function Dossier({ m, c, src, onClose }: { m: Meta; c: Character; src: string | 
             )}
           </div>
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
