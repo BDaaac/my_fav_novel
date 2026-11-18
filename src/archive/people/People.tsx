@@ -30,7 +30,7 @@ const shortName = (c: Character) => c.name.split(" (")[0];
 
 export function People({ art }: { art: string[] }) {
   const [open, setOpen] = useState<string | null>(null);
-  const has = (id: string) => (art.includes(`${id}.png`) ? `/art/people/${id}.png` : null);
+  const has = (id: string) => (art.includes(`${id}.jpg`) ? `/art/people/${id}.jpg` : null);
   return (
     <main className="min-h-screen overflow-x-clip bg-[#0b0a09] pb-32 text-[#e9e1d0] [background-image:repeating-linear-gradient(90deg,transparent_0_118px,rgba(255,255,255,0.018)_118px_120px),radial-gradient(ellipse_at_50%_0%,#2a1410_0%,#0b0a09_60%)]">
       {/* стойка регистрации: лампа, латунная табличка, указатель этажа и ключи */}
@@ -57,7 +57,7 @@ export function People({ art }: { art: string[] }) {
           <div className="h-3 rounded-full bg-gradient-to-b from-[#6a5a3a] to-[#2a2216] shadow-[0_6px_14px_rgba(0,0,0,0.6)]" />
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 md:gap-x-10">
             {row.map((m, i) => (
-              <Badge key={m.id} m={m} c={byId(m.id)} src={has(m.id)} i={r * 4 + i} onOpen={() => setOpen(m.id)} />
+              <Badge key={m.id} m={m} c={byId(m.id)} src={has(m.id)} i={r * 4 + i} paused={!!open} onOpen={() => setOpen(m.id)} />
             ))}
           </div>
         </section>
@@ -132,7 +132,7 @@ function KeyRack({ onOpen }: { onOpen: (id: string) => void }) {
 }
 
 /** Пропуск на клипсе: маятник. Тянешь — раскачивается от скорости руки, отпускаешь — возвращается. */
-function Badge({ m, c, src, i, onOpen }: { m: Meta; c: Character; src: string | null; i: number; onOpen: () => void }) {
+function Badge({ m, c, src, i, paused, onOpen }: { m: Meta; c: Character; src: string | null; i: number; paused: boolean; onOpen: () => void }) {
   const x = useMotionValue(0);
   const idle = useMotionValue(0);
   const v = useVelocity(x);
@@ -142,9 +142,10 @@ function Badge({ m, c, src, i, onOpen }: { m: Meta; c: Character; src: string | 
 
   // лёгкое собственное покачивание, у каждого в своём ритме
   useEffect(() => {
+    if (paused) return;
     const ctl = animate(idle, [-(1.2 + (i % 3) * 0.5), 1.2 + (i % 3) * 0.5], { duration: 2.6 + (i % 4) * 0.45, repeat: Infinity, repeatType: "mirror", ease: "easeInOut", delay: i * 0.2 });
     return () => ctl.stop();
-  }, [idle, i]);
+  }, [idle, i, paused]);
 
   return (
     <motion.div
@@ -156,7 +157,7 @@ function Badge({ m, c, src, i, onOpen }: { m: Meta; c: Character; src: string | 
       dragConstraints={{ left: 0, right: 0 }}
       onDragStart={() => setDragged(true)}
       onDragEnd={() => setTimeout(() => setDragged(false), 250)}
-      onHoverStart={() => !dragged && animate(swing, [swing.get(), 7, -5, 3, 0], { duration: 1.4 })}
+      onHoverStart={() => !dragged && !paused && animate(swing, [swing.get(), 7, -5, 3, 0], { duration: 1.4 })}
       onTap={() => !dragged && onOpen()}
       role="button"
       tabIndex={0}
@@ -173,7 +174,7 @@ function Badge({ m, c, src, i, onOpen }: { m: Meta; c: Character; src: string | 
         </div>
         <div className="relative aspect-[3/4] bg-black/40">
           {src ? (
-            <Image src={src} alt={shortName(c)} fill sizes="340px" priority className="pointer-events-none object-cover" draggable={false} />
+            <Image src={src} alt={shortName(c)} fill sizes="340px" unoptimized priority className="pointer-events-none object-cover" draggable={false} />
           ) : (
             <div className="flex h-full items-center justify-center font-display text-7xl opacity-30">{shortName(c)[0]}</div>
           )}
@@ -209,12 +210,7 @@ function Dossier({ m, c, src, onClose }: { m: Meta; c: Character; src: string | 
   useEffect(() => {
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", k);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", k);
-      document.body.style.overflow = prev;
-    };
+    return () => window.removeEventListener("keydown", k);
   }, [onClose]);
 
   return (
@@ -229,7 +225,7 @@ function Dossier({ m, c, src, onClose }: { m: Meta; c: Character; src: string | 
       >
         {/* портрет */}
         <div className="relative hidden md:block" style={{ background: m.color }}>
-          {src && <Image src={src} alt={shortName(c)} fill sizes="340px" priority className="object-cover" />}
+          {src && <Image src={src} alt={shortName(c)} fill sizes="340px" unoptimized priority className="object-cover" />}
           <div className="absolute inset-0 bg-gradient-to-t from-[#12100e] via-transparent to-black/30" />
           <div className="absolute inset-x-0 top-0 bg-black/60 py-1.5 text-center font-system text-[13px] tracking-[0.45em]" style={{ color: m.ink }}>
             {m.word}
