@@ -10,6 +10,7 @@ import { ArtProvider } from "./artfiles";
 import { Care } from "./Care";
 import { Corridor } from "./Corridor";
 import { Finale } from "./Finale";
+import { Search } from "./Search";
 
 /**
  * Архив комнаты 101 — не справочник, а сама комната.
@@ -28,6 +29,7 @@ export function Room101({ art }: { art: string[] }) {
           <House />
           <TvZoom />
           <Broadcast />
+          <Search />
           <Corridor />
           <Ward />
           <Finale>
