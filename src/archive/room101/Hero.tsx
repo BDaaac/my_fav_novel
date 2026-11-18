@@ -14,11 +14,11 @@ import { cn } from "@/lib/utils";
  */
 type Oddity = { id: string; at: [number, number]; home: [number, number]; label: string; normal: string; truth: string };
 const ODDITIES: Oddity[] = [
-  { id: "photo", at: [12, 30], home: [50, 20], label: "Фото на стене", normal: "Семейное фото. Сегодня едем в дендрарий, потом утка и курорт.", truth: "Куда мы едем? Как я здесь оказался? Память утекает, как песок." },
-  { id: "sister", at: [26, 42], home: [53, 47], label: "Хиган", normal: "Сестрёнка, второй класс старшей школы. «Оппа, я звала тебя пять раз!»", truth: "Жуёт личинок и не понимает, о чём ты. И почему она не в школе?" },
-  { id: "dad", at: [17, 62], home: [81, 50], label: "Диван", normal: "Отец уже поел, сидит на диване и ворчит.", truth: "Он жуёт что-то шевелящееся. Личинки." },
-  { id: "mom", at: [49, 47], home: [17, 46], label: "Кухня", normal: "Мама кричит из кухни: все уже позавтракали, вставай!", truth: "Никто не ел. Ложки не подняты, рисоварку даже не открывали." },
-  { id: "rice", at: [57, 78], home: [44, 70], label: "Миски", normal: "Мама всегда кладёт в рис что-то полезное.", truth: "В рисе извиваются живые личинки шелкопряда. «Суперфуд», — говорит сестра." },
+  { id: "photo", at: [12, 30], home: [51, 17], label: "Фото на стене", normal: "Семейное фото. Сегодня едем в дендрарий, потом утка и курорт.", truth: "Куда мы едем? Как я здесь оказался? Память утекает, как песок." },
+  { id: "sister", at: [26, 42], home: [41, 42], label: "Хиган", normal: "Сестрёнка, второй класс старшей школы. «Оппа, я звала тебя пять раз!»", truth: "Жуёт личинок и не понимает, о чём ты. И почему она не в школе?" },
+  { id: "dad", at: [17, 62], home: [86, 42], label: "Отец", normal: "Отец уже поел, сидит на диване и ворчит.", truth: "Он жуёт что-то шевелящееся. Личинки." },
+  { id: "mom", at: [49, 47], home: [21, 36], label: "Мама", normal: "Мама кричит из кухни: все уже позавтракали, вставай!", truth: "Никто не ел. Ложки не подняты, рисоварку даже не открывали." },
+  { id: "rice", at: [57, 78], home: [57, 62], label: "Миски", normal: "Мама всегда кладёт в рис что-то полезное.", truth: "В рисе извиваются живые личинки шелкопряда. «Суперфуд», — говорит сестра." },
 ];
 const MAD_FALLBACK = "sepia(0.8) saturate(2.6) hue-rotate(-30deg) contrast(1.5) brightness(0.75)";
 
@@ -57,7 +57,7 @@ export function Hero() {
   return (
     <section className="relative h-screen min-h-[680px] overflow-hidden bg-[#140d08] text-[#f3e9d6]">
       <motion.div className="absolute inset-0" animate={{ scale: glimpse ? 1.04 : 1 + level / 900 }} transition={{ duration: glimpse ? 0.25 : 2 }}>
-        <Image src={base} alt="Гостиная дома: семейные фото на стене, диван, стол с мисками, телевизор" fill priority sizes="100vw" className="object-cover" />
+        <Image src={base} alt="Утро в квартире: мама у рисоварки, сестра за столом, отец на диване" fill priority sizes="100vw" className="object-cover" />
         {/* правда: проступает с заражением и вспыхивает, когда трогаешь вещи */}
         <div className={cn("absolute inset-0 transition-opacity", glimpse ? "duration-150" : "duration-1000")} style={{ opacity: glimpse ? 0.92 : Math.max(0, (level - 25) / 110) }}>
           <Image src={mad ?? base} alt="" fill sizes="100vw" className="object-cover" style={mad ? undefined : { filter: MAD_FALLBACK }} />
@@ -65,21 +65,18 @@ export function Hero() {
       </motion.div>
 
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,transparent_35%,rgba(20,10,5,0.75))]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-[#140d08]/90 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-80 bg-gradient-to-t from-[#140d08] via-[#140d08]/80 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#140d08]/60 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-[#140d08] via-[#140d08]/85 to-transparent" />
 
       {ODDITIES.map((o) => (
         <Hotspot key={o.id} o={o} pos={home ? o.home : o.at} open={open === o.id} stage={s} onClick={() => reveal(o)} />
       ))}
 
-      <div className="pointer-events-none absolute left-6 top-8 md:left-12">
-        <div className="font-system text-[12px] tracking-[0.3em] text-[#e6b980]">КОМНАТА ПРОКЛЯТИЙ · 1-Й ЭТАЖ · №101</div>
-        <MadTitle text="Странная семья" alt="Наш дом" className="mt-1 text-[#f6ead2]" size="clamp(3rem, 7vw, 6.5rem)" />
-        <Mad as="div" text="{Комната,|Дом,} где тебя всегда ждут к ужину" className="font-hand text-3xl text-[#e6b980]" />
-      </div>
-
       <div className="pointer-events-none absolute inset-x-6 bottom-10 md:inset-x-12">
-        <div className="max-w-xl">
+        <div className="font-system text-[12px] tracking-[0.3em] text-[#e6b980]">КОМНАТА ПРОКЛЯТИЙ · 1-Й ЭТАЖ · №101 · ПОПЫТКА 1</div>
+        <MadTitle text="Странная семья" alt="Наш дом" className="mt-1 text-[#f6ead2]" size="clamp(2.6rem, 5.2vw, 5rem)" />
+        <Mad as="div" text="{Комната,|Дом,} где тебя всегда ждут к ужину" className="font-hand text-3xl text-[#e6b980]" />
+        <div className="mt-3 max-w-xl">
           <Mad
             className="font-display text-[19px] leading-relaxed text-[#efe2c8]"
             text="Каждый гость просыпается в своей семье. Хан Гаина будит мама, сестрёнка Хиган зовёт «оппой», отец ворчит с дивана. Всё было бы хорошо, только родные ведут себя всё {безумнее,|заботливее,} а отель понемногу выветривается из памяти."

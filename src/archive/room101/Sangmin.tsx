@@ -34,6 +34,7 @@ export function Ward() {
   const { shield, won, setWon } = useStory();
   const art = useArt();
   const heartArt = art("ward-heart");
+  const guardArt = art("ward-guard");
   const [phase, setPhase] = useState<Phase>(won ? "won" : "dark");
   const [hits, setHits] = useState(0);
   const [flash, setFlash] = useState(0);
@@ -168,7 +169,7 @@ export function Ward() {
                 key="heart"
                 className="absolute h-[340px] w-[340px] -translate-x-1/2 -translate-y-1/2"
                 style={{ left: `${HEART.x}%`, top: `${HEART.y}%` }}
-                animate={{ opacity: phase === "guard" ? 0.45 : 1 }}
+                animate={{ opacity: phase === "guard" ? (guardArt ? 0 : 0.45) : 1 }}
                 exit={{ scaleY: 0.05, opacity: 0, y: 260, transition: { duration: 1.4 } }}
               >
                 <motion.div className="h-full w-full" animate={{ scale: phase === "shot" ? [1, 1.25, 0.95, 1.2, 1] : [1, 1.09, 1, 1.05, 1] }} transition={{ duration: phase === "shot" ? 0.4 : beat, repeat: Infinity, times: [0, 0.12, 0.3, 0.42, 1] }}>
@@ -179,22 +180,36 @@ export function Ward() {
             )}
           </AnimatePresence>
 
-          {/* страж: не фигура, а тень выше трёх метров */}
+          {/* страж выше трёх метров */}
           <AnimatePresence>
-            {phase === "guard" && (
-              <motion.div
-                key="guard"
-                className="absolute bottom-0 left-1/2 h-[92%] w-[46%] origin-bottom -translate-x-1/2"
-                initial={{ opacity: 0, scaleY: 0.6 }}
-                animate={fell ? { rotate: 82, y: 120, opacity: 0.5 } : { opacity: 1, scaleY: 1, scale: [1, 1.03, 1] }}
-                exit={{ opacity: 0 }}
-                transition={fell ? { duration: 0.9, ease: "easeIn" } : { scale: { duration: 2.4, repeat: Infinity }, opacity: { duration: 1.2 } }}
-              >
-                <motion.div key={move} initial={{ scale: 1 }} animate={{ scale: fell ? 1 : [1, 1.14, 1] }} transition={{ duration: 0.5 }} className="h-full w-full origin-bottom">
-                  <div className="h-full w-full bg-black blur-[22px] [clip-path:polygon(38%_0,62%_0,70%_12%,96%_22%,100%_58%,86%_60%,80%_34%,74%_100%,54%_100%,50%_62%,46%_100%,26%_100%,20%_34%,14%_60%,0_58%,4%_22%,30%_12%)]" />
+            {phase === "guard" &&
+              (guardArt ? (
+                <motion.div
+                  key="guard"
+                  className="absolute inset-0 origin-bottom"
+                  initial={{ opacity: 0, scale: 1.08 }}
+                  animate={fell ? { opacity: 0, y: 160, scale: 1.15, rotate: 4 } : { opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: fell ? 1.6 : 1.4, ease: fell ? "easeIn" : "easeOut" }}
+                >
+                  {/* каждый выпад — рывок на зрителя */}
+                  <motion.div key={move} className="absolute inset-0 origin-top" initial={{ scale: 1 }} animate={{ scale: fell ? 1 : [1, 1.1, 1.02] }} transition={{ duration: 0.6 }}>
+                    <Image src={guardArt} alt="Гигант нависает над входом в палату" fill sizes="100vw" className="object-cover" />
+                  </motion.div>
+                  <div className="absolute inset-0 bg-gradient-to-b from-[#020606]/80 via-transparent to-[#020606]/70" />
                 </motion.div>
-              </motion.div>
-            )}
+              ) : (
+                <motion.div
+                  key="guard"
+                  className="absolute bottom-0 left-1/2 h-[92%] w-[46%] origin-bottom -translate-x-1/2"
+                  initial={{ opacity: 0 }}
+                  animate={fell ? { rotate: 82, y: 120, opacity: 0.5 } : { opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: fell ? 0.9 : 1.2 }}
+                >
+                  <div className="h-full w-full rounded-t-[45%] bg-black blur-[40px]" />
+                </motion.div>
+              ))}
           </AnimatePresence>
 
           {heartArt && flash > 0 && phase !== "won" && (
