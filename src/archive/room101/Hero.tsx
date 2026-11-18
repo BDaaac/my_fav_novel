@@ -30,12 +30,32 @@ export function Hero() {
   const base = art("hero-home") ?? art("living") ?? "";
   const mad = art("hero-home-mad");
   const ref = useRef<HTMLDivElement>(null);
-  const [lens, setLens] = useState<{ x: number; y: number } | null>(null);
+  const lensEl = useRef<HTMLDivElement>(null);
+  const innerEl = useRef<HTMLDivElement>(null);
+  const pos = useRef({ x: 0, y: 0 });
+  const raf = useRef(0);
   const [found, setFound] = useState<Set<string>>(new Set());
   const [open, setOpen] = useState<string | null>(null);
   const [freed, setFreed] = useState(false);
   const r = 110 + level * 1.6;
-  const mask = lens ? `radial-gradient(circle ${r}px at ${lens.x}px ${lens.y}px, black 45%, transparent 100%)` : "none";
+  const rRef = useRef(r);
+  rRef.current = r;
+  // лупа двигается только transform-ом, раз в кадр и мимо React: ничего не перерисовывается
+  const paint = () => {
+    raf.current = 0;
+    const el = ref.current;
+    const l = lensEl.current;
+    const inner = innerEl.current;
+    if (!el || !l || !inner) return;
+    const b = el.getBoundingClientRect();
+    const x = pos.current.x - b.left - rRef.current;
+    const y = pos.current.y - b.top - rRef.current;
+    l.style.opacity = "1";
+    l.style.transform = `translate3d(${x}px,${y}px,0)`;
+    inner.style.width = `${b.width}px`;
+    inner.style.height = `${b.height}px`;
+    inner.style.transform = `translate3d(${-x}px,${-y}px,0)`;
+  };
   const madImg = (
     <Image src={mad ?? base} alt="" fill sizes="100vw" className="object-cover" style={mad ? undefined : { filter: MAD_FALLBACK }} />
   );
@@ -59,11 +79,13 @@ export function Hero() {
         ref={ref}
         className="absolute inset-0 cursor-none"
         onMouseMove={(e) => {
-          const b = ref.current!.getBoundingClientRect();
-          setLens({ x: e.clientX - b.left, y: e.clientY - b.top });
-          if (Math.random() < 0.015) add(1);
+          pos.current = { x: e.clientX, y: e.clientY };
+          if (!raf.current) raf.current = requestAnimationFrame(paint);
+          if (Math.random() < 0.008) add(1);
         }}
-        onMouseLeave={() => setLens(null)}
+        onMouseLeave={() => {
+          if (lensEl.current) lensEl.current.style.opacity = "0";
+        }}
       >
         {/* норма */}
         <motion.div className="absolute inset-0" animate={{ scale: 1 + level / 900 }} transition={{ duration: 2 }}>
@@ -73,17 +95,15 @@ export function Hero() {
         <div className="pointer-events-none absolute inset-0 transition-opacity duration-1000" style={{ opacity: Math.max(0, (level - 25) / 110) }}>
           {madImg}
         </div>
-        {lens && (
-          <>
-            <div className="pointer-events-none absolute inset-0" style={{ maskImage: mask, WebkitMaskImage: mask }}>
-              {madImg}
-            </div>
-            <div
-              className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#f3e9d6]/25 shadow-[inset_0_0_60px_rgba(140,20,20,0.35)]"
-              style={{ left: lens.x, top: lens.y, width: r * 1.3, height: r * 1.3 }}
-            />
-          </>
-        )}
+        <div
+          ref={lensEl}
+          className="pointer-events-none absolute left-0 top-0 overflow-hidden rounded-full opacity-0 transition-opacity duration-200 will-change-transform [mask-image:radial-gradient(circle_closest-side,black_55%,transparent_100%)]"
+          style={{ width: r * 2, height: r * 2 }}
+        >
+          <div ref={innerEl} className="absolute left-0 top-0 will-change-transform">
+            {madImg}
+          </div>
+        </div>
       </div>
 
       {/* виньетка и затемнение под текст */}

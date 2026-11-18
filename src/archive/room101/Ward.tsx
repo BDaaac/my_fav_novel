@@ -17,7 +17,11 @@ const HITS = 6;
 
 export function Ward() {
   const [hits, setHits] = useState(0);
-  const [light, setLight] = useState<{ x: number; y: number } | null>(null);
+  const hole = useRef<HTMLDivElement>(null);
+  const solid = useRef<HTMLDivElement>(null);
+  const dot = useRef<HTMLDivElement>(null);
+  const pos = useRef({ x: 0, y: 0 });
+  const raf = useRef(0);
   const [flash, setFlash] = useState(0);
   const { add } = useInfection();
   const art = useArt();
@@ -25,7 +29,25 @@ export function Ward() {
   const stage = useRef<HTMLDivElement>(null);
   const done = hits >= HITS;
   const beat = Math.max(0.5, 1.15 - hits * 0.1); // чем ближе к концу, тем чаще пульс
-  const dark = light ? `radial-gradient(circle 190px at ${light.x}px ${light.y}px, transparent 0%, rgba(2,6,6,0.82) 60%, #020606 100%)` : "#020606";
+  // свет двигается transform-ом, без состояния React
+  const paint = () => {
+    raf.current = 0;
+    const el = stage.current;
+    if (!el || !hole.current || !solid.current || !dot.current) return;
+    const b = el.getBoundingClientRect();
+    const x = pos.current.x - b.left;
+    const y = pos.current.y - b.top;
+    hole.current.style.opacity = "1";
+    solid.current.style.opacity = "0";
+    hole.current.style.transform = `translate3d(calc(${x}px - 150vmax), calc(${y}px - 150vmax), 0)`;
+    dot.current.style.opacity = "1";
+    dot.current.style.transform = `translate3d(${x - 6}px, ${y - 6}px, 0)`;
+  };
+  const lightsOut = () => {
+    if (hole.current) hole.current.style.opacity = "0";
+    if (solid.current) solid.current.style.opacity = "1";
+    if (dot.current) dot.current.style.opacity = "0";
+  };
 
   return (
     <section className="relative overflow-hidden bg-[#020606] text-[#cfeee8]">
@@ -41,19 +63,17 @@ export function Ward() {
         ref={stage}
         className="relative mt-8 h-[92vh] min-h-[640px] cursor-none"
         onMouseMove={(e) => {
-          const b = stage.current!.getBoundingClientRect();
-          setLight({ x: e.clientX - b.left, y: e.clientY - b.top });
-          if (!done && Math.random() < 0.03) add(1); // ментальное давление
+          pos.current = { x: e.clientX, y: e.clientY };
+          if (!raf.current) raf.current = requestAnimationFrame(paint);
+          if (!done && Math.random() < 0.015) add(1); // ментальное давление
         }}
-        onMouseLeave={() => setLight(null)}
+        onMouseLeave={lightsOut}
       >
         {/* то, что есть в темноте: отблески кристаллов и ком без очертаний */}
         <div className="absolute inset-0 [background:radial-gradient(circle_at_18%_78%,#1fd1b922,transparent_22%),radial-gradient(circle_at_84%_70%,#1fd1b91c,transparent_20%),radial-gradient(circle_at_70%_22%,#1fd1b914,transparent_16%)]" />
         <svg className="absolute h-0 w-0" aria-hidden>
           <filter id="flesh101">
-            <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="3" seed="11">
-              <animate attributeName="baseFrequency" dur="9s" values="0.018;0.026;0.018" repeatCount="indefinite" />
-            </feTurbulence>
+            <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" seed="11" />
             <feDisplacementMap in="SourceGraphic" scale="70" />
             <feGaussianBlur stdDeviation="7" />
           </filter>
@@ -81,7 +101,17 @@ export function Ward() {
         )}
 
         {/* темнота со слабым светом курсора */}
-        <div className="pointer-events-none absolute inset-0" style={{ background: done ? "rgba(2,6,6,0.55)" : dark }} />
+        {done ? (
+          <div className="pointer-events-none absolute inset-0 bg-[#020606]/55" />
+        ) : (
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div ref={solid} className="absolute inset-0 bg-[#020606]" />
+            <div
+              ref={hole}
+              className="absolute left-0 top-0 h-[300vmax] w-[300vmax] opacity-0 will-change-transform [background:radial-gradient(circle_at_center,transparent_0,rgba(2,6,6,0.82)_114px,#020606_190px)]"
+            />
+          </div>
+        )}
         <Noise opacity={0.08} />
 
         {/* пульс слышен и в темноте: по нему ищут сердце */}
@@ -128,9 +158,7 @@ export function Ward() {
         )}
 
         {/* свет в руке */}
-        {light && !done && (
-          <div className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#fff3d6] shadow-[0_0_30px_12px_rgba(255,240,200,0.35)]" style={{ left: light.x, top: light.y }} />
-        )}
+        {!done && <div ref={dot} className="pointer-events-none absolute left-0 top-0 h-3 w-3 rounded-full bg-[#fff3d6] opacity-0 shadow-[0_0_30px_12px_rgba(255,240,200,0.35)] will-change-transform" />}
 
         <div className="pointer-events-none absolute inset-x-0 bottom-6 text-center font-system text-[11px] tracking-widest opacity-50">
           {done ? "" : hits === 0 ? "ищите по пульсу · бейте" : `удары Джинчхоля · ${hits}/${HITS}`}

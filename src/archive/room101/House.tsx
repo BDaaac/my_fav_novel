@@ -46,12 +46,8 @@ export function House() {
           />
         </div>
 
-        <h4 className="mt-20 font-system text-xs uppercase tracking-[0.3em] text-[#8fb0ff]">Кто где проснулся · откройте дверь</h4>
-        <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
-          {RUN2.team.map((id) => (
-            <Door key={id} id={id} role={RUN2.roles?.find((r) => r.who === id)?.role ?? "в своём доме, с «семьёй»"} />
-          ))}
-        </div>
+        <h4 className="mt-20 font-system text-xs uppercase tracking-[0.3em] text-[#8fb0ff]">Ночь · в каждом окне телевизор · загляните</h4>
+        <Windows />
 
         <div className="mt-16 grid gap-6 md:grid-cols-[1.1fr_1fr]">
           <EscapeTimer />
@@ -65,18 +61,23 @@ export function House() {
           </div>
         </div>
 
-        <ol className="mt-20 space-y-6 border-l border-[#8fb0ff]/30 pl-6">
+        <div className="mt-20 border border-[#8fb0ff]/25 bg-black/35">
+          <div className="flex items-center justify-between border-b border-[#8fb0ff]/25 px-4 py-2 font-system text-[11px] uppercase tracking-[0.25em] text-[#8fb0ff]">
+            <span>Программа передач · ABS</span>
+            <motion.span className="text-[#ff8a8a]" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.6, repeat: Infinity }}>
+              ● в эфире
+            </motion.span>
+          </div>
           {RUN2.acts.map((a) => (
-            <li key={a.title} className="relative">
-              <span className="absolute -left-[29px] top-3 h-2 w-2 rounded-full bg-[#8fb0ff] shadow-[0_0_10px_#8fb0ff]" />
-              <div className="font-display text-2xl text-[#f0e8d6]">
-                <Mad as="span" text={a.title} />
-                <Ch n={a.ch[0] === a.ch[1] ? a.ch[0] : `${a.ch[0]}–${a.ch[1]}`} />
+            <div key={a.title} className="grid gap-x-6 gap-y-1 border-b border-[#8fb0ff]/10 px-4 py-4 last:border-0 md:grid-cols-[120px_1fr]">
+              <div className="font-system text-[13px] text-[#9ff5c8] [text-shadow:0_0_8px_#4fffb055]">гл. {a.ch[0] === a.ch[1] ? a.ch[0] : `${a.ch[0]}–${a.ch[1]}`}</div>
+              <div>
+                <Mad as="div" text={a.title} className="font-display text-2xl text-[#f0e8d6]" />
+                <Mad text={a.text} className="mt-1 font-display text-[17px] leading-relaxed text-[#c9c2b2]" />
               </div>
-              <Mad text={a.text} className="font-display text-[17px] leading-relaxed text-[#c9c2b2]" />
-            </li>
+            </div>
           ))}
-        </ol>
+        </div>
         <Mad className="mt-10 max-w-3xl font-display text-[19px] italic text-[#c9c2b2]" text={RUN2.outcome.text} />
       </div>
     </section>
@@ -148,32 +149,73 @@ function Ticker() {
   );
 }
 
-function Door({ id, role }: { id: string; role: string }) {
-  const [open, setOpen] = useState(false);
-  const escaped = ESCAPED.has(id);
+/** Ночной дом: восемь окон, за шторами мерцает телевизор. Загляни — кто там и выбрался ли. */
+function Windows() {
   return (
-    <button
-      onClick={() => setOpen((o) => !o)}
-      className={cn(
-        "relative h-56 rounded-t-[40px] border-4 text-left transition",
-        open ? "border-[#5a4a3a] bg-[#0b0d14] shadow-[inset_0_0_40px_rgba(143,176,255,0.25)]" : "border-[#2a1d14] bg-gradient-to-b from-[#5a3d26] to-[#3a2616] hover:brightness-110",
-      )}
-    >
-      {!open ? (
-        <div className="flex h-full flex-col justify-between p-3">
-          <span className="font-system text-[11px] text-[#e9d9b8]">{nameOf(id).split(" (")[0]}</span>
-          <span className="ml-auto h-3 w-3 rounded-full bg-[#c9a227]" />
-          <span className="font-hand text-lg text-[#e9d9b8]/70">дом</span>
-        </div>
-      ) : (
-        <div className="flex h-full flex-col justify-between p-3">
-          <p className="font-display text-[14px] leading-snug">{role}</p>
-          <span className={cn("font-system text-[10px] uppercase tracking-wider", escaped ? "text-[#7fd4a0]" : "text-[#ff8a8a]")}>
-            {escaped ? "сбежал(а) с первой попытки" : `застрял(а): ${STUCK_WHY[id] ?? ""}`}
-          </span>
-        </div>
-      )}
-    </button>
+    <div className="relative mt-4 overflow-hidden border border-black/50 bg-[#0c0e14] p-6 shadow-[inset_0_0_90px_rgba(0,0,0,0.85)] [background-image:repeating-linear-gradient(0deg,transparent_0_22px,rgba(255,255,255,0.028)_22px_23px),repeating-linear-gradient(90deg,transparent_0_58px,rgba(255,255,255,0.02)_58px_59px)] md:p-10">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4 md:gap-x-10">
+        {RUN2.team.map((id, i) => (
+          <HomeWindow key={id} id={id} i={i} role={RUN2.roles?.find((r) => r.who === id)?.role ?? "в своём доме, с «семьёй»"} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function HomeWindow({ id, role, i }: { id: string; role: string; i: number }) {
+  const [open, setOpen] = useState(false);
+  const { add } = useInfection();
+  const escaped = ESCAPED.has(id);
+  const gone = open && escaped; // ушёл — свет погас
+  return (
+    <div>
+      <button
+        onClick={() => {
+          if (!open && !escaped) add(3);
+          setOpen((o) => !o);
+        }}
+        aria-label={`Окно: ${nameOf(id)}`}
+        className="group relative block aspect-[4/5] w-full overflow-hidden border-[7px] border-[#1f222b] bg-[#04060a] shadow-[0_0_0_1px_#000,0_10px_30px_rgba(0,0,0,0.6)]"
+      >
+        {/* свет телевизора */}
+        <motion.div
+          className="absolute inset-0 transition-[filter] duration-1000 [background:radial-gradient(ellipse_at_50%_95%,#9fc0ff_0%,#3a6cff_30%,#12204a_65%,transparent_100%)]"
+          style={{ filter: open && !escaped ? "hue-rotate(125deg) saturate(1.4)" : "none" }}
+          animate={{ opacity: gone ? 0 : [0.55, 0.9, 0.4, 0.8, 0.6, 0.95, 0.55] }}
+          transition={gone ? { duration: 1.2 } : { duration: 2.2 + (i % 4) * 0.7, repeat: Infinity, delay: i * 0.3 }}
+        />
+        {/* шторы */}
+        {[0, 1].map((side) => (
+          <div
+            key={side}
+            className={cn(
+              "absolute inset-y-0 w-[48%] transition-transform duration-700 ease-out [background:repeating-linear-gradient(90deg,#2a2233_0_9px,#1c1724_9px_18px)] group-hover:brightness-125",
+              side ? "right-0" : "left-0",
+              open && (side ? "translate-x-[78%]" : "-translate-x-[78%]"),
+            )}
+            style={{ opacity: 0.8 }}
+          />
+        ))}
+        {/* переплёт */}
+        <div className="pointer-events-none absolute inset-y-0 left-1/2 w-[5px] -translate-x-1/2 bg-[#1f222b]" />
+        <div className="pointer-events-none absolute inset-x-0 top-[38%] h-[5px] bg-[#1f222b]" />
+      </button>
+      <div className="mx-auto h-2 w-[108%] -translate-x-[3.7%] bg-[#1a1c24]" />
+      <div className="mt-2 flex items-center justify-between font-system text-[11px] text-[#c9d2ee]/80">
+        <span>{nameOf(id).split(" (")[0]}</span>
+        {open && <span className={cn("h-1.5 w-1.5 rounded-full", escaped ? "bg-[#7fd4a0]" : "bg-[#ff6a6a]")} />}
+      </div>
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+            <p className="mt-1.5 font-display text-[14px] leading-snug text-[#d8d2c4]">{role}</p>
+            <p className={cn("mt-1 font-system text-[10px] uppercase tracking-wider", escaped ? "text-[#7fd4a0]" : "text-[#ff9a9a]")}>
+              {escaped ? "вышел(ла) из дома. свет погас" : `не вышел(ла): ${STUCK_WHY[id] ?? ""}`}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
