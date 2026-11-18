@@ -141,6 +141,7 @@
   --color-gate: #8f7cff;
   --font-display: var(--font-cormorant);
   --font-system: var(--font-jetbrains);
+  --font-hand: var(--font-caveat);
 }
 
 :root {
