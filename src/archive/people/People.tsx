@@ -30,22 +30,53 @@ const shortName = (c: Character) => c.name.split(" (")[0];
 
 export function People({ art }: { art: string[] }) {
   const [open, setOpen] = useState<string | null>(null);
+  const [ring, setRing] = useState(0);
   const has = (id: string) => (art.includes(`${id}.png`) ? `/art/people/${id}.png` : null);
   return (
     <main className="min-h-screen overflow-x-clip bg-[#0b0a09] pb-32 text-[#e9e1d0] [background-image:repeating-linear-gradient(90deg,transparent_0_118px,rgba(255,255,255,0.018)_118px_120px),radial-gradient(ellipse_at_50%_0%,#2a1410_0%,#0b0a09_60%)]">
-      <header className="mx-auto max-w-6xl px-6 pt-16">
-        <div className="font-system text-[12px] tracking-[0.3em] text-[#c9a227]">ОТЕЛЬ «ПИОНЕР» · СТОЙКА РЕГИСТРАЦИИ</div>
-        <h1 className="mt-2 font-display text-5xl md:text-7xl">Гости</h1>
-        <p className="mt-3 max-w-xl font-display text-[19px] leading-relaxed opacity-70">Восемь пропусков на первом этаже. Возьмите любой, чтобы открыть досье. Сведения по главам 1–100.</p>
+      {/* стойка регистрации: лампа, латунная табличка и звонок */}
+      <header className="relative mx-auto max-w-6xl px-6 pt-14 text-center">
+        <div className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[720px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,214,140,0.22),transparent_65%)]" />
+        <div className="relative mx-auto w-fit rounded-[3px] border border-[#3a2c12] bg-gradient-to-b from-[#d9b65a] via-[#b08a2e] to-[#7a5c16] px-10 py-4 shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.45)]">
+          {["left-2 top-2", "right-2 top-2", "left-2 bottom-2", "right-2 bottom-2"].map((c) => (
+            <span key={c} className={`absolute ${c} h-1.5 w-1.5 rounded-full bg-[#4a3810] shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]`} />
+          ))}
+          <div className="font-system text-[11px] tracking-[0.45em] text-[#3a2c12]">ОТЕЛЬ «ПИОНЕР»</div>
+          <h1 className="font-display text-5xl font-semibold tracking-[0.12em] text-[#2a1f0a] [text-shadow:0_1px_0_rgba(255,255,255,0.35)] md:text-6xl">ГОСТИ</h1>
+          <div className="font-system text-[10px] tracking-[0.4em] text-[#3a2c12]">СТОЙКА РЕГИСТРАЦИИ</div>
+        </div>
+
+        <div className="relative mx-auto mt-7 flex w-fit flex-wrap items-center justify-center gap-x-8 gap-y-4">
+          <dl className="flex gap-6 font-system text-[11px] tracking-widest text-[#e9e1d0]/70">
+            {[
+              ["заселено", String(GUESTS.length)],
+              ["этаж", "1"],
+              ["главы", "1–100"],
+            ].map(([k, v]) => (
+              <div key={k} className="text-left">
+                <dt className="text-[9px] uppercase opacity-60">{k}</dt>
+                <dd className="font-display text-2xl tracking-normal text-[#c9a227]">{v}</dd>
+              </div>
+            ))}
+          </dl>
+          {/* звонок на стойке: позвонишь — все пропуска качнутся */}
+          <button onClick={() => setRing((r) => r + 1)} aria-label="Позвонить в звонок" className="group relative h-16 w-24">
+            <motion.span key={ring} initial={{ y: 0 }} animate={ring ? { y: [0, 5, 0] } : {}} transition={{ duration: 0.25 }} className="absolute left-1/2 top-0 h-3 w-3 -translate-x-1/2 rounded-full bg-gradient-to-b from-[#f3d98a] to-[#8a6420]" />
+            <span className="absolute left-1/2 top-2.5 h-9 w-[72px] -translate-x-1/2 rounded-t-full bg-gradient-to-b from-[#f3d98a] via-[#b08a2e] to-[#6a4e14] shadow-[inset_8px_4px_10px_rgba(255,255,255,0.35)] transition group-hover:brightness-110" />
+            <span className="absolute bottom-1 left-1/2 h-2.5 w-24 -translate-x-1/2 rounded-sm bg-gradient-to-b from-[#3a2c12] to-[#1a1408]" />
+            {ring > 0 && <motion.span key={`w${ring}`} className="pointer-events-none absolute left-1/2 top-6 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#f3d98a]" initial={{ scale: 0.6, opacity: 0.8 }} animate={{ scale: 5, opacity: 0 }} transition={{ duration: 0.9 }} />}
+          </button>
+        </div>
+        <p className="relative mx-auto mt-4 max-w-md font-display text-[17px] italic leading-relaxed opacity-60">Позвоните в звонок или снимите пропуск с рейки, чтобы открыть досье.</p>
       </header>
 
       {[GUESTS.slice(0, 4), GUESTS.slice(4)].map((row, r) => (
-        <section key={r} className="relative mx-auto mt-14 max-w-6xl px-6">
+        <section key={r} className="relative mx-auto mt-12 max-w-6xl px-6">
           {/* рейка, на которой висят пропуска */}
           <div className="h-3 rounded-full bg-gradient-to-b from-[#6a5a3a] to-[#2a2216] shadow-[0_6px_14px_rgba(0,0,0,0.6)]" />
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 md:gap-x-10">
             {row.map((m, i) => (
-              <Badge key={m.id} m={m} c={byId(m.id)} src={has(m.id)} i={r * 4 + i} onOpen={() => setOpen(m.id)} />
+              <Badge key={m.id} m={m} c={byId(m.id)} src={has(m.id)} i={r * 4 + i} ring={ring} onOpen={() => setOpen(m.id)} />
             ))}
           </div>
         </section>
@@ -57,7 +88,7 @@ export function People({ art }: { art: string[] }) {
 }
 
 /** Пропуск на клипсе: маятник. Тянешь — раскачивается от скорости руки, отпускаешь — возвращается. */
-function Badge({ m, c, src, i, onOpen }: { m: Meta; c: Character; src: string | null; i: number; onOpen: () => void }) {
+function Badge({ m, c, src, i, ring, onOpen }: { m: Meta; c: Character; src: string | null; i: number; ring: number; onOpen: () => void }) {
   const x = useMotionValue(0);
   const idle = useMotionValue(0);
   const v = useVelocity(x);
@@ -70,6 +101,14 @@ function Badge({ m, c, src, i, onOpen }: { m: Meta; c: Character; src: string | 
     const ctl = animate(idle, [-(1.2 + (i % 3) * 0.5), 1.2 + (i % 3) * 0.5], { duration: 2.6 + (i % 4) * 0.45, repeat: Infinity, repeatType: "mirror", ease: "easeInOut", delay: i * 0.2 });
     return () => ctl.stop();
   }, [idle, i]);
+
+  // звонок на стойке: все пропуска качнулись, каждый по-своему
+  useEffect(() => {
+    if (!ring) return;
+    const k = (i % 2 ? -1 : 1) * (10 + (i % 3) * 4);
+    const ctl = animate(swing, [swing.get(), k, -k * 0.6, k * 0.3, 0], { duration: 1.6, delay: i * 0.05 });
+    return () => ctl.stop();
+  }, [ring, swing, i]);
 
   return (
     <motion.div
