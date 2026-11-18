@@ -1,11 +1,10 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image";
-import { useArt } from "./artfiles";
 import { AnimatePresence, motion } from "motion/react";
-import { FAMILY_PHOTOS, RUN1, nameOf } from "./data";
+import { RUN1 } from "./data";
+import { Darkroom } from "./Darkroom";
 import { Wallpaper } from "./art";
-import { Ch, stageOf, useInfection } from "./infection";
+import { Ch } from "./infection";
 import { Mad } from "./mad";
 import { cn } from "@/lib/utils";
 
@@ -62,7 +61,7 @@ export function KeyTag() {
   );
 }
 
-/** Заход 1: фото на столе; перевернёшь — кошмар. Дальше — страницы дневника. */
+/** Заход 1: фотолаборатория с плёнкой шести семей, дальше — страницы дневника. */
 export function AlbumRun() {
   return (
     <section className="relative overflow-hidden bg-[var(--paper)] text-[var(--ink)] transition-colors duration-1000">
@@ -73,11 +72,7 @@ export function AlbumRun() {
           className="mt-6 max-w-3xl font-display text-[20px] leading-relaxed"
           text="Отель объявил охоту за сокровищами, и команда с тонфой и декоративным кинжалом вошла в 101-й. Шестеро проснулись в шести разных домах. Окно Статуса показывало, как растёт заражение, а «родные» мягко {сводили с ума.|заботились.}"
         />
-        <div className="mt-14 grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-3">
-          {FAMILY_PHOTOS.map((p, i) => (
-            <Polaroid key={p.who} p={p} tilt={[-4, 3, -2, 4, -3, 2][i]} />
-          ))}
-        </div>
+        <Darkroom />
         <Diary />
       </div>
     </section>
@@ -93,104 +88,6 @@ export function RunHeader({ n, ch, title, note, dark }: { n: number; ch: string;
       <Mad as="div" text={title} className="mt-2 font-display text-5xl md:text-7xl" />
       <Mad as="div" text={note} className={cn("mt-2 font-hand text-2xl", dark ? "opacity-70" : "text-[var(--accent)]")} />
     </div>
-  );
-}
-
-function Polaroid({ p, tilt }: { p: (typeof FAMILY_PHOTOS)[number]; tilt: number }) {
-  const [flipped, setFlipped] = useState(false);
-  const { level, add } = useInfection();
-  const s = stageOf(level);
-  const art = useArt();
-  const front = art(`album-${p.who}`);
-  const back = art(`album-${p.who}-truth`);
-  return (
-    <button
-      onClick={() => {
-        setFlipped((f) => !f);
-        if (!flipped && !p.escaped) add(6);
-      }}
-      className="group relative block aspect-[4/5] w-full transition-transform hover:z-10 hover:scale-[1.03] [perspective:900px]"
-      style={{ rotate: `${tilt}deg` }}
-    >
-      <span className="absolute -top-3 left-1/2 z-10 h-6 w-16 -translate-x-1/2 rotate-[-4deg] bg-[#e8d9a8]/80 shadow-sm" />
-      <motion.div animate={{ rotateY: flipped ? 180 : 0 }} transition={{ duration: 0.6 }} className="relative h-full w-full [transform-style:preserve-3d]">
-        <div className="absolute inset-0 flex flex-col bg-[#fbf6ea] p-3 pb-2 shadow-[0_8px_22px_rgba(60,30,10,0.4)] [backface-visibility:hidden]">
-          <div className="relative flex-1 overflow-hidden">
-            {front ? (
-              <>
-                <Image src={front} alt={p.caption} fill sizes="(min-width: 768px) 33vw, 50vw" className="object-cover transition-[filter] duration-1000" style={{ filter: PHOTO_FILTER[s] }} />
-                {/* правда просвечивает сквозь фото при высоком заражении */}
-                {back && s >= 2 && <Image src={back} alt="" fill sizes="(min-width: 768px) 33vw, 50vw" className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-60" />}
-              </>
-            ) : (
-              <PhotoScene count={p.family} stage={s} escaped={p.escaped} seed={tilt} />
-            )}
-          </div>
-          <div className="pt-2 text-left font-hand text-xl leading-tight text-[#3b2a1e]">
-            {s >= 2 ? (p.escaped ? "Сын опять не с нами" : "Мы всегда будем вместе ♥") : p.caption}
-          </div>
-          <div className="text-left font-system text-[10px] text-[#8a6e52]">{nameOf(p.who)}</div>
-        </div>
-        <div className="absolute inset-0 flex flex-col justify-between overflow-hidden bg-[#efe3c8] p-4 text-left shadow-[0_8px_22px_rgba(60,30,10,0.4)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
-          {back && (
-            <>
-              <Image src={back} alt="" fill sizes="(min-width: 768px) 33vw, 50vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#efe3c8] via-[#efe3c8]/85 to-[#efe3c8]/10" />
-            </>
-          )}
-          <div className={cn("relative", back && "mt-auto")}>
-            <div className={cn("font-system text-[11px] uppercase tracking-widest", p.escaped ? "text-[#2f6b3a]" : "text-[#8c1c24]")}>{p.escaped ? "Побег" : "Провал"}</div>
-            <p className="mt-2 font-hand text-[22px] leading-tight text-[#2a1d14]">{p.truth}</p>
-          </div>
-          <div className="relative font-system text-[10px] text-[#8a6e52]">{p.ch}</div>
-        </div>
-      </motion.div>
-    </button>
-  );
-}
-
-/** Фото выцветает и краснеет вместе с заражением. */
-const PHOTO_FILTER = ["none", "saturate(1.15)", "sepia(0.3) saturate(1.4) hue-rotate(-10deg)", "sepia(0.5) saturate(1.8) hue-rotate(-20deg) contrast(1.2)", "sepia(0.7) saturate(2.4) hue-rotate(-28deg) contrast(1.4)"];
-
-function PhotoScene({ count, stage, escaped, seed }: { count: number; stage: number; escaped?: boolean; seed: number }) {
-  const xs = Array.from({ length: count + 1 }, (_, i) => 30 + (i * 140) / count);
-  const id = `ph${seed}`;
-  return (
-    <svg viewBox="0 0 200 200" className="h-full w-full" preserveAspectRatio="xMidYMid slice">
-      <defs>
-        <radialGradient id={id} cx="0.5" cy="0.3" r="0.8">
-          <stop offset="0" stopColor="#f3dfb2" />
-          <stop offset="1" stopColor="#8c6a42" />
-        </radialGradient>
-      </defs>
-      <rect width="200" height="200" fill={`url(#${id})`} />
-      {escaped && (
-        <g>
-          <rect x="138" y="18" width="48" height="66" fill="#dcecf3" stroke="#5a4030" strokeWidth="3" />
-          <line x1="162" y1="18" x2="162" y2="84" stroke="#5a4030" strokeWidth="2" />
-          <line x1="138" y1="51" x2="186" y2="51" stroke="#5a4030" strokeWidth="2" />
-        </g>
-      )}
-      {xs.map((x, i) => {
-        const guest = i === Math.floor(count / 2);
-        if (escaped && guest) return null; // его на фото уже нет
-        const h = guest ? 0.86 : 0.95 + ((i * 37) % 10) / 60;
-        return (
-          <g key={i} transform={`translate(${x} 200) scale(${h})`}>
-            <path d="M-22 0 Q-24 -70 0 -78 Q24 -70 22 0 Z" fill={guest ? "#2a1d14" : "#4a3626"} />
-            <ellipse cx="0" cy="-96" rx="15" ry="18" fill={guest ? "#2a1d14" : "#d9bc90"} />
-            {!guest && stage >= 2 && <path d={stage >= 4 ? "M-12 -90 Q0 -74 12 -90 Q0 -82 -12 -90Z" : "M-8 -90 Q0 -83 8 -90"} fill={stage >= 4 ? "#5a0a0e" : "none"} stroke="#2a120a" strokeWidth="2" />}
-            {!guest && stage >= 3 && (
-              <>
-                <circle cx="-5" cy="-100" r="2" fill="#120806" />
-                <circle cx="5" cy="-100" r="2" fill="#120806" />
-              </>
-            )}
-          </g>
-        );
-      })}
-      <rect width="200" height="200" fill="#5a3a12" opacity="0.1" />
-    </svg>
   );
 }
 
