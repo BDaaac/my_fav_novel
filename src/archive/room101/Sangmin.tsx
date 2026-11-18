@@ -89,19 +89,18 @@ export function Ward() {
   useEffect(() => {
     if (!ripping || phase !== "stone") return;
     const id = setInterval(() => {
-      setRip((r) => {
-        const v = Math.min(1, r + 0.02);
-        if (v >= 1) {
-          setRipping(false);
-          setPhase("won");
-          setWon(true);
-        }
-        return v;
-      });
+      setRip((r) => Math.min(1, r + 0.02));
       if (Math.random() < 0.15) add(1);
     }, 50);
     return () => clearInterval(id);
-  }, [ripping, phase, add, setWon]);
+  }, [ripping, phase, add]);
+  // камень вышел — победа (отдельным эффектом, не внутри обновления состояния)
+  useEffect(() => {
+    if (phase !== "stone" || rip < 1) return;
+    setRipping(false);
+    setPhase("won");
+    setWon(true);
+  }, [rip, phase, setWon]);
   useEffect(() => {
     if (ripping || phase !== "stone" || rip === 0 || rip >= 1) return;
     const id = setInterval(() => setRip((r) => Math.max(0, r - 0.03)), 50);

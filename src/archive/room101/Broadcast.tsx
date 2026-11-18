@@ -106,17 +106,15 @@ export function Broadcast() {
                           type="checkbox"
                           className="mt-1 accent-[#8c1c24]"
                           checked={broken.has(i)}
-                          onChange={() =>
+                          onChange={() => {
+                            if (!broken.has(i)) add(4);
                             setBroken((s) => {
                               const n = new Set(s);
                               if (n.has(i)) n.delete(i);
-                              else {
-                                n.add(i);
-                                add(4);
-                              }
+                              else n.add(i);
                               return n;
-                            })
-                          }
+                            });
+                          }}
                         />
                         <span className={cn("font-system text-[13px]", broken.has(i) && "line-through opacity-50")}>{r.rule}</span>
                       </label>
