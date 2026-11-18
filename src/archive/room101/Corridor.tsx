@@ -1,44 +1,91 @@
 "use client";
 import { useRef } from "react";
-import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
+import { motion, useMotionValueEvent, useScroll, useTransform, type MotionValue } from "motion/react";
+import { useInfection } from "./infection";
+import { useStory, type Shield } from "./story";
+import { cn } from "@/lib/utils";
 
 /**
- * Переход «студия → палата»: коридор 4-го этажа больницы (гл. 73).
+ * Переход «студия → палата»: коридор 4-го этажа больницы (гл. 73–74).
  * Листаешь — идёшь вперёд: рамы коридора наезжают, дверь в конце растёт и глотает экран.
+ * На этом этаже давит на разум: фильтр Гаина не держит, спасают браслет Сонъи и Красное лекарство.
  */
 const FRAMES = 9;
 const WALK = 8.6; // сколько «рам» проходим за прокрутку
 
+const SHIELDS: { id: Shield; name: string; note: string }[] = [
+  { id: "filter", name: "Фильтр Гаина", note: "держал до сих пор. Здесь не выдержит" },
+  { id: "bracelet", name: "Браслет Сонъи", note: "защита духа, пока у неё есть силы" },
+  { id: "pill", name: "Красное лекарство", note: "принять и очнуться. Оно одно" },
+];
+// насколько «плывёт» коридор и сколько заражения набегает по дороге
+const PRESSURE: Record<Shield, { blur: number; skew: number; hue: number; inf: number }> = {
+  filter: { blur: 3.5, skew: 3, hue: 40, inf: 3 },
+  bracelet: { blur: 1, skew: 0.8, hue: 10, inf: 1 },
+  pill: { blur: 0, skew: 0, hue: 0, inf: 0 },
+};
+
 export function Corridor() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  const intro = useTransform(scrollYProgress, [0, 0.12, 0.3], [0, 1, 0]);
+  const { add } = useInfection();
+  const { shield, setShield } = useStory();
+  const p = PRESSURE[shield ?? "filter"];
+  const intro = useTransform(scrollYProgress, [0, 0.04, 0.26, 0.34], [0, 1, 1, 0]);
+  const introOff = useTransform(scrollYProgress, (v) => (v > 0.34 ? "none" : "auto"));
   const near = useTransform(scrollYProgress, [0.45, 0.6, 0.8], [0, 1, 0]);
   const black = useTransform(scrollYProgress, [0.86, 1], [0, 1]);
+  // давление растёт к концу коридора
+  const filter = useTransform(scrollYProgress, (v) => (p.blur || p.hue ? `blur(${(p.blur * v).toFixed(2)}px) hue-rotate(${Math.round(-p.hue * v)}deg) saturate(${1 + v * (p.hue / 30)})` : "none"));
+  const step = useRef(0);
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    const s = Math.floor(v * 14);
+    if (s > step.current && p.inf) add(p.inf);
+    step.current = s;
+  });
+
   return (
-    <div ref={ref} className="relative h-[260vh] bg-[#0c0f0e]">
+    <div ref={ref} className="relative h-[280vh] bg-[#0c0f0e]">
       <div className="sticky top-0 h-screen overflow-hidden bg-[#070a09]">
-        {/* стены сходятся в точку */}
-        <svg className="absolute inset-0 h-full w-full opacity-40" preserveAspectRatio="none" viewBox="0 0 100 100" aria-hidden>
-          {[
-            [0, 0],
-            [100, 0],
-            [0, 100],
-            [100, 100],
-          ].map(([x, y]) => (
-            <line key={`${x}${y}`} x1={x} y1={y} x2="50" y2="50" stroke="#2f3f3a" strokeWidth="0.15" vectorEffect="non-scaling-stroke" />
+        <motion.div className="absolute inset-0" style={{ filter }} animate={p.skew ? { skewX: [-p.skew, p.skew, -p.skew], scale: [1, 1 + p.skew / 100, 1] } : { skewX: 0, scale: 1 }} transition={{ duration: 3.2, repeat: p.skew ? Infinity : 0, ease: "easeInOut" }}>
+          {/* стены сходятся в точку */}
+          <svg className="absolute inset-0 h-full w-full opacity-40" preserveAspectRatio="none" viewBox="0 0 100 100" aria-hidden>
+            {[
+              [0, 0],
+              [100, 0],
+              [0, 100],
+              [100, 100],
+            ].map(([x, y]) => (
+              <line key={`${x}${y}`} x1={x} y1={y} x2="50" y2="50" stroke="#2f3f3a" strokeWidth="0.15" vectorEffect="non-scaling-stroke" />
+            ))}
+          </svg>
+          {Array.from({ length: FRAMES }, (_, i) => (
+            <Frame key={i} i={i} p={scrollYProgress} />
           ))}
-        </svg>
-        {Array.from({ length: FRAMES }, (_, i) => (
-          <Frame key={i} i={i} p={scrollYProgress} />
-        ))}
-        <Door p={scrollYProgress} />
-        <motion.div style={{ opacity: intro }} className="pointer-events-none absolute inset-x-0 top-[14%] px-6 text-center">
-          <div className="font-system text-[12px] tracking-[0.3em] text-[#9fb8b0]/70">БОЛЬНИЦА «НОВЫЙ МИР» · 4-Й ЭТАЖ · ГЛ. 73</div>
-          <p className="mx-auto mt-3 max-w-lg font-display text-[20px] leading-relaxed text-[#cfe0da]">«Я ищу ученика Ким Санмина». Медсестра дёргает головой, разворачивается и идёт по коридору. Идите за ней.</p>
+          <Door p={scrollYProgress} />
+        </motion.div>
+
+        <motion.div style={{ opacity: intro, pointerEvents: introOff }} className="absolute inset-x-0 top-[10%] px-6 text-center">
+          <div className="font-system text-[12px] tracking-[0.3em] text-[#9fb8b0]/70">БОЛЬНИЦА «НОВЫЙ МИР» · 4-Й ЭТАЖ · ГЛ. 73–74</div>
+          <p className="mx-auto mt-3 max-w-lg font-display text-[20px] leading-relaxed text-[#cfe0da]">«Я ищу ученика Ким Санмина». Медсестра дёргает головой, разворачивается и идёт по коридору. На этом этаже давит на разум. Чем прикроетесь?</p>
+          <div className="mx-auto mt-5 flex max-w-2xl flex-wrap justify-center gap-3">
+            {SHIELDS.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setShield(s.id)}
+                className={cn("w-[200px] border px-3 py-2 text-left transition", shield === s.id ? "border-[#9ff5e8] bg-[#9ff5e8]/15 shadow-[0_0_24px_-6px_#9ff5e8]" : "border-[#5d7b72] bg-black/50 hover:bg-[#5d7b72]/20")}
+              >
+                <div className="font-system text-[13px] text-[#eafffb]">{s.name}</div>
+                <div className="mt-0.5 font-display text-[14px] leading-snug text-[#cfe0da]/75">{s.note}</div>
+              </button>
+            ))}
+          </div>
+          {!shield && <div className="mt-3 font-system text-[10px] tracking-widest text-[#9fb8b0]/60">не выберете — пойдёте с одним фильтром</div>}
         </motion.div>
         <motion.div style={{ opacity: near }} className="pointer-events-none absolute inset-x-0 bottom-[12%] px-6 text-center">
-          <p className="mx-auto max-w-lg font-display text-[20px] leading-relaxed text-[#cfe0da]">Чем ближе к концу коридора, тем сильнее давит на голову. Гаин и Елена смотрят на Сонъи и хотят её съесть.</p>
+          <p className="mx-auto max-w-lg font-display text-[20px] leading-relaxed text-[#cfe0da]">
+            {shield === "pill" ? "Голова ясная. Остальные рядом смотрят на Сонъи так, будто хотят её съесть." : shield === "bracelet" ? "Браслет держит. Но Гаин и Елена всё равно смотрят на Сонъи и хотят её съесть." : "Фильтр трещит. Вы смотрите на Сонъи и понимаете, что хотите её съесть."}
+          </p>
         </motion.div>
         <motion.div style={{ opacity: black }} className="pointer-events-none absolute inset-0 bg-[#020606]" />
       </div>

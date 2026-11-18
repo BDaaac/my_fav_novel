@@ -24,6 +24,7 @@ export function InfectionProvider({ children }: { children: React.ReactNode }) {
   const [note, setNote] = useState<string | null>(null);
   const paused = useRef(false);
   const [safe, setSafe] = useState(false);
+  const [advice, setAdvice] = useState(3);
   const safeRef = useRef(false);
 
   const add = useCallback((n: number) => {
@@ -47,6 +48,18 @@ export function InfectionProvider({ children }: { children: React.ReactNode }) {
     }, 1500);
   }, []);
 
+  /** Совет Мудреца: подсказка для той сцены, что сейчас на экране. Их всего три. */
+  const sage = useCallback(() => {
+    const mid = window.innerHeight / 2;
+    const el = [...document.querySelectorAll<HTMLElement>("[data-sage]")].find((e) => {
+      const r = e.getBoundingClientRect();
+      return r.top <= mid && r.bottom >= mid;
+    });
+    if (!el) return;
+    setAdvice((a) => Math.max(0, a - 1));
+    setNote(`[Совет Мудреца] ${el.dataset.sage}`);
+  }, []);
+
   useEffect(() => {
     const id = setInterval(() => !paused.current && !document.hidden && add(0.6), 1000);
     return () => clearInterval(id);
@@ -65,7 +78,7 @@ export function InfectionProvider({ children }: { children: React.ReactNode }) {
   }, [level]);
   useEffect(() => {
     if (!note) return;
-    const id = setTimeout(() => setNote(null), 5500);
+    const id = setTimeout(() => setNote(null), 8000);
     return () => clearTimeout(id);
   }, [note]);
 
@@ -85,7 +98,7 @@ export function InfectionProvider({ children }: { children: React.ReactNode }) {
           {children}
         </motion.div>
       </div>
-      <Status level={level} safe={safe} onJump={() => escape("Побег засчитан. Вся группа вернулась в коридор; снаружи прошло около двух часов (гл. 11).")} falling={falling} />
+      <Status level={level} safe={safe} advice={advice} onSage={sage} onJump={() => escape("Побег засчитан. Вся группа вернулась в коридор; снаружи прошло около двух часов (гл. 11).")} falling={falling} />
       <AnimatePresence>
         {note && (
           <motion.div
@@ -103,7 +116,7 @@ export function InfectionProvider({ children }: { children: React.ReactNode }) {
 }
 
 /** Окно статуса отеля — единственное, что «семья» переписать не может (только пытается). */
-function Status({ level, onJump, falling, safe }: { level: number; onJump: () => void; falling: boolean; safe: boolean }) {
+function Status({ level, onJump, falling, safe, advice, onSage }: { level: number; onJump: () => void; falling: boolean; safe: boolean; advice: number; onSage: () => void }) {
   const s = stageOf(level);
   const label = ["низкое", "растёт", "высокое", "опасное", "КРИТИЧЕСКОЕ"][s];
   return (
@@ -116,6 +129,12 @@ function Status({ level, onJump, falling, safe }: { level: number; onJump: () =>
         <div className="mt-1.5 h-1 w-full bg-[#7fd4ff]/15">
           <div className={cn("h-full transition-all duration-500", s >= 2 ? "bg-[#c0333d]" : "bg-[#7fd4ff]")} style={{ width: `${level}%` }} />
         </div>
+        {!safe && (
+          <button onClick={onSage} disabled={advice <= 0} className="mt-2 flex w-full justify-between border border-[#7fd4ff]/40 px-2 py-1 transition hover:bg-[#7fd4ff]/10 disabled:opacity-40 disabled:hover:bg-transparent">
+            <span>[Совет Мудреца]</span>
+            <span>{advice}</span>
+          </button>
+        )}
         {s >= 3 && <div className="mt-1 font-hand text-lg leading-none text-[#e05a5a]">{s >= 4 ? "всё хорошо, милый ♥" : "не слушай его, родной"}</div>}
       </div>
       <AnimatePresence>

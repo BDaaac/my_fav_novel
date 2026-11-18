@@ -1,11 +1,12 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Noise from "@/components/Noise";
 import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
 import { RULES, RUN3 } from "./data";
 import { Mad } from "./mad";
 import { useInfection } from "./infection";
+import { Blackout } from "./story";
 import { cn } from "@/lib/utils";
 
 /** Переход: экран телевизора наезжает и заполняет всё — мы внутри эфира ABS. */
@@ -28,7 +29,7 @@ export function TvZoom() {
           </div>
         </motion.div>
         <motion.div style={{ opacity: text }} className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center text-[#d6dcd8]">
-          <div className="font-system text-[12px] tracking-[0.3em] opacity-70">ЗАХОД 3 · ГЛ. 67–76</div>
+          <div className="font-system text-[12px] tracking-[0.3em] opacity-70">ЗАХОД 3 · ПОПЫТКИ 3–5 · ГЛ. 67–76</div>
           <div className="mt-3 font-glitch text-5xl md:text-8xl">Медиа, меняющие реальность</div>
           <div className="mt-4 max-w-xl font-display text-xl opacity-80">«Странная семья» была только внешним слоем. Название комнаты в Окне Статуса сменилось.</div>
         </motion.div>
@@ -40,6 +41,13 @@ export function TvZoom() {
 /** Третий слой: телестудия ABS, которая на самом деле больница «Новый Мир». */
 export function Broadcast() {
   const [broken, setBroken] = useState<Set<number>>(new Set());
+  const [death, setDeath] = useState<"no" | "now" | "seen">("no");
+  // подвал (правила 0–2) — третья попытка: Гаин один, ранен, на шум сходятся медсёстры
+  useEffect(() => {
+    if (death !== "no" || ![0, 1, 2].every((i) => broken.has(i))) return;
+    const id = setTimeout(() => setDeath("now"), 1800);
+    return () => clearTimeout(id);
+  }, [broken, death]);
   const { add } = useInfection();
   const hospital = broken.size / RULES.length; // 0..1 — насколько студия стала больницей
   return (
@@ -86,7 +94,7 @@ export function Broadcast() {
           {(["Подвал", "Верхние этажи"] as const).map((sheet) => (
             <div key={sheet} className="rotate-[-0.8deg] border border-black/20 bg-[#f2f0e6] p-5 text-[#1d2220] shadow-[0_10px_24px_rgba(0,0,0,0.4)] even:rotate-[0.9deg]">
               <div className="flex items-baseline justify-between border-b-2 border-black/70 pb-2">
-                <span className="font-system text-sm font-bold uppercase tracking-wider">Правила · {sheet}</span>
+                <span className="font-system text-sm font-bold uppercase tracking-wider">Правила · {sheet} · попытка {sheet === "Подвал" ? 3 : 4}</span>
                 <span className="font-system text-[10px] opacity-60">ABS · ламинировано</span>
               </div>
               <ul className="mt-3 space-y-3">
@@ -135,6 +143,14 @@ export function Broadcast() {
           <Mad className="mt-6 font-system text-sm opacity-80" text={`Нарушено правил: ${broken.size} из ${RULES.length}. Студия всё больше похожа на больницу «Новый Мир».`} />
         )}
       </div>
+      <Blackout
+        open={death === "now"}
+        lines={["Со всех сторон металлический скрежет. Медсёстры. Их много.", "…Сознание меркнет."]}
+        status={["Пользователь: Хан Гаин (Мудрость) · Уровень 1, коридор", "Третья попытка окончена"]}
+        note="Вынес из подвала три слова для поиска: Больница «Новый Мир», Ли Хёкчин, Ким Санмин."
+        button="Четвёртая попытка"
+        onClose={() => setDeath("seen")}
+      />
     </section>
   );
 }
