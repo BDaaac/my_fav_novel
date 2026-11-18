@@ -12,9 +12,10 @@ const NAMES = Object.fromEntries((characters as { id: string; name: string }[]).
 export const nameOf = (id: string) => NAMES[id] ?? id;
 export const short = (id: string) => nameOf(id).split(" (")[0].split(" ").slice(-1)[0];
 
-export const ITEMS_101 = (items as { id: string; name: string; owner: string | null; room: string; ch: number; effect: string }[]).filter(
-  (i) => i.room === "101",
-);
+/** Из комнаты можно вынести только Наследие (одно на комнату). */
+export const LEGACY_101 = (items as { id: string; name: string; owner: string | null; room: string; ch: number; effect: string }[]).find(
+  (i) => i.id === "otherworld-star-shard",
+)!;
 
 /** Кошмар каждого в первом заходе (гл. 6–10): «фото» и что за ним на самом деле. */
 export const FAMILY_PHOTOS: { who: string; caption: string; family: number; truth: string; ch: string; escaped?: boolean }[] = [
@@ -25,20 +26,6 @@ export const FAMILY_PHOTOS: { who: string; caption: string; family: number; trut
   { who: "elena-ivanova", caption: "Ужин с родителями и сестрой", family: 3, truth: "Сестра отравила её вместе с родителями.", ch: "гл. 8–9" },
   { who: "park-seungyeop", caption: "Сын опять сидит за «Лол»", family: 2, truth: "Он почти не смотрел на «родителей» и потому заметил их безумие. Вспомнил товарищей и прыгнул из окна третьего этажа. Побег спас всю группу.", ch: "гл. 9–10", escaped: true },
 ];
-
-/** Попытки третьего слоя: кто погиб в какой. */
-export const ATTEMPTS: { n: number; note: string; ch: string }[] = [
-  { n: 1, note: "Первый заход в «Странную семью Re»: четверо застряли (Ынсоль, Елена, Муксон, Ари).", ch: "гл. 62" },
-  { n: 2, note: "Ари побеждает «маму» Миро, но её заражает любовь матери.", ch: "гл. 63" },
-  { n: 3, note: "Гаин нарочно нарушает правила подвала. Его тело превращается в плоть.", ch: "гл. 67–68" },
-  { n: 4, note: "Бойня в телестудии и палата Санмина: Сонъи стреляет в своих и в себя.", ch: "гл. 70–73" },
-  { n: 5, note: "Семьи звереют, побег закрыт. Джинчхоль добивает ком плоти и вырывает Осколок.", ch: "гл. 74–76" },
-];
-
-export function deathsIn(attempt: number) {
-  const tag = `Попытка ${attempt}`;
-  return [...(RUN2.deaths ?? []), ...(RUN3.deaths ?? [])].filter((d) => d.how.includes(tag));
-}
 
 /** Правила из заламинированных инструкций и что за ними (гл. 67–68, 72). */
 export const RULES: { sheet: "Подвал" | "Верхние этажи"; rule: string; broken: string; ch: number }[] = [

@@ -1,8 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
+import Noise from "@/components/Noise";
 import { AnimatePresence, motion } from "motion/react";
 import { RUN2, nameOf } from "./data";
-import { Ch, N, useInfection } from "./infection";
+import { Ch, useInfection } from "./infection";
+import { Mad } from "./mad";
+import { RunHeader } from "./Home";
 import { cn } from "@/lib/utils";
 
 const ESCAPED = new Set(["han-gain", "park-seungyeop", "cha-jinchul", "yu-sonyi"]);
@@ -23,58 +26,87 @@ const KNOCKS = ["Тук. Тук.", "Милый, ты куда?", "Мама сд�
 
 export function House() {
   return (
-    <div className="relative overflow-hidden rounded-sm bg-[#1a1d24] px-6 py-8 text-[#d8d2c4] md:px-10">
-      {/* мертвенно-синий свет экрана */}
-      <div className="pointer-events-none absolute -right-20 -top-20 h-96 w-96 rounded-full bg-[#3a6cff]/20 blur-3xl" />
-      <Ticker />
-      <p className="mt-6 max-w-2xl font-display text-lg leading-relaxed">
-        Каждый у себя дома, среди заражённой «семьи». Похоже на Корею в пандемию, но здравый смысл перевёрнут: по ТВ показывают людоедство и бои на ножах, и все считают это <N a="безумием" b="развлечением" />.
-        <Ch n={64} />
-      </p>
+    <section className="relative overflow-hidden bg-[#14161d] text-[#d8d2c4]">
+      {/* комната ночью: свет только от телевизора */}
+      <motion.div
+        className="pointer-events-none absolute left-1/2 top-40 h-[700px] w-[1100px] -translate-x-1/2 rounded-full bg-[#3a6cff]/25 blur-[120px]"
+        animate={{ opacity: [0.7, 1, 0.55, 0.9, 0.7] }}
+        transition={{ duration: 4, repeat: Infinity }}
+      />
+      <div className="relative mx-auto max-w-6xl px-6 py-24">
+        <RunHeader n={2} ch="62–66" title="Странная семья Re" note="Возвращение спустя полсотни глав. Теперь семья смотрит телевизор." dark />
+        <div className="mt-12 grid items-center gap-10 lg:grid-cols-[1.2fr_1fr]">
+          <LivingTv />
+          <Mad
+            className="font-display text-[20px] leading-relaxed"
+            text="Каждый у себя дома, среди заражённой «семьи». Похоже на Корею в пандемию, но здравый смысл перевёрнут: по ТВ показывают людоедство и бои на ножах, и все считают это {безумием|развлечением}. Проклятие идёт не от семьи, а через эфир."
+          />
+        </div>
 
-      <h4 className="mt-8 font-system text-xs uppercase tracking-[0.25em] text-[#8fb0ff]">Кто где проснулся</h4>
-      <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
-        {RUN2.team.map((id) => (
-          <Door key={id} id={id} role={RUN2.roles?.find((r) => r.who === id)?.role ?? "в своём доме, с «семьёй»"} />
-        ))}
-      </div>
+        <h4 className="mt-20 font-system text-xs uppercase tracking-[0.3em] text-[#8fb0ff]">Кто где проснулся · откройте дверь</h4>
+        <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
+          {RUN2.team.map((id) => (
+            <Door key={id} id={id} role={RUN2.roles?.find((r) => r.who === id)?.role ?? "в своём доме, с «семьёй»"} />
+          ))}
+        </div>
 
-      <div className="mt-10 grid gap-6 md:grid-cols-[1.1fr_1fr]">
-        <EscapeTimer />
-        <div className="border border-[#8fb0ff]/25 bg-black/20 p-4">
-          <h4 className="font-system text-xs uppercase tracking-[0.25em] text-[#8fb0ff]">Улики</h4>
-          <ul className="mt-3 space-y-2 font-display text-[15px] leading-snug">
-            {RUN2.god.facts.map((f, i) => (
-              <li key={i}>
-                — {f.text}
-                <Ch n={f.ch ?? ""} />
-              </li>
+        <div className="mt-16 grid gap-6 md:grid-cols-[1.1fr_1fr]">
+          <EscapeTimer />
+          <div className="space-y-3">
+            {[...RUN2.god.facts.map((f) => ({ t: f.text, ch: String(f.ch ?? "") })), { t: "Первыми сошли с ума шоу ABS. Гаин едет туда на такси вместе с заражённой сестрой.", ch: "64–65" }].map((f, i) => (
+              <div key={i} className="rotate-[-0.6deg] bg-[#f3e27a] p-3 text-[#2a2410] shadow-[0_6px_14px_rgba(0,0,0,0.4)] even:rotate-[0.8deg]">
+                <Mad as="div" text={f.t} className="font-hand text-[21px] leading-tight" />
+                <div className="text-right font-system text-[10px] opacity-60">гл. {f.ch}</div>
+              </div>
             ))}
-            <li>
-              — Первыми сошли с ума шоу ABS. Гаин едет туда на такси вместе с заражённой сестрой.
-              <Ch n="64–65" />
+          </div>
+        </div>
+
+        <ol className="mt-20 space-y-6 border-l border-[#8fb0ff]/30 pl-6">
+          {RUN2.acts.map((a) => (
+            <li key={a.title} className="relative">
+              <span className="absolute -left-[29px] top-3 h-2 w-2 rounded-full bg-[#8fb0ff] shadow-[0_0_10px_#8fb0ff]" />
+              <div className="font-display text-2xl text-[#f0e8d6]">
+                <Mad as="span" text={a.title} />
+                <Ch n={a.ch[0] === a.ch[1] ? a.ch[0] : `${a.ch[0]}–${a.ch[1]}`} />
+              </div>
+              <Mad text={a.text} className="font-display text-[17px] leading-relaxed text-[#c9c2b2]" />
             </li>
-          </ul>
+          ))}
+        </ol>
+        <Mad className="mt-10 max-w-3xl font-display text-[19px] italic text-[#c9c2b2]" text={RUN2.outcome.text} />
+      </div>
+    </section>
+  );
+}
+
+/** Телевизор в гостиной: улыбающийся ведущий над кровавым шоу. */
+function LivingTv() {
+  return (
+    <div className="relative mx-auto w-full max-w-[560px]">
+      <div className="rounded-[30px] bg-gradient-to-b from-[#3a332d] to-[#1a1613] p-5 shadow-[0_30px_60px_rgba(0,0,0,0.6)]">
+        <div className="relative aspect-[4/3] overflow-hidden rounded-[24px] bg-[#0b1430] shadow-[inset_0_0_50px_rgba(0,0,0,0.9)]">
+          <Noise opacity={0.12} scanlines={0.5} flicker={0.4} />
+          <svg viewBox="0 0 400 300" className="absolute inset-0 h-full w-full">
+            <rect width="400" height="300" fill="#1b2f6e" />
+            <rect y="200" width="400" height="100" fill="#3a0a14" />
+            {/* ведущий */}
+            <g transform="translate(200 210)">
+              <path d="M-60 90 Q-64 -10 0 -20 Q64 -10 60 90 Z" fill="#101626" />
+              <ellipse cx="0" cy="-60" rx="34" ry="40" fill="#d9c0a0" />
+              <path d="M-20 -48 Q0 -26 20 -48" stroke="#5a0a0e" strokeWidth="4" fill="#fff" />
+              <circle cx="-12" cy="-68" r="3.5" fill="#111" />
+              <circle cx="12" cy="-68" r="3.5" fill="#111" />
+            </g>
+            <rect x="0" y="252" width="400" height="48" fill="#c0333d" />
+          </svg>
+          <div className="absolute bottom-0 left-0 right-0 overflow-hidden">
+            <Ticker />
+          </div>
+          <div className="absolute left-3 top-3 bg-[#c0333d] px-2 font-system text-[11px] font-bold text-white">ABS</div>
         </div>
       </div>
-
-      <h4 className="mt-10 font-system text-xs uppercase tracking-[0.25em] text-[#8fb0ff]">Ход событий</h4>
-      <ol className="mt-3 space-y-4 border-l border-[#8fb0ff]/30 pl-5">
-        {RUN2.acts.map((a) => (
-          <li key={a.title} className="relative">
-            <span className="absolute -left-[25px] top-2 h-2 w-2 rounded-full bg-[#8fb0ff]" />
-            <div className="font-display text-xl text-[#f0e8d6]">
-              {a.title}
-              <Ch n={a.ch[0] === a.ch[1] ? a.ch[0] : `${a.ch[0]}–${a.ch[1]}`} />
-            </div>
-            <p className="font-display text-[15px] leading-snug text-[#c9c2b2]">{a.text}</p>
-          </li>
-        ))}
-      </ol>
-      <p className="mt-6 border-t border-[#8fb0ff]/20 pt-4 font-display text-[15px] italic text-[#c9c2b2]">
-        {RUN2.outcome.text}
-        <Ch n={RUN2.outcome.ch ?? 66} />
-      </p>
+      <div className="mx-auto h-4 w-40 rounded-b-xl bg-[#1a1613]" />
     </div>
   );
 }
@@ -103,8 +135,8 @@ function Door({ id, role }: { id: string; role: string }) {
     <button
       onClick={() => setOpen((o) => !o)}
       className={cn(
-        "relative h-40 border text-left transition [perspective:600px]",
-        open ? "border-[#8fb0ff]/50 bg-[#232838]" : "border-[#5a4a3a] bg-[#3a2c22] hover:bg-[#45352a]",
+        "relative h-56 rounded-t-[40px] border-4 text-left transition",
+        open ? "border-[#5a4a3a] bg-[#0b0d14] shadow-[inset_0_0_40px_rgba(143,176,255,0.25)]" : "border-[#2a1d14] bg-gradient-to-b from-[#5a3d26] to-[#3a2616] hover:brightness-110",
       )}
     >
       {!open ? (

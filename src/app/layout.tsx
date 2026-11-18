@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, JetBrains_Mono, Inter, Caveat } from "next/font/google";
+import { Cormorant_Garamond, JetBrains_Mono, Inter, Caveat, Rubik_Glitch, Rubik_Wet_Paint } from "next/font/google";
 import "./globals.css";
 import { SpoilerProvider } from "@/lib/spoiler";
 
@@ -13,6 +13,8 @@ const jetbrains = JetBrains_Mono({
   subsets: ["latin", "cyrillic"],
 });
 const caveat = Caveat({ variable: "--font-caveat", subsets: ["latin", "cyrillic"] });
+const glitch = Rubik_Glitch({ variable: "--ff-glitch", subsets: ["latin", "cyrillic"], weight: "400" });
+const wet = Rubik_Wet_Paint({ variable: "--ff-wet", subsets: ["latin", "cyrillic"], weight: "400" });
 const inter = Inter({ variable: "--font-sans", subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
@@ -23,7 +25,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ru" className="dark">
-      <body className={`${cormorant.variable} ${jetbrains.variable} ${inter.variable} ${caveat.variable} grain antialiased`}>
+      <body className={`${cormorant.variable} ${jetbrains.variable} ${inter.variable} ${caveat.variable} ${glitch.variable} ${wet.variable} grain antialiased`}>
         <SpoilerProvider>{children}</SpoilerProvider>
       </body>
     </html>
