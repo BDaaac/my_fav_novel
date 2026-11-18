@@ -70,11 +70,6 @@ export function People({ art }: { art: string[] }) {
 
 /** Указатель лифта: стрелка стоит на первом этаже, остальные пока закрыты. */
 function FloorDial() {
-  const [set, setSet] = useState(false);
-  useEffect(() => {
-    const id = setTimeout(() => setSet(true), 400);
-    return () => clearTimeout(id);
-  }, []);
   return (
     <div className="text-center">
       <svg viewBox="0 0 120 70" className="h-[70px] w-[120px]" aria-hidden>
@@ -91,8 +86,8 @@ function FloorDial() {
             </text>
           </g>
         ))}
-        {/* стрелка съезжает с третьего этажа на первый */}
-        <g style={{ transformBox: "view-box", transformOrigin: "60px 62px", transform: `rotate(${set ? -60 : 60}deg)`, transition: "transform 1.6s cubic-bezier(0.3, 1.3, 0.5, 1)" }}>
+        {/* стрелка стоит на первом этаже */}
+        <g style={{ transformBox: "view-box", transformOrigin: "60px 62px", transform: "rotate(-60deg)" }}>
           <line x1="60" y1="62" x2="60" y2="20" stroke="#f3d98a" strokeWidth="2.5" strokeLinecap="round" />
         </g>
         <circle cx="60" cy="62" r="5" fill="#c9a227" />
