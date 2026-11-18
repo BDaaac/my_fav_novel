@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
 import Noise from "@/components/Noise";
 import { RUN3, nameOf } from "./data";
 import { FleshHeart } from "./art";
@@ -110,11 +111,11 @@ export function Shard({ size = 1 }: { size?: number }) {
       initial={{ scale: 0, rotate: -60 }}
       animate={{ scale: size, rotate: 0, y: [0, -8, 0] }}
       transition={{ scale: { type: "spring", stiffness: 80 }, y: { duration: 3, repeat: Infinity } }}
-      className="relative h-40 w-24"
+      whileHover={{ scale: size * 1.08, filter: "brightness(1.3)" }}
+      className="relative h-44 w-44"
     >
-      <div className="absolute -inset-10 rounded-full bg-[#9ff5e8]/30 blur-2xl" />
-      <div className="absolute inset-0 rotate-12 bg-gradient-to-br from-white via-[#9ff5e8] to-[#5a7cff] [clip-path:polygon(50%_0,100%_32%,74%_100%,22%_92%,0_28%)]" />
-      <div className="absolute inset-0 rotate-12 bg-gradient-to-tl from-transparent via-white/60 to-transparent [clip-path:polygon(50%_0,62%_40%,48%_92%,30%_35%)]" />
+      <div className="absolute inset-4 rounded-full bg-[#9ff5e8]/25 blur-2xl" />
+      <Image src="/art/101/shard.png" alt="Осколок Иномирной Звезды" fill sizes="176px" className="object-contain [mask-image:radial-gradient(circle_closest-side,black_55%,transparent_98%)]" />
     </motion.div>
   );
 }

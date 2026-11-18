@@ -24,7 +24,7 @@ export function Hero() {
             className="font-display text-[19px] leading-relaxed md:text-right"
             text="Каждый гость просыпается в своей семье. Мама будит к завтраку, сестрёнка зовёт гулять, и всё было бы хорошо, только родные ведут себя всё {безумнее.|заботливее.} Чем дольше рядом с ними, тем легче принять это за норму и забыть отель."
           />
-          <div className="relative mx-auto aspect-[34/42] w-[280px] md:w-[340px]">
+          <div className="relative mx-auto aspect-[4/5] w-[280px] md:w-[340px]">
             <FamilyPortrait onLook={() => add(2)} />
           </div>
           <KeyTag />

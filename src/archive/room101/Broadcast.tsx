@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
+import Image from "next/image";
 import Noise from "@/components/Noise";
 import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
 import { RULES, RUN3 } from "./data";
@@ -49,6 +50,15 @@ export function Broadcast() {
         color: hospital > 0.5 ? "#1d2220" : "#d6dcd8",
       }}
     >
+      {/* студия проступает больницей «Новый Мир» по мере нарушения правил */}
+      <Image
+        src="/art/101/studio.png"
+        alt=""
+        fill
+        sizes="100vw"
+        className="pointer-events-none object-cover transition-all duration-1000"
+        style={{ opacity: 0.12 + hospital * 0.38, filter: `grayscale(${1 - hospital}) blur(${(1 - hospital) * 3}px)` }}
+      />
       <Noise opacity={0.06 + hospital * 0.1} dust={hospital} scratches={hospital * 0.6} />
       {hospital > 0 && (
         <div

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Noise from "@/components/Noise";
 import { AnimatePresence, motion } from "motion/react";
 import { RUN2, nameOf } from "./data";
@@ -27,7 +28,9 @@ const KNOCKS = ["Тук. Тук.", "Милый, ты куда?", "Мама сд�
 export function House() {
   return (
     <section className="relative overflow-hidden bg-[#14161d] text-[#d8d2c4]">
-      {/* комната ночью: свет только от телевизора */}
+      {/* гостиная ночью (ИИ-арт): свет только от телевизора */}
+      <Image src="/art/101/living.png" alt="" fill sizes="100vw" className="pointer-events-none object-cover opacity-35" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#14161d]/40 via-[#14161d]/80 to-[#14161d]" />
       <motion.div
         className="pointer-events-none absolute left-1/2 top-40 h-[700px] w-[1100px] -translate-x-1/2 rounded-full bg-[#3a6cff]/25 blur-[120px]"
         animate={{ opacity: [0.7, 1, 0.55, 0.9, 0.7] }}
@@ -80,30 +83,47 @@ export function House() {
   );
 }
 
-/** Телевизор в гостиной: улыбающийся ведущий над кровавым шоу. */
+/** Телевизор в гостиной. Переключай каналы — на каждом тот же ведущий, только ближе. */
 function LivingTv() {
+  const [ch, setCh] = useState(0);
+  const [snow, setSnow] = useState(false);
+  const { add } = useInfection();
+  const flip = () => {
+    setSnow(true);
+    add(3);
+    setTimeout(() => {
+      setCh((c) => c + 1);
+      setSnow(false);
+    }, 260);
+  };
+  const zoom = 1 + Math.min(ch, 6) * 0.12;
   return (
     <div className="relative mx-auto w-full max-w-[560px]">
       <div className="rounded-[30px] bg-gradient-to-b from-[#3a332d] to-[#1a1613] p-5 shadow-[0_30px_60px_rgba(0,0,0,0.6)]">
         <div className="relative aspect-[4/3] overflow-hidden rounded-[24px] bg-[#0b1430] shadow-[inset_0_0_50px_rgba(0,0,0,0.9)]">
+          <motion.div
+            className="absolute inset-0"
+            animate={{ scale: zoom, filter: `saturate(${1 + ch * 0.15}) hue-rotate(${-ch * 6}deg) contrast(${1 + ch * 0.05})` }}
+            transition={{ type: "spring", stiffness: 40 }}
+            style={{ transformOrigin: "52% 38%" }}
+          >
+            <Image src="/art/101/host.png" alt="Ведущий ABS улыбается слишком широко" fill sizes="560px" className="object-cover" />
+          </motion.div>
           <Noise opacity={0.12} scanlines={0.5} flicker={0.4} />
-          <svg viewBox="0 0 400 300" className="absolute inset-0 h-full w-full">
-            <rect width="400" height="300" fill="#1b2f6e" />
-            <rect y="200" width="400" height="100" fill="#3a0a14" />
-            {/* ведущий */}
-            <g transform="translate(200 210)">
-              <path d="M-60 90 Q-64 -10 0 -20 Q64 -10 60 90 Z" fill="#101626" />
-              <ellipse cx="0" cy="-60" rx="34" ry="40" fill="#d9c0a0" />
-              <path d="M-20 -48 Q0 -26 20 -48" stroke="#5a0a0e" strokeWidth="4" fill="#fff" />
-              <circle cx="-12" cy="-68" r="3.5" fill="#111" />
-              <circle cx="12" cy="-68" r="3.5" fill="#111" />
-            </g>
-            <rect x="0" y="252" width="400" height="48" fill="#c0333d" />
-          </svg>
-          <div className="absolute bottom-0 left-0 right-0 overflow-hidden">
+          {snow && <div className="absolute inset-0 z-10 bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><filter id=%22n%22><feTurbulence baseFrequency=%220.9%22/></filter><rect width=%22120%22 height=%22120%22 filter=%22url(%23n)%22/></svg>')]" />}
+          <div className="absolute bottom-0 left-0 right-0 z-10 overflow-hidden">
             <Ticker />
           </div>
-          <div className="absolute left-3 top-3 bg-[#c0333d] px-2 font-system text-[11px] font-bold text-white">ABS</div>
+          <div className="absolute left-3 top-3 z-10 bg-[#c0333d] px-2 font-system text-[11px] font-bold text-white">ABS</div>
+          <div className="absolute right-3 top-3 z-10 font-system text-[12px] text-[#9ff5c8] [text-shadow:0_0_6px_#4fffb0]">CH {String(ch + 1).padStart(2, "0")}</div>
+        </div>
+        <div className="mt-3 flex items-center justify-between">
+          <span className="font-system text-[10px] text-[#cfc4b2]/60">
+            {ch === 0 ? "Переключите канал" : ch < 4 ? "Везде ABS. Везде он." : "Других каналов нет. Улыбайтесь."}
+          </span>
+          <button onClick={flip} aria-label="Переключить канал" className="h-11 w-11 rounded-full bg-[#5a4f45] shadow-[inset_0_-3px_6px_rgba(0,0,0,0.5)] transition" style={{ transform: `rotate(${ch * 45}deg)` }}>
+            <span className="mx-auto block h-5 w-1 bg-[#cfc4b2]" />
+          </button>
         </div>
       </div>
       <div className="mx-auto h-4 w-40 rounded-b-xl bg-[#1a1613]" />

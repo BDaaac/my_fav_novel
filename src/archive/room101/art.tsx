@@ -1,5 +1,7 @@
 "use client";
-import { motion } from "motion/react";
+import { useRef, useState } from "react";
+import Image from "next/image";
+import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { STAGE, stageOf, useInfection } from "./infection";
 
 /** Обои дома: узор из цветов; с заражением в цветах открываются глаза, под ними появляются улыбки. */
@@ -39,80 +41,95 @@ export function Wallpaper({ className = "" }: { className?: string }) {
   );
 }
 
-/** Семейный портрет над камином. Лиц нет — пока заражение не нарисует их само. */
+/**
+ * Семейный портрет (ИИ-арт). Заражение перекрашивает холст; лупа показывает, что под лаком.
+ * Портрет чуть поворачивается за курсором — семья следит.
+ */
 export function FamilyPortrait({ onLook }: { onLook?: () => void }) {
-  const { level } = useInfection();
+  const { level, add } = useInfection();
   const s = stageOf(level);
-  const people = [
-    { x: 92, h: 1.18, kind: "father" },
-    { x: 152, h: 1.08, kind: "mother" },
-    { x: 206, h: 0.78, kind: "sister" },
-    { x: 252, h: 0.86, kind: "guest" },
-  ];
+  const ref = useRef<HTMLDivElement>(null);
+  const mx = useMotionValue(0.5);
+  const my = useMotionValue(0.5);
+  const rx = useSpring(useTransform(my, [0, 1], [7, -7]), { stiffness: 60, damping: 14 });
+  const ry = useSpring(useTransform(mx, [0, 1], [-9, 9]), { stiffness: 60, damping: 14 });
+  const [lens, setLens] = useState<{ x: number; y: number } | null>(null);
+  const filter = [
+    "none",
+    "saturate(1.15) contrast(1.05)",
+    "sepia(0.35) saturate(1.3) hue-rotate(-12deg) contrast(1.1)",
+    "sepia(0.55) saturate(1.8) hue-rotate(-22deg) contrast(1.25) brightness(0.92)",
+    "sepia(0.7) saturate(2.4) hue-rotate(-28deg) contrast(1.45) brightness(0.85)",
+  ][s];
   return (
-    <motion.svg
-      viewBox="0 0 340 420"
-      className="h-full w-full drop-shadow-[0_25px_35px_rgba(40,20,5,0.45)]"
-      animate={{ rotate: s >= 3 ? (level - STAGE.glitch) / 5 : 0 }}
-      transition={{ type: "spring", stiffness: 30 }}
+    <motion.div
+      ref={ref}
+      style={{ rotateX: rx, rotateY: ry, transformPerspective: 900, rotate: s >= 3 ? (level - STAGE.glitch) / 5 : 0 }}
+      className="relative h-full w-full cursor-none drop-shadow-[0_25px_35px_rgba(40,20,5,0.55)]"
       onMouseEnter={onLook}
+      onMouseMove={(e) => {
+        const r = ref.current!.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width;
+        const y = (e.clientY - r.top) / r.height;
+        mx.set(x);
+        my.set(y);
+        setLens({ x, y });
+        if (Math.random() < 0.02) add(1);
+      }}
+      onMouseLeave={() => {
+        mx.set(0.5);
+        my.set(0.5);
+        setLens(null);
+      }}
     >
-      <defs>
-        <radialGradient id="pt-bg" cx="0.5" cy="0.38" r="0.7">
-          <stop offset="0" stopColor="#e9d3a8" />
-          <stop offset="0.7" stopColor="#b08a5a" />
-          <stop offset="1" stopColor="#5c3f22" />
-        </radialGradient>
-        <linearGradient id="pt-gold" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#f3d98a" />
-          <stop offset="0.5" stopColor="#a8792a" />
-          <stop offset="1" stopColor="#5e3f10" />
-        </linearGradient>
-        <clipPath id="pt-oval">
-          <ellipse cx="170" cy="210" rx="138" ry="182" />
-        </clipPath>
-      </defs>
-      <ellipse cx="170" cy="210" rx="160" ry="204" fill="url(#pt-gold)" />
-      <ellipse cx="170" cy="210" rx="148" ry="192" fill="none" stroke="#3a2608" strokeWidth="2" opacity="0.6" />
-      <g clipPath="url(#pt-oval)">
-        <rect width="340" height="420" fill="url(#pt-bg)" />
-        <rect y="300" width="340" height="120" fill="#6b4a2a" opacity="0.5" />
-        {people.map((p, i) => {
-          const guest = p.kind === "guest";
-          const fade = guest && s >= 3 ? 0.35 : 1;
-          return (
-            <g key={i} transform={`translate(${p.x} 360) scale(${p.h})`} opacity={fade}>
-              <path d="M-28 40 Q-32 -70 0 -86 Q32 -70 28 40 Z" fill={p.kind === "mother" || p.kind === "sister" ? "#4a2f22" : "#2c1d15"} />
-              {(p.kind === "mother" || p.kind === "sister") && <path d="M-22 -110 Q0 -150 22 -110 L26 -80 L-26 -80 Z" fill="#2a1a10" />}
-              <ellipse cx="0" cy="-106" rx="17" ry="21" fill="#e6c9a0" />
-              {/* лица дорисовывает заражение */}
-              {s >= 3 && !guest && (
-                <>
-                  <circle cx="-6" cy="-110" r="2.6" fill="#120806" />
-                  <circle cx="6" cy="-110" r="2.6" fill="#120806" />
-                </>
-              )}
-              {s >= 2 && !guest && (
-                <path
-                  d={s >= 4 ? "M-15 -98 Q0 -78 15 -98 Q0 -86 -15 -98 Z" : "M-9 -98 Q0 -90 9 -98"}
-                  fill={s >= 4 ? "#5a0a0e" : "none"}
-                  stroke={s >= 4 ? "#f6efe0" : "#3a1a10"}
-                  strokeWidth={s >= 4 ? 1.2 : 2}
-                  strokeLinecap="round"
-                />
-              )}
-              {guest && s >= 2 && <path d="M-6 -96 Q0 -100 6 -96" fill="none" stroke="#3a1a10" strokeWidth="1.6" />}
-            </g>
-          );
-        })}
-        {/* старая фотобумага */}
-        <rect width="340" height="420" fill="#5a3a12" opacity="0.12" />
-      </g>
-      <rect x="120" y="398" width="100" height="20" rx="3" fill="url(#pt-gold)" />
-      <text x="170" y="412" textAnchor="middle" fontSize="10" fontFamily="serif" fill="#3a2608">
+      <div className="absolute inset-0 overflow-hidden rounded-[50%/50%]">
+        <motion.div
+          className="absolute inset-0"
+          animate={s >= 4 ? { filter: [filter, "invert(1) hue-rotate(180deg) saturate(3)", filter] } : { filter }}
+          transition={s >= 4 ? { duration: 0.25, repeat: Infinity, repeatDelay: 2.6 } : { duration: 1.2 }}
+        >
+          <Image src="/art/101/portrait.png" alt="Семейный портрет в золотой раме" fill sizes="340px" className="object-cover" priority />
+        </motion.div>
+        <div className="pointer-events-none absolute inset-0 bg-[#7a0c12] mix-blend-multiply transition-opacity duration-1000" style={{ opacity: Math.max(0, (level - 30) / 140) }} />
+        {s >= 3 && (
+          <svg className="pointer-events-none absolute inset-0 h-full w-full mix-blend-multiply" aria-hidden>
+            <filter id="pt-crack">
+              <feTurbulence type="fractalNoise" baseFrequency="0.035 0.6" numOctaves="2" seed="7" />
+              <feColorMatrix values="0 0 0 0 0.25  0 0 0 0 0.02  0 0 0 0 0.03  0 0 0 -2.6 1.5" />
+            </filter>
+            <rect width="100%" height="100%" filter="url(#pt-crack)" opacity={(level - STAGE.glitch) / 40} />
+          </svg>
+        )}
+      </div>
+      {/* лупа: под лаком семья смотрит прямо на тебя */}
+      {lens && (
+        <div
+          className="pointer-events-none absolute z-10 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-[#c9a227] shadow-[0_0_0_2px_#3a2608,0_10px_30px_rgba(0,0,0,0.6)]"
+          style={{
+            left: `${lens.x * 100}%`,
+            top: `${lens.y * 100}%`,
+            backgroundImage: "url(/art/101/portrait.png)",
+            backgroundSize: "320% 320%",
+            backgroundPosition: `${lens.x * 100}% ${lens.y * 100}%`,
+            filter: s >= 2 ? "grayscale(1) contrast(1.8) brightness(0.8) sepia(1) hue-rotate(-40deg) saturate(4)" : "contrast(1.1)",
+          }}
+        />
+      )}
+      {s >= 4 &&
+        [22, 38, 61, 77].map((x, i) => (
+          <motion.span
+            key={x}
+            className="absolute top-[92%] w-1.5 rounded-b-full bg-[#6a0a10]"
+            style={{ left: `${x}%` }}
+            initial={{ height: 0 }}
+            animate={{ height: 30 + i * 18 }}
+            transition={{ duration: 4 + i, ease: "easeOut" }}
+          />
+        ))}
+      <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-sm bg-gradient-to-b from-[#f3d98a] to-[#8a6420] px-4 py-0.5 font-display text-[12px] text-[#3a2608] shadow">
         {s >= 4 ? "НАВСЕГДА ВМЕСТЕ" : "Семья · 101"}
-      </text>
-    </motion.svg>
+      </div>
+    </motion.div>
   );
 }
 
