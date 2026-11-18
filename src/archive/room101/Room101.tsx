@@ -9,6 +9,7 @@ import { InfectionProvider } from "./infection";
 import { ArtProvider } from "./artfiles";
 import { Care } from "./Care";
 import { Corridor } from "./Corridor";
+import { Finale } from "./Finale";
 
 /**
  * Архив комнаты 101 — не справочник, а сама комната.
@@ -29,8 +30,9 @@ export function Room101({ art }: { art: string[] }) {
           <Broadcast />
           <Corridor />
           <Ward />
-          <Seam from="#020606" to="#0b0a09" />
-          <Legacy />
+          <Finale>
+            <Legacy />
+          </Finale>
         </main>
       </InfectionProvider>
     </ArtProvider>

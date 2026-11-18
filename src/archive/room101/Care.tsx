@@ -22,7 +22,9 @@ const BACK = ["Ты вернулся ♥", "Где ты был? Мы волно�
 type Note = { id: number; text: string; x: number; rot: number };
 
 export function Care() {
-  const { level, falling } = useInfection();
+  const { level, falling, safe } = useInfection();
+  const safeRef = useRef(safe);
+  safeRef.current = safe;
   const stage = stageOf(level);
   const stageRef = useRef(stage);
   stageRef.current = stage;
@@ -32,6 +34,7 @@ export function Care() {
   const last = useRef(0);
 
   const push = useRef((text: string) => {
+    if (safeRef.current) return; // вне номера семья молчит
     const id = ++seq.current;
     last.current = Date.now();
     setNotes((n) => [...n.slice(-1), { id, text, x: 4 + ((id * 37) % 30), rot: ((id * 53) % 9) - 4 }]);
@@ -107,6 +110,7 @@ export function Care() {
       />
       <AnimatePresence>
         {!falling &&
+          !safe &&
           notes.map((n) => (
             <motion.div
               key={n.id}

@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
  * Комната постепенно переписывает себя: цвет, шрифты, слова — безумие становится нормой.
  * Лечится только побегом: прыжок из окна (Сынёп, гл. 10) или 10 минут вдали от семьи (гл. 66).
  */
-type Ctx = { level: number; add: (n: number) => void; escape: (how: string) => void; falling: boolean };
-const InfCtx = createContext<Ctx>({ level: 0, add: () => {}, escape: () => {}, falling: false });
+type Ctx = { level: number; add: (n: number) => void; escape: (how: string) => void; falling: boolean; safe: boolean; calm: (on: boolean) => void };
+const InfCtx = createContext<Ctx>({ level: 0, add: () => {}, escape: () => {}, falling: false, safe: false, calm: () => {} });
 export const useInfection = () => useContext(InfCtx);
 
 /** Пороги: переписывание слов → тёплая гниль → распад шрифта → критическое. */
@@ -23,8 +23,18 @@ export function InfectionProvider({ children }: { children: React.ReactNode }) {
   const [falling, setFalling] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const paused = useRef(false);
+  const [safe, setSafe] = useState(false);
+  const safeRef = useRef(false);
 
-  const add = useCallback((n: number) => setLevel((l) => Math.max(0, Math.min(100, l + n))), []);
+  const add = useCallback((n: number) => {
+    if (!safeRef.current) setLevel((l) => Math.max(0, Math.min(100, l + n)));
+  }, []);
+  /** Вне комнаты (финал): заражение снято и не растёт. */
+  const calm = useCallback((on: boolean) => {
+    safeRef.current = on;
+    setSafe(on);
+    if (on) setLevel(0);
+  }, []);
   const escape = useCallback((how: string) => {
     setFalling(true);
     paused.current = true;
@@ -69,13 +79,13 @@ export function InfectionProvider({ children }: { children: React.ReactNode }) {
   } as React.CSSProperties;
 
   return (
-    <InfCtx.Provider value={{ level, add, escape, falling }}>
+    <InfCtx.Provider value={{ level, add, escape, falling, safe, calm }}>
       <div style={vars} className={cn("relative", level >= STAGE.critical && "cursor-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22><text y=%2220%22 font-size=%2220%22>♥</text></svg>'),_auto]")}>
         <motion.div animate={falling ? { y: "115vh", rotate: 5 } : { y: 0, rotate: 0 }} transition={{ duration: falling ? 1.4 : 0, ease: [0.5, 0, 1, 0.6] }}>
           {children}
         </motion.div>
       </div>
-      <Status level={level} onJump={() => escape("Побег засчитан. Вся группа вернулась в коридор; снаружи прошло около двух часов (гл. 11).")} falling={falling} />
+      <Status level={level} safe={safe} onJump={() => escape("Побег засчитан. Вся группа вернулась в коридор; снаружи прошло около двух часов (гл. 11).")} falling={falling} />
       <AnimatePresence>
         {note && (
           <motion.div
@@ -93,14 +103,14 @@ export function InfectionProvider({ children }: { children: React.ReactNode }) {
 }
 
 /** Окно статуса отеля — единственное, что «семья» переписать не может (только пытается). */
-function Status({ level, onJump, falling }: { level: number; onJump: () => void; falling: boolean }) {
+function Status({ level, onJump, falling, safe }: { level: number; onJump: () => void; falling: boolean; safe: boolean }) {
   const s = stageOf(level);
   const label = ["низкое", "растёт", "высокое", "опасное", "КРИТИЧЕСКОЕ"][s];
   return (
     <div className="fixed right-5 top-5 z-40 w-[300px] font-system text-[12px] text-[#7fd4ff]">
       <div className="border border-[#7fd4ff]/50 bg-[#06141c]/90 px-3 py-2 shadow-[0_0_24px_-8px_#7fd4ff] backdrop-blur">
         <div className="flex justify-between">
-          <span>[Заражение: {label}]</span>
+          <span>{safe ? "[Вне номера · заражение снято]" : `[Заражение: ${label}]`}</span>
           <span>{Math.round(level)}%</span>
         </div>
         <div className="mt-1.5 h-1 w-full bg-[#7fd4ff]/15">
@@ -119,7 +129,7 @@ function Status({ level, onJump, falling }: { level: number; onJump: () => void;
           </motion.div>
         )}
       </AnimatePresence>
-      <div className="mt-1 text-right text-[10px] text-[#7fd4ff]/50">Esc — очнуться</div>
+      {!safe && <div className="mt-1 text-right text-[10px] text-[#7fd4ff]/50">Esc — очнуться</div>}
     </div>
   );
 }
