@@ -11,7 +11,9 @@ import { GuestCard, type Guest } from "./GuestCard";
  * Гости отеля «Пионер»: пропуска на клипсах. Каждый качается сам, его можно схватить и качнуть;
  * клик открывает карточку гостя. Тексты карточек лежат в src/data/guests.
  */
-type Meta = { id: string; age: string; word: string; color: string; ink: string };
+type Floor = 1 | 2 | 3;
+/** from — этаж, на котором гость вошёл в команду (по умолчанию первый). */
+type Meta = { id: string; age: string; word: string; color: string; ink: string; from?: Floor };
 // порядок как на стойке регистрации; word — Благословение латиницей, как девиз на пропуске
 const GUESTS: Meta[] = [
   { id: "han-gain", age: "20", word: "SAPIENTIA", color: "#2f4a6b", ink: "#9fc4ff" },
@@ -22,14 +24,19 @@ const GUESTS: Meta[] = [
   { id: "lee-eunsol", age: "32", word: "DIVITIAE", color: "#1f4f55", ink: "#8fe0e6" },
   { id: "kim-mukseon", age: "?", word: "COMMUNIO", color: "#4d4338", ink: "#e0cdb0" },
   { id: "kim-ari", age: "16?", word: "SUGGESTIO", color: "#571626", ink: "#ff8fa8" },
+  // вошли в команду на втором этаже
+  { id: "kim-sanghyun", age: "", word: "DILIGENTIA", color: "#3f4a2c", ink: "#d2e08c", from: 2 },
+  { id: "miro", age: "", word: "CONSTANTIA", color: "#3a3352", ink: "#d7c8ff", from: 2 },
 ];
 const ALL = characters as unknown as Character[];
 const ITEMS = items as unknown as Item[];
-const byId = (id: string) => ALL.find((c) => c.id === id)!;
-const shortName = (c: Character) => c.name.split(" (")[0];
+const byId = (id: string): Character | undefined => ALL.find((c) => c.id === id);
+const shortName = (c?: Character) => c?.name.split(" (")[0] ?? "";
+const years = (n: string) => (/^\d+$/.test(n) ? `${n} ${+n % 10 === 1 && +n % 100 !== 11 ? "год" : [2, 3, 4].includes(+n % 10) && ![12, 13, 14].includes(+n % 100) ? "года" : "лет"}` : n);
 
 /** Черновик карточки из старых данных — пока нет файла src/data/guests/<id>.json. */
-function draft(m: Meta, c: Character): Guest {
+function draft(m: Meta, c?: Character): Guest {
+  if (!c) return { id: m.id, name: m.id, registry: [], about: [], blessing: { name: "", text: [], limits: [] }, legacies: [], items: [], draft: true };
   const own = ITEMS.filter((it) => it.owner === c.id);
   const isLegacy = (it: Item) => /наследи/i.test(it.name + " " + it.effect);
   const facts = [...c.facts].sort((a, b) => (a.ch ?? 0) - (b.ch ?? 0));
@@ -38,7 +45,7 @@ function draft(m: Meta, c: Character): Guest {
     id: c.id,
     name: shortName(c),
     registry: [
-      { label: "Возраст", value: `${m.age} ${+m.age % 10 === 1 && +m.age % 100 !== 11 ? "год" : [2, 3, 4].includes(+m.age % 10) && ![12, 13, 14].includes(+m.age % 100) ? "года" : "лет"}` },
+      { label: "Возраст", value: years(m.age) },
     ],
     about: facts.slice(0, 4).map((f) => ({ text: f.text, ch: f.ch ? [f.ch] : [] })),
     blessing: { name: c.stat ?? "", text: facts.filter((f) => /Благословен/i.test(f.text)).slice(0, 3).map((f) => ({ text: f.text, ch: f.ch ? [f.ch] : [] })), limits: [] },
@@ -47,8 +54,6 @@ function draft(m: Meta, c: Character): Guest {
     draft: true,
   };
 }
-
-type Floor = 1 | 2 | 3;
 
 export function People({ art, floors }: { art: Record<Floor, string[]>; floors: Record<Floor, Record<string, Guest>> }) {
   const [open, setOpen] = useState<string | null>(null);
@@ -60,6 +65,12 @@ export function People({ art, floors }: { art: Record<Floor, string[]>; floors: 
     for (let f = floor; f >= 1; f--) if (art[f as Floor].includes(`${id}.jpg`)) return f === 1 ? `/art/people/${id}.jpg` : `/art/people/f${f}/${id}.jpg`;
     return null;
   };
+  // на этаже показаны только те, кто уже в команде
+  const list = GUESTS.filter((m) => (m.from ?? 1) <= floor);
+  const half = Math.ceil(list.length / 2);
+  const nameOf = (id: string) => guests[id]?.name ?? floors[1][id]?.name ?? shortName(byId(id)) ?? id;
+  const statOf = (id: string) => guests[id]?.blessing.name || byId(id)?.stat || "—";
+  const ageOf = (m: Meta) => guests[m.id]?.registry.find((r) => r.label === "Возраст")?.value ?? years(m.age);
   return (
     <main className="min-h-screen overflow-x-clip bg-[#0b0a09] pb-32 text-[#e9e1d0] [background-image:repeating-linear-gradient(90deg,transparent_0_118px,rgba(255,255,255,0.018)_118px_120px),radial-gradient(ellipse_at_50%_0%,#2a1410_0%,#0b0a09_60%)]">
       {/* стойка регистрации: лампа, латунная табличка, указатель этажа и ключи */}
@@ -76,17 +87,17 @@ export function People({ art, floors }: { art: Record<Floor, string[]>; floors: 
 
         <div className="relative mx-auto mt-8 flex w-fit flex-wrap items-end justify-center gap-x-12 gap-y-6">
           <FloorDial floor={floor} ready={ready} onFloor={setFloor} />
-          <KeyRack onOpen={setOpen} />
+          <KeyRack list={list} nameOf={nameOf} onOpen={setOpen} />
         </div>
       </header>
 
-      {[GUESTS.slice(0, 4), GUESTS.slice(4)].map((row, r) => (
+      {[list.slice(0, half), list.slice(half)].map((row, r) => (
         <section key={r} className="relative mx-auto mt-12 max-w-6xl px-6">
           {/* рейка, на которой висят пропуска */}
           <div className="h-3 rounded-full bg-gradient-to-b from-[#6a5a3a] to-[#2a2216] shadow-[0_6px_14px_rgba(0,0,0,0.6)]" />
-          <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 md:gap-x-10">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:gap-x-8 md:[grid-template-columns:repeat(var(--n),minmax(0,1fr))]" style={{ "--n": half } as React.CSSProperties}>
             {row.map((m, i) => (
-              <Badge key={m.id} m={m} c={byId(m.id)} src={has(m.id)} floor={floor} i={r * 4 + i} paused={!!open} onOpen={() => setOpen(m.id)} />
+              <Badge key={m.id} m={m} name={nameOf(m.id)} stat={statOf(m.id)} age={ageOf(m)} src={has(m.id)} floor={floor} i={r * half + i} paused={!!open} onOpen={() => setOpen(m.id)} />
             ))}
           </div>
         </section>
@@ -95,7 +106,7 @@ export function People({ art, floors }: { art: Record<Floor, string[]>; floors: 
       {open &&
         (() => {
           const m = GUESTS.find((g) => g.id === open)!;
-          return <GuestCard key={open + floor} floor={floor} g={guests[open] ?? draft(m, byId(open))} src={has(open)} color={m.color} ink={m.ink} word={m.word} no={GUESTS.indexOf(m) + 1} names={Object.fromEntries(GUESTS.map((x) => [x.id, guests[x.id]?.name ?? shortName(byId(x.id))]))} faces={Object.fromEntries(GUESTS.map((x) => [x.id, has(x.id)]))} onOpen={setOpen} onClose={() => setOpen(null)} />;
+          return <GuestCard key={open + floor} floor={floor} g={guests[open] ?? draft(m, byId(open))} src={has(open)} color={m.color} ink={m.ink} word={m.word} no={GUESTS.indexOf(m) + 1} names={Object.fromEntries(GUESTS.map((x) => [x.id, nameOf(x.id)]))} faces={Object.fromEntries(GUESTS.map((x) => [x.id, has(x.id)]))} onOpen={setOpen} onClose={() => setOpen(null)} />;
         })()}
     </main>
   );
@@ -144,16 +155,16 @@ function FloorDial({ floor, ready, onFloor }: { floor: Floor; ready: Floor[]; on
 }
 
 /** Доска с ключами: по ключу на гостя. Ключ открывает досье. */
-function KeyRack({ onOpen }: { onOpen: (id: string) => void }) {
+function KeyRack({ list, nameOf, onOpen }: { list: Meta[]; nameOf: (id: string) => string; onOpen: (id: string) => void }) {
   return (
     <div className="text-center">
       <div className="relative flex gap-2.5 border-t-[3px] border-[#6a5a3a] px-1 pt-0">
-        {GUESTS.map((g, i) => (
+        {list.map((g, i) => (
           <button
             key={g.id}
             onClick={() => onOpen(g.id)}
-            aria-label={`Ключ: ${shortName(byId(g.id))}`}
-            title={shortName(byId(g.id))}
+            aria-label={`Ключ: ${nameOf(g.id)}`}
+            title={nameOf(g.id)}
             className="sway group relative block h-[62px] w-4 transition-[filter] hover:brightness-150"
             style={{ "--sway": `${3 + (i % 3)}deg`, "--sway-d": `${2 + (i % 4) * 0.3}s`, animationDelay: `${-i * 0.4}s` } as React.CSSProperties}
           >
@@ -165,13 +176,13 @@ function KeyRack({ onOpen }: { onOpen: (id: string) => void }) {
           </button>
         ))}
       </div>
-      <div className="mt-1 font-system text-[10px] tracking-[0.35em] text-[#e9e1d0]/60">{GUESTS.length} ГОСТЕЙ</div>
+      <div className="mt-1 font-system text-[10px] tracking-[0.35em] text-[#e9e1d0]/60">{list.length} ГОСТЕЙ</div>
     </div>
   );
 }
 
 /** Пропуск на клипсе: маятник. Тянешь — раскачивается от скорости руки, отпускаешь — возвращается. */
-function Badge({ m, c, src, floor, i, paused, onOpen }: { m: Meta; c: Character; src: string | null; floor: Floor; i: number; paused: boolean; onOpen: () => void }) {
+function Badge({ m, name, stat, age, src, floor, i, paused, onOpen }: { m: Meta; name: string; stat: string; age: string; src: string | null; floor: Floor; i: number; paused: boolean; onOpen: () => void }) {
   const x = useMotionValue(0);
   const v = useVelocity(x);
   const swing = useSpring(useTransform(v, [-1500, 1500], [28, -28]), { stiffness: 60, damping: 5, mass: 1.2 });
@@ -199,7 +210,7 @@ function Badge({ m, c, src, floor, i, paused, onOpen }: { m: Meta; c: Character;
       onTap={() => !dragged && onOpen()}
       role="button"
       tabIndex={0}
-      aria-label={`Досье: ${shortName(c)}`}
+      aria-label={`Досье: ${name}`}
       onKeyDown={(e) => e.key === "Enter" && onOpen()}
     >
       <div className="sway relative pt-10" style={{ "--sway": `${1.2 + (i % 3) * 0.5}deg`, "--sway-d": `${2.6 + (i % 4) * 0.45}s`, animationDelay: `${-i * 0.7}s`, animationPlayState: paused ? "paused" : "running" } as React.CSSProperties}>
@@ -213,9 +224,9 @@ function Badge({ m, c, src, floor, i, paused, onOpen }: { m: Meta; c: Character;
         </div>
         <div className="relative aspect-[3/4] bg-black/40">
           {src ? (
-            <Image key={src} src={src} alt={shortName(c)} fill sizes="340px" unoptimized priority className="pointer-events-none object-cover" draggable={false} />
+            <Image key={src} src={src} alt={name} fill sizes="340px" unoptimized priority className="pointer-events-none object-cover" draggable={false} />
           ) : (
-            <div className="flex h-full items-center justify-center font-display text-7xl opacity-30">{shortName(c)[0]}</div>
+            <div className="flex h-full items-center justify-center font-display text-7xl opacity-30">{name[0]}</div>
           )}
           <div className="absolute inset-x-0 top-0 bg-black/60 py-0.5 text-center font-system text-[11px] tracking-[0.35em]" style={{ color: m.ink }}>
             {m.word}
@@ -226,11 +237,11 @@ function Badge({ m, c, src, floor, i, paused, onOpen }: { m: Meta; c: Character;
         </div>
         <div className="px-2.5 pb-2.5 pt-1.5">
           <div className="font-display text-[24px] font-semibold leading-none" style={{ color: m.ink }}>
-            {shortName(c)}
+            {name}
           </div>
-          <div className="mt-1 flex justify-between font-system text-[10px] opacity-75">
-            <span>{c.stat ?? "—"}</span>
-            <span>{m.age} лет</span>
+          <div className="mt-1 flex justify-between gap-2 font-system text-[10px] opacity-75">
+            <span>{stat}</span>
+            <span className="text-right">{age}</span>
           </div>
         </div>
       </div>
