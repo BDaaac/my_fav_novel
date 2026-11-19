@@ -41,5 +41,9 @@ export default function ArchivePeople() {
     g.links = arr<NonNullable<Guest["links"]>[number]>(d.links).filter((l) => l.to !== g.id);
     g.merits = arr(d.merits);
   });
+  extra("feats", (g, d) => {
+    const best = d.best as NonNullable<Guest["feats"]>["best"];
+    g.feats = { best: best?.title && best.text ? best : undefined, more: arr(d.more) };
+  });
   return <People art={art} guests={guests} />;
 }

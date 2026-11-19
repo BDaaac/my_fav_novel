@@ -25,6 +25,8 @@ export type Guest = {
   links?: { to: string; bond?: string; text: string }[];
   /** что отель засчитал лично гостю */
   merits?: { title: string; room?: string; text: string }[];
+  /** главное дело гостя на первом этаже и ещё несколько сильных поступков */
+  feats?: { best?: { title: string; room?: string; text: string }; more: { title: string; room?: string; text: string }[] };
 };
 
 const STAMP: Record<string, string> = { Побег: "#1f4a7a", Решение: "#8f1d22", Провал: "#3b362e" };
@@ -37,6 +39,7 @@ const SHEETS = [
   { id: "blessing", label: "Благословение" },
   { id: "legacies", label: "Наследия" },
   { id: "items", label: "Предметы" },
+  { id: "feats", label: "Подвиги" },
 ] as const;
 type SheetId = (typeof SHEETS)[number]["id"];
 
@@ -75,7 +78,7 @@ export function GuestCard({ g, src, color, ink, word, no, names, faces, onOpen, 
   }
   for (const d of deaths) cell(d.room).deaths.push(d.cause);
 
-  const count: Record<SheetId, number | null> = { about: null, blessing: null, legacies: g.legacies.length, items: g.items.length };
+  const count: Record<SheetId, number | null> = { about: null, blessing: null, legacies: g.legacies.length, items: g.items.length, feats: null };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#0b0908] p-4 [background-image:radial-gradient(ellipse_at_50%_20%,rgba(255,214,140,0.12),transparent_60%)] md:p-8" onClick={onClose}>
@@ -296,6 +299,48 @@ export function GuestCard({ g, src, color, ink, word, no, names, faces, onOpen, 
                   ))}
                 </ol>
                 {!g.items.length && <Empty text="В описи пусто." />}
+              </div>
+            )}
+
+            {sheet === "feats" && (
+              <div className="mt-6">
+                {g.feats?.best ? (
+                  <>
+                    {/* главное дело: крупно, с номером комнаты, как подпись под экспонатом */}
+                    <div className="grid gap-x-7 gap-y-2 sm:grid-cols-[120px_1fr]">
+                      <div>
+                        <div className="font-system text-[9px] uppercase tracking-[0.26em] opacity-55">номер</div>
+                        <div className="font-display text-[76px] font-semibold leading-[0.85] text-[#8f1d22]">{g.feats.best.room || "★"}</div>
+                      </div>
+                      <div>
+                        <div className="font-system text-[9px] uppercase tracking-[0.26em] opacity-55">главное дело на первом этаже</div>
+                        <h3 className="mt-1 font-display text-[36px] font-semibold leading-[1.02]">{g.feats.best.title}</h3>
+                        <p className="mt-3 max-w-[58ch] font-display text-[19px] leading-[1.5]">{g.feats.best.text}</p>
+                      </div>
+                    </div>
+                    {g.feats.more.length > 0 && (
+                      <>
+                        <div className="mt-9 flex items-center gap-3 font-system text-[9px] uppercase tracking-[0.26em] opacity-55">
+                          <span>Ещё за гостем</span>
+                          <span className="h-px flex-1 bg-[#2a2218]/50" />
+                        </div>
+                        <ol>
+                          {g.feats.more.map((f, i) => (
+                            <li key={f.title + i} className="grid gap-x-7 border-b border-dotted border-[#2a2218]/35 py-3 sm:grid-cols-[120px_1fr]">
+                              <div className="font-display text-[30px] font-semibold leading-none opacity-80">{f.room || "—"}</div>
+                              <div>
+                                <h4 className="font-display text-[21px] font-semibold leading-tight">{f.title}</h4>
+                                <p className="mt-0.5 max-w-[62ch] font-display text-[16.5px] leading-[1.45]">{f.text}</p>
+                              </div>
+                            </li>
+                          ))}
+                        </ol>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <Empty text="Подвиги в карточку ещё не внесены." />
+                )}
               </div>
             )}
 
