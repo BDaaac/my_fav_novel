@@ -130,7 +130,7 @@ export function GuestCard({ g, src, color, ink, word, no, names, faces, onOpen, 
               return (
                 <div key={m.title + i} className="group relative mt-8 border border-[#b9a983] bg-[#f6f0de] p-[5px] shadow-[0_6px_14px_rgba(40,30,10,0.32)]" style={{ rotate: `${i % 2 ? -1.6 : 1.4}deg` }}>
                   {/* печать на лентах: снимок фольги, белый фон гасится умножением */}
-                  <span className="absolute -right-5 -top-7 z-10 block w-[86px] origin-top transition-transform duration-500 ease-out group-hover:rotate-[9deg]">
+                  <span className="absolute -right-5 -top-7 z-10 block w-[86px]">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={`/art/people/fx/seal-${kind}.png`} alt="" aria-hidden className="block w-full select-none drop-shadow-[0_3px_3px_rgba(40,30,10,0.35)]" />
                     <span className="absolute inset-x-0 top-0 flex aspect-square items-center justify-center font-display text-[24px] font-semibold leading-none" style={{ color: kind === "bronze" ? "#f3e2c4" : kind === "silver" ? "#262b33" : "#3a2a08", textShadow: kind === "bronze" ? "0 1px 1px rgba(0,0,0,0.6)" : "0 1px 0 rgba(255,255,255,0.5)" }}>{m.room || "★"}</span>
@@ -320,12 +320,6 @@ export function GuestCard({ g, src, color, ink, word, no, names, faces, onOpen, 
               убрать в картотеку ✕
             </button>
           </div>
-          {/* кровь натекла с верхнего края и стекает по листу; белый фон снимка гасится умножением */}
-          {deaths.length > 0 && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={`/art/people/fx/drips-${g.id}.jpg`} alt="" aria-hidden className="pointer-events-none absolute left-[46%] top-0 w-[min(470px,46%)] -translate-x-1/2 select-none mix-blend-multiply" />
-          )}
-
           <div className="relative mt-4 flex flex-wrap items-end justify-between gap-x-6">
             <div>
               <div className="font-display text-[30px] font-semibold leading-none">{g.name}</div>
