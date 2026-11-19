@@ -5,11 +5,11 @@ import { animate, motion, useMotionValue, useSpring, useTransform, useVelocity }
 import characters from "@/data/characters.json";
 import items from "@/data/items.json";
 import type { Character, Item } from "@/data/types";
-import { cn } from "@/lib/utils";
+import { GuestCard, type Guest } from "./GuestCard";
 
 /**
  * Гости отеля «Пионер»: пропуска на клипсах. Каждый качается сам, его можно схватить и качнуть;
- * клик открывает досье. Оформление своё, гостиничное; сведения — из глав 1–100.
+ * клик открывает карточку гостя. Тексты карточек лежат в src/data/guests.
  */
 type Meta = { id: string; age: string; word: string; color: string; ink: string };
 // порядок как на стойке регистрации; word — Благословение латиницей, как девиз на пропуске
@@ -28,7 +28,28 @@ const ITEMS = items as unknown as Item[];
 const byId = (id: string) => ALL.find((c) => c.id === id)!;
 const shortName = (c: Character) => c.name.split(" (")[0];
 
-export function People({ art }: { art: string[] }) {
+/** Черновик карточки из старых данных — пока нет файла src/data/guests/<id>.json. */
+function draft(m: Meta, c: Character): Guest {
+  const own = ITEMS.filter((it) => it.owner === c.id);
+  const isLegacy = (it: Item) => /наследи/i.test(it.name + " " + it.effect);
+  const facts = [...c.facts].sort((a, b) => (a.ch ?? 0) - (b.ch ?? 0));
+  const toItem = (it: Item) => ({ name: it.name, source: /^\d/.test(it.room) ? `номер ${it.room}` : it.room, ch: [it.ch], text: it.effect });
+  return {
+    id: c.id,
+    name: shortName(c),
+    registry: [
+      { label: "Возраст", value: `${m.age} лет` },
+      { label: "В отеле", value: `с главы ${c.firstCh ?? facts[0]?.ch ?? "?"}` },
+    ],
+    about: facts.slice(0, 4).map((f) => ({ text: f.text, ch: f.ch ? [f.ch] : [] })),
+    blessing: { name: c.stat ?? "", text: facts.filter((f) => /Благословен/i.test(f.text)).slice(0, 3).map((f) => ({ text: f.text, ch: f.ch ? [f.ch] : [] })), limits: [] },
+    legacies: own.filter(isLegacy).map((it) => ({ name: it.name, room: /^\d/.test(it.room) ? it.room : undefined, ch: [it.ch], text: it.effect })),
+    items: own.filter((it) => !isLegacy(it)).map(toItem),
+    draft: true,
+  };
+}
+
+export function People({ art, guests }: { art: string[]; guests: Record<string, Guest> }) {
   const [open, setOpen] = useState<string | null>(null);
   const has = (id: string) => (art.includes(`${id}.jpg`) ? `/art/people/${id}.jpg` : null);
   return (
@@ -63,7 +84,11 @@ export function People({ art }: { art: string[] }) {
         </section>
       ))}
 
-      {open && <Dossier key={open} m={GUESTS.find((g) => g.id === open)!} c={byId(open)} src={has(open)} onClose={() => setOpen(null)} />}
+      {open &&
+        (() => {
+          const m = GUESTS.find((g) => g.id === open)!;
+          return <GuestCard key={open} g={guests[open] ?? draft(m, byId(open))} src={has(open)} color={m.color} ink={m.ink} word={m.word} no={GUESTS.indexOf(m) + 1} onClose={() => setOpen(null)} />;
+        })()}
     </main>
   );
 }
@@ -190,119 +215,5 @@ function Badge({ m, c, src, i, paused, onOpen }: { m: Meta; c: Character; src: s
       </div>
       </div>
     </motion.div>
-  );
-}
-
-const TABS = ["Сведения", "Предметы", "Хроника"] as const;
-
-/** Досье: слева портрет и пропуск, справа — Благословение, предметы и хроника по главам. */
-function Dossier({ m, c, src, onClose }: { m: Meta; c: Character; src: string | null; onClose: () => void }) {
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Сведения");
-  const own = ITEMS.filter((it) => it.owner === c.id);
-  const facts = [...c.facts].sort((a, b) => (a.ch ?? 0) - (b.ch ?? 0));
-  const key = facts.slice(0, 5);
-  useEffect(() => {
-    const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", k);
-    return () => window.removeEventListener("keydown", k);
-  }, [onClose]);
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070605] p-3 md:p-6" onClick={onClose}>
-      <motion.div
-        initial={{ y: 14 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.18, ease: "easeOut" }}
-        onClick={(e) => e.stopPropagation()}
-        className="relative grid h-[min(680px,94vh)] w-[min(1040px,100%)] overflow-hidden rounded-md border border-black bg-[#12100e] shadow-[0_30px_90px_rgba(0,0,0,0.9)] md:grid-cols-[340px_1fr]"
-      >
-        {/* портрет */}
-        <div className="relative hidden bg-cover bg-center md:block" role="img" aria-label={shortName(c)} style={{ backgroundColor: m.color, backgroundImage: src ? `url(${src})` : undefined }}>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#12100e] via-transparent to-black/30" />
-          <div className="absolute inset-x-0 top-0 bg-black/60 py-1.5 text-center font-system text-[13px] tracking-[0.45em]" style={{ color: m.ink }}>
-            {m.word}
-          </div>
-          <div className="absolute inset-x-5 bottom-5">
-            <div className="font-display text-[40px] font-semibold leading-none" style={{ color: m.ink }}>
-              {shortName(c)}
-            </div>
-            <div className="mt-2 font-system text-[11px] tracking-widest opacity-80">ГОСТЬ · {m.age} ЛЕТ · С ГЛ. {c.firstCh ?? facts[0]?.ch ?? "?"}</div>
-          </div>
-        </div>
-
-        {/* сведения */}
-        <div className="flex min-h-0 flex-col">
-          <div className="flex items-start justify-between gap-4 border-b border-white/10 px-6 pb-4 pt-5">
-            <div>
-              <div className="font-system text-[10px] uppercase tracking-[0.3em] text-[#c9a227]">Благословение</div>
-              <div className="font-display text-4xl font-semibold" style={{ color: m.ink }}>
-                {c.stat ?? "нет"}
-              </div>
-              {c.role && <p className="mt-1 max-w-md font-display text-[16px] leading-snug opacity-75">{c.role}</p>}
-              <div className="mt-1 font-display text-xl md:hidden">{shortName(c)}</div>
-            </div>
-            <button onClick={onClose} aria-label="Закрыть досье" className="border border-white/25 px-3 py-1 font-system text-[12px] hover:bg-white/10">
-              ✕
-            </button>
-          </div>
-          <div className="flex gap-1 px-6 pt-3">
-            {TABS.map((t) => (
-              <button key={t} onClick={() => setTab(t)} className={cn("px-3 py-1.5 font-system text-[12px] tracking-wider transition", tab === t ? "text-black" : "border border-white/15 opacity-70 hover:opacity-100")} style={tab === t ? { background: m.ink } : undefined}>
-                {t}
-                {t === "Предметы" && ` · ${own.length}`}
-                {t === "Хроника" && ` · ${facts.length}`}
-              </button>
-            ))}
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4 [scrollbar-color:#3a3226_transparent] [scrollbar-width:thin]">
-            {tab === "Сведения" && (
-              <ul className="space-y-3">
-                {key.map((f, i) => (
-                  <li key={i} className="border-l-2 pl-3 font-display text-[18px] leading-snug" style={{ borderColor: m.ink }}>
-                    {f.text}
-                    <sup className="ml-1 font-system text-[10px] opacity-50">гл. {f.ch}</sup>
-                  </li>
-                ))}
-                {facts.length > key.length && (
-                  <li>
-                    <button onClick={() => setTab("Хроника")} className="font-system text-[12px] underline opacity-60 hover:opacity-100">
-                      ещё {facts.length - key.length} записей в хронике
-                    </button>
-                  </li>
-                )}
-              </ul>
-            )}
-            {tab === "Предметы" &&
-              (own.length ? (
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {own.map((it) => (
-                    <div key={it.id} className="border border-white/12 bg-white/[0.03] p-3">
-                      <div className="font-display text-[19px] font-semibold leading-tight" style={{ color: m.ink }}>
-                        {it.name}
-                      </div>
-                      <div className="mt-0.5 font-system text-[10px] tracking-wider opacity-55">
-                        {/^\d/.test(it.room) ? `номер ${it.room}` : it.room} · гл. {it.ch}
-                      </div>
-                      <p className="mt-1.5 font-display text-[15px] leading-snug opacity-85">{it.effect}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="font-display text-[17px] opacity-60">За первые сто глав за этим гостем предметов не записано.</p>
-              ))}
-            {tab === "Хроника" && (
-              <ol className="space-y-2.5">
-                {facts.map((f, i) => (
-                  <li key={i} className="grid grid-cols-[58px_1fr] gap-3">
-                    <span className="pt-0.5 font-system text-[11px] opacity-55">гл. {f.ch}</span>
-                    <span className="font-display text-[16px] leading-snug">{f.text}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </div>
-        </div>
-      </motion.div>
-    </div>
   );
 }
