@@ -1,9 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion } from "motion/react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { useStage } from "@/stage/Stage";
 import { useRoom } from "./state";
 import { cn } from "@/lib/utils";
+
+gsap.registerPlugin(useGSAP);
 
 /**
  * Ночная партия с «другой Ари» (гл. 21). Правила из книги:
@@ -11,6 +15,7 @@ import { cn } from "@/lib/utils";
  * Она побеждает, уничтожив 6 из 8 карт Жертвы. Гаин побеждает, сведя её силу к нулю, — и это почти невозможно.
  * Ничья: самому разрушить три карты Жертвы или больше, тогда шести ей уже не набрать.
  * В книге Гаин проиграл пять партий подряд и свёл шестую.
+ * Сцена идёт поверх арта со столом: карты лежат на столешнице рубашкой вверх, раздача и переворот — на GSAP.
  */
 type Card = "up" | "ari" | "me";
 const LIFE = 20;
@@ -26,15 +31,29 @@ const TALK = [
 
 export function Cards() {
   const { draw, setDraw } = useRoom();
+  const table = useRef<HTMLDivElement>(null);
   const [sac, setSac] = useState<Card[]>(fresh);
   const [life, setLife] = useState(LIFE);
   const [busy, setBusy] = useState(false);
   const [losses, setLosses] = useState(0);
   const [end, setEnd] = useState<null | "lose" | "draw" | "win">(null);
-  const [hit, setHit] = useState(0);
+  const [round, setRound] = useState(0); // новая раздача
 
   const ariCount = sac.filter((c) => c === "ari").length;
   const meCount = sac.filter((c) => c === "me").length;
+
+  // раздача: карты летят из колоды у свечи на свои места
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.from(".sac-card", { x: -520, y: -60, rotate: -40, autoAlpha: 0, duration: 0.6, ease: "power3.out", stagger: 0.07 });
+        gsap.from(".ari-line", { autoAlpha: 0, y: 10, duration: 0.6, delay: 0.5, ease: "power2.out" });
+      });
+      return () => mm.revert();
+    },
+    { scope: table, dependencies: [round] },
+  );
 
   // ход Ари: уничтожает одну из оставшихся карт Жертвы
   useEffect(() => {
@@ -47,7 +66,7 @@ export function Cards() {
         return s.map((c, i) => (i === k ? "ari" : c));
       });
       setBusy(false);
-    }, 700);
+    }, 750);
     return () => clearTimeout(id);
   }, [busy, end]);
 
@@ -58,6 +77,7 @@ export function Cards() {
     else if (ariCount >= 6) {
       setEnd("lose");
       setLosses((l) => l + 1);
+      useStage.getState().flash();
     } else if (!sac.includes("up")) {
       setEnd("draw");
       setDraw(true);
@@ -67,7 +87,7 @@ export function Cards() {
   const attack = () => {
     if (busy || end) return;
     setLife((l) => l - 2); // остальное съедают её защитные карты
-    setHit((h) => h + 1);
+    gsap.fromTo(".ari-face", { x: -6, filter: "brightness(2.2) saturate(2)" }, { x: 0, filter: "brightness(0.8) saturate(1)", duration: 0.45, ease: "power2.out" });
     setBusy(true);
   };
   const breakCard = (i: number) => {
@@ -80,96 +100,99 @@ export function Cards() {
     setLife(LIFE);
     setEnd(null);
     setBusy(false);
+    setRound((r) => r + 1);
   };
 
   return (
-    <section className="relative overflow-hidden text-[#e6dcc6]">
-      <div className="relative mx-auto max-w-5xl px-6 py-24">
+    <section ref={table} className="relative flex min-h-[calc(100vh-7rem)] flex-col px-6 pt-20">
+      <header className="mx-auto w-full max-w-6xl">
         <div className="font-system text-[12px] tracking-[0.3em] text-[#c9b27a]">НОЧЬ ТРЕТЬЕГО ДНЯ · ГЛ. 21</div>
-        <h2 className="mt-2 font-display text-5xl md:text-6xl">Партия</h2>
-        <p className="mt-4 max-w-2xl font-display text-[19px] leading-relaxed opacity-85">За окном буря и жуткий лунный свет. К Гаину приходит Ари, но говорит она чужим, жёстким голосом. У неё колода.</p>
+        <h2 className="mt-1 font-display text-5xl">Партия</h2>
+      </header>
 
-        {/* она */}
-        <div className="mt-10 flex items-center gap-5">
-          <div className="relative h-28 w-[84px] shrink-0 overflow-hidden border border-black">
-            <Image src="/art/people/kim-ari.jpg" alt="Другая Ари" fill sizes="84px" unoptimized className="object-cover brightness-75 contrast-125" />
-            <motion.span key={hit} className="absolute inset-0 bg-[#c0333d]" initial={{ opacity: hit ? 0.6 : 0 }} animate={{ opacity: 0 }} transition={{ duration: 0.4 }} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="font-display text-2xl">«Другая Ари»</div>
-            <div className="mt-1 flex items-center gap-2 font-system text-[11px]">
-              <span className="opacity-60">жизненная сила</span>
-              <div className="h-2 w-48 bg-white/10">
-                <div className="h-full bg-[#c0333d] transition-all duration-300" style={{ width: `${(Math.max(0, life) / LIFE) * 100}%` }} />
-              </div>
-              <span>{Math.max(0, life)}</span>
-              <span className="ml-3 opacity-60">уничтожила жертв</span>
-              <span className={cn(ariCount >= 5 && "text-[#ff8a8a]")}>{ariCount}/6</span>
-            </div>
-            <AnimatePresence mode="wait">
-              <motion.p key={`${losses}${end}`} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} className="mt-2 font-hand text-[24px] leading-tight text-[#f0c9c9]">
-                {end === "draw" ? "Вот. Теперь ты понял, что я хотела сказать." : end === "lose" ? "Шесть. Партия моя." : TALK[Math.min(losses, TALK.length - 1)]}
-              </motion.p>
-            </AnimatePresence>
-          </div>
+      {/* она сидит напротив, там, где на арте пустой стул */}
+      <div className="mx-auto mt-4 flex w-full max-w-3xl flex-col items-center text-center">
+        <div className="ari-face relative h-32 w-24 overflow-hidden border border-black shadow-[0_0_50px_rgba(192,51,61,0.35)] [filter:brightness(0.8)]">
+          <Image src="/art/people/kim-ari.jpg" alt="Другая Ари" fill sizes="96px" unoptimized className="object-cover contrast-125" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
         </div>
+        <div className="mt-2 flex items-center gap-3 font-system text-[11px] text-[#e6dcc6]">
+          <span className="opacity-60">сила</span>
+          <div className="h-1.5 w-40 bg-white/15">
+            <div className="h-full origin-left bg-[#c0333d] transition-transform duration-300" style={{ transform: `scaleX(${Math.max(0, life) / LIFE})` }} />
+          </div>
+          <span>{Math.max(0, life)}</span>
+          <span className={cn("ml-2", ariCount >= 5 && "text-[#ff8a8a]")}>жертв у неё: {ariCount}/6</span>
+        </div>
+        <p key={`${losses}${end}`} className="ari-line mt-3 min-h-[60px] max-w-xl font-hand text-[27px] leading-tight text-[#f3cfcf] [text-shadow:0_2px_14px_#000]">
+          {end === "draw" ? "Вот. Теперь ты понял, что я хотела сказать." : end === "lose" ? "Шесть. Партия моя." : TALK[Math.min(losses, TALK.length - 1)]}
+        </p>
+      </div>
 
-        {/* стол: восемь карт Жертвы */}
-        <div className="mt-8 rounded-sm border border-[#3a2a16] bg-[#1a120b] p-5 shadow-[inset_0_0_60px_rgba(0,0,0,0.7)]">
-          <div className="font-system text-[10px] uppercase tracking-widest opacity-55">карты Жертвы · их восемь</div>
-          <div className="mt-3 grid grid-cols-4 gap-3 sm:grid-cols-8">
-            {sac.map((c, i) => (
-              <motion.button
-                key={i}
+      {/* стол: восемь карт Жертвы веером, в перспективе столешницы */}
+      <div className="mx-auto mt-auto w-full max-w-5xl pb-6 [perspective:1100px]">
+        <div key={round} className="flex justify-center gap-3 [transform:rotateX(34deg)] [transform-style:preserve-3d]">
+          {sac.map((c, i) => {
+            const off = i - 3.5;
+            return (
+              <div key={i} className="sac-card [transform-style:preserve-3d]">
+              <button
                 onClick={() => breakCard(i)}
                 disabled={c !== "up" || busy || !!end}
-                whileHover={c === "up" && !busy && !end ? { y: -6 } : undefined}
-                animate={c === "ari" ? { rotate: [0, -6, 4, 0], opacity: 0.45 } : c === "me" ? { rotate: 8, opacity: 0.7 } : { rotate: 0, opacity: 1 }}
                 aria-label={c === "up" ? `Разрушить карту Жертвы ${i + 1}` : `Карта ${i + 1} выбыла`}
-                className={cn(
-                  "relative aspect-[5/7] border-2 font-display text-3xl",
-                  c === "up" ? "cursor-pointer border-[#c9b27a] bg-gradient-to-b from-[#efe6cf] to-[#c9b98f] text-[#2a2218]" : c === "ari" ? "border-[#c0333d] bg-[#2a0d10] text-[#c0333d]" : "border-[#c9b27a]/60 bg-[#2a2416] text-[#c9b27a]",
-                )}
+                className={cn("group relative block aspect-[5/7] w-[min(11vw,118px)] transition-transform duration-500 ease-out [transform-style:preserve-3d]", c === "up" && !busy && !end && "cursor-pointer hover:-translate-y-4")}
+                style={{ transform: `rotate(${off * 3.2}deg) translateY(${off * off * 2.4 + (c === "ari" ? -46 : c === "me" ? 34 : 0)}px)` }}
               >
-                {c === "up" ? "☩" : c === "ari" ? "✕" : "⌁"}
-                <span className="absolute inset-x-0 bottom-1 font-system text-[8px] uppercase tracking-wider">{c === "up" ? "жертва" : c === "ari" ? "её рукой" : "вами"}</span>
-              </motion.button>
-            ))}
-          </div>
-
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <button onClick={attack} disabled={busy || !!end} className="border border-[#c0333d] px-5 py-2 font-display text-lg text-[#ffb0b0] transition hover:bg-[#c0333d]/20 disabled:opacity-30">
-              Атаковать её
-            </button>
-            <span className="font-system text-[11px] opacity-55">или нажмите на карту Жертвы, чтобы разрушить её самому</span>
-            <span className="ml-auto font-system text-[11px] opacity-70">
-              разрушено вами: {meCount} · проиграно партий: {losses}
-            </span>
-          </div>
+                <div className="absolute inset-0 transition-transform duration-500 [transform-style:preserve-3d]" style={{ transform: c === "up" ? "rotateY(0deg)" : "rotateY(180deg)" }}>
+                  {/* рубашка */}
+                  <div className="absolute inset-0 rounded-[5px] border-2 border-[#c9b27a] bg-[#3a1216] shadow-[0_14px_22px_rgba(0,0,0,0.75)] [backface-visibility:hidden] [background-image:repeating-linear-gradient(45deg,rgba(201,178,122,0.22)_0_2px,transparent_2px_11px),repeating-linear-gradient(-45deg,rgba(201,178,122,0.22)_0_2px,transparent_2px_11px)]">
+                    <div className="absolute inset-[7px] rounded-[2px] border border-[#c9b27a]/70" />
+                    <div className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rotate-45 border border-[#c9b27a] bg-[#3a1216]" />
+                  </div>
+                  {/* лицо: видно, только когда карта выбыла */}
+                  <div
+                    className={cn(
+                      "absolute inset-0 flex flex-col items-center justify-center rounded-[5px] border-2 shadow-[0_14px_22px_rgba(0,0,0,0.75)] [backface-visibility:hidden] [transform:rotateY(180deg)]",
+                      c === "ari" ? "border-[#c0333d] bg-[#1c0709] text-[#c0333d]" : "border-[#c9b27a] bg-[#efe6cf] text-[#2a2218]",
+                    )}
+                  >
+                    <span className="font-display text-4xl leading-none">{c === "ari" ? "✕" : "☩"}</span>
+                    <span className="mt-1 font-system text-[8px] uppercase tracking-wider">{c === "ari" ? "её рукой" : "вами"}</span>
+                  </div>
+                </div>
+              </button>
+              </div>
+            );
+          })}
         </div>
 
-        <AnimatePresence>
-          {end && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={cn("mt-6 border p-5", end === "draw" ? "border-[#c9b27a]/60 bg-[#1c1812]" : "border-[#c0333d]/50 bg-[#1a0c0d]")}>
-              {end === "draw" ? (
-                <>
-                  <div className="font-system text-[11px] uppercase tracking-[0.3em] text-[#c9b27a]">Ничья</div>
-                  <p className="mt-2 font-display text-[19px] leading-relaxed">
-                    Шести жертв ей уже не набрать. Гаин проиграл пять партий подряд, прежде чем это увидел: одолеть её нельзя, но можно отнять у ритуала жертвы. Отель потом назовёт эту стратегию верной: убить жертву вместо дьявола.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="font-display text-[19px] leading-relaxed">{end === "win" ? "Её сила на нуле. В книге так не вышло ни разу." : "Она уничтожила шесть карт из восьми. По этим правилам её не перебить."}</p>
-                  <button onClick={again} className="mt-3 border border-white/30 px-5 py-1.5 font-display text-lg hover:bg-white/10">
-                    Ещё партию
-                  </button>
-                </>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-        {draw && !end && <p className="mt-4 font-system text-[11px] text-[#c9b27a]">Ничья уже была сыграна.</p>}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+          <button onClick={attack} disabled={busy || !!end} className="border border-[#c0333d] bg-black/55 px-6 py-2 font-display text-xl text-[#ffb0b0] transition hover:bg-[#c0333d]/25 disabled:opacity-30">
+            Атаковать её
+          </button>
+          <span className="font-system text-[11px] text-[#e6dcc6]/70">или возьмите со стола карту Жертвы и разрушьте её сами</span>
+          <span className="font-system text-[11px] text-[#e6dcc6]">
+            разрушено вами: {meCount} · проиграно партий: {losses}
+          </span>
+        </div>
+
+        {end && (
+          <div className={cn("mx-auto mt-5 max-w-2xl border bg-black/75 p-4 text-center", end === "draw" ? "border-[#c9b27a]/70" : "border-[#c0333d]/60")}>
+            {end === "draw" ? (
+              <p className="font-display text-[18px] leading-relaxed text-[#efe6cf]">
+                Ничья. Шести жертв ей уже не набрать. Гаин проиграл пять партий подряд, прежде чем это увидел: одолеть её нельзя, но можно отнять у ритуала жертвы. Отель потом назовёт эту стратегию верной: убить жертву вместо дьявола.
+              </p>
+            ) : (
+              <>
+                <p className="font-display text-[18px] text-[#efe6cf]">{end === "win" ? "Её сила на нуле. В книге так не вышло ни разу." : "Она уничтожила шесть карт из восьми. По этим правилам её не перебить."}</p>
+                <button onClick={again} className="mt-3 border border-white/40 px-5 py-1.5 font-display text-lg hover:bg-white/10">
+                  Ещё партию
+                </button>
+              </>
+            )}
+          </div>
+        )}
+        {draw && !end && <p className="mt-3 text-center font-system text-[11px] text-[#c9b27a]">Ничья уже была сыграна.</p>}
       </div>
     </section>
   );
