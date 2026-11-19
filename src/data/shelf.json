@@ -12,7 +12,7 @@
       { "label": "главы прочитаны", "value": "1168" }
     ],
     "href": "/books/escape-hotel",
-    "cover": "/art/books/escape-hotel-cover-key.jpg",
+    "cover": "/art/books/escape-hotel-cover-key-title.jpg",
     "scene": "/art/books/escape-hotel-bell.jpg",
     "spine": { "bg": "#1f2a5e", "band": "#c9a24a", "ink": "#f0dfb0" },
     "height": 372

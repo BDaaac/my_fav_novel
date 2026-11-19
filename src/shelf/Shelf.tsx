@@ -225,19 +225,17 @@ function Exhibit({
   );
 }
 
-/** обложка: картина в золотой рамке-тиснении, корешок с бинтами слева */
+/** обложка: картина в край, корешок с бинтами слева */
 function Cover({ book }: { book: Book }) {
   return (
     <div className="absolute inset-0 overflow-hidden rounded-r-[4px] rounded-l-[2px] shadow-[0_24px_50px_rgba(0,0,0,0.6)]" style={{ backfaceVisibility: "hidden", background: book.spine.bg }}>
       {book.cover ? (
-        <Image src={book.cover} alt="" fill sizes="260px" className="object-cover" priority />
+        <Image src={book.cover} alt="" fill sizes="260px" className="object-cover object-top" priority />
       ) : (
         <div className="flex h-full items-center justify-center p-6 text-center font-[family-name:var(--ff-press)] text-2xl" style={{ color: book.spine.ink }}>
           {book.title}
         </div>
       )}
-      <div className="pointer-events-none absolute inset-[8px] border" style={{ borderColor: `${book.spine.band}b0` }} />
-      <div className="pointer-events-none absolute inset-[12px] border" style={{ borderColor: `${book.spine.band}50` }} />
       {/* шарнир и бинты корешка */}
       <div className="pointer-events-none absolute inset-y-0 left-0 w-[18px]" style={{ background: `linear-gradient(90deg, ${book.spine.bg}, rgba(0,0,0,0.55) 70%, rgba(255,236,200,0.12))` }} />
       {[0.12, 0.88].map((y) => (
