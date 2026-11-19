@@ -30,9 +30,9 @@
       { "label": "том в свитке", "value": "1" }
     ],
     "href": "/books/reverend-gu",
-    "cover": "/art/books/reverend-gu.jpg",
+    "cover": "/art/books/reverend-gu-cover.jpg",
     "scene": "/art/books/reverend-gu-scene.jpg",
-    "spine": { "bg": "#16302a", "band": "#b08a2e", "ink": "#e6dcc0" },
+    "spine": { "bg": "#1b2232", "band": "#a9b4c8", "ink": "#e6e9f0" },
     "height": 380
   }
 ]
