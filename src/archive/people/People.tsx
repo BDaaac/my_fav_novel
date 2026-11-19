@@ -86,7 +86,7 @@ export function People({ art, guests }: { art: string[]; guests: Record<string, 
       {open &&
         (() => {
           const m = GUESTS.find((g) => g.id === open)!;
-          return <GuestCard key={open} g={guests[open] ?? draft(m, byId(open))} src={has(open)} color={m.color} ink={m.ink} word={m.word} no={GUESTS.indexOf(m) + 1} onClose={() => setOpen(null)} />;
+          return <GuestCard key={open} g={guests[open] ?? draft(m, byId(open))} src={has(open)} color={m.color} ink={m.ink} word={m.word} no={GUESTS.indexOf(m) + 1} names={Object.fromEntries(GUESTS.map((x) => [x.id, guests[x.id]?.name ?? shortName(byId(x.id))]))} onOpen={setOpen} onClose={() => setOpen(null)} />;
         })()}
     </main>
   );

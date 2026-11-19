@@ -23,5 +23,23 @@ export default function ArchivePeople() {
       } catch {}
     }
   } catch {}
+  // оборот, пометки на полях и вклад лежат отдельными файлами и подмешиваются к карточке
+  const extra = (sub: string, apply: (g: Guest, d: Record<string, unknown>) => void) => {
+    try {
+      for (const f of fs.readdirSync(path.join(dir, sub))) {
+        if (!f.endsWith(".json")) continue;
+        try {
+          const d = JSON.parse(fs.readFileSync(path.join(dir, sub, f), "utf8"));
+          if (guests[d?.id]) apply(guests[d.id], d);
+        } catch {}
+      }
+    } catch {}
+  };
+  const arr = <T,>(v: unknown) => (Array.isArray(v) ? (v as T[]) : []);
+  extra("back", (g, d) => (g.back = { rooms: arr(d.rooms), deaths: arr(d.deaths) }));
+  extra("extra", (g, d) => {
+    g.links = arr<NonNullable<Guest["links"]>[number]>(d.links).filter((l) => l.to !== g.id);
+    g.merits = arr(d.merits);
+  });
   return <People art={art} guests={guests} />;
 }
