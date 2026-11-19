@@ -44,7 +44,7 @@ const INK = "#2a2218";
 const PAPER =
   "radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.35), transparent 55%), repeating-linear-gradient(0deg, rgba(90,70,40,0.035) 0 1px, transparent 1px 3px), linear-gradient(#ebe1c9, #e2d6ba)";
 
-export function GuestCard({ g, src, color, ink, word, no, names, onOpen, onClose }: { g: Guest; src: string | null; color: string; ink: string; word: string; no: number; names: Record<string, string>; onOpen: (id: string) => void; onClose: () => void }) {
+export function GuestCard({ g, src, color, ink, word, no, names, faces, onOpen, onClose }: { g: Guest; src: string | null; color: string; ink: string; word: string; no: number; names: Record<string, string>; faces: Record<string, string | null>; onOpen: (id: string) => void; onClose: () => void }) {
   const [sheet, setSheet] = useState<SheetId>("about");
   const [back, setBack] = useState(false);
   useEffect(() => {
@@ -125,19 +125,25 @@ export function GuestCard({ g, src, color, ink, word, no, names, onOpen, onClose
               </span>
               <span className="rotate-[3deg] border px-2 py-0.5 font-system text-[10px] uppercase tracking-[0.2em] opacity-70">{word}</span>
             </div>
-            {g.merits?.map((m, i) => (
-              <div key={m.title + i} className="relative mt-7 bg-[#f6f0de] px-3 pb-2.5 pt-3 shadow-[0_5px_12px_rgba(40,30,10,0.3)]" style={{ rotate: `${i % 2 ? -1.5 : 1.5}deg` }}>
-                {/* золотая печать с лентами */}
-                <span className="absolute -right-3 -top-5 flex h-12 w-12 items-center justify-center">
-                  <span className="absolute left-2 top-7 h-8 w-3 rotate-[14deg] bg-[#8f1d22] [clip-path:polygon(0_0,100%_0,100%_100%,50%_78%,0_100%)]" />
-                  <span className="absolute right-2 top-7 h-8 w-3 rotate-[-14deg] bg-[#8f1d22] [clip-path:polygon(0_0,100%_0,100%_100%,50%_78%,0_100%)]" />
-                  <span className="relative flex h-12 w-12 items-center justify-center rounded-full border-2 border-dotted border-[#7a5a12] font-display text-[20px] font-semibold text-[#5a400a] shadow-[0_2px_5px_rgba(40,30,10,0.4)] [background:radial-gradient(circle_at_35%_30%,#f3dc8c,#c9a227_60%,#9a7614)]">{m.room || "★"}</span>
-                </span>
-                <div className="font-system text-[8px] uppercase tracking-[0.28em] opacity-60">отмечен отелем</div>
-                <div className="mt-0.5 pr-8 font-display text-[19px] font-semibold leading-tight">{m.title}</div>
-                <p className="mt-1 font-display text-[14px] leading-snug">{m.text}</p>
-              </div>
-            ))}
+            {g.merits?.map((m, i) => {
+              const kind = /Решение/.test(m.title) ? "gold" : /Побег/.test(m.title) ? "silver" : "bronze";
+              return (
+                <div key={m.title + i} className="group relative mt-8 border border-[#b9a983] bg-[#f6f0de] p-[5px] shadow-[0_6px_14px_rgba(40,30,10,0.32)]" style={{ rotate: `${i % 2 ? -1.6 : 1.4}deg` }}>
+                  {/* печать на лентах: снимок фольги, белый фон гасится умножением */}
+                  <span className="absolute -right-5 -top-7 z-10 block w-[86px] origin-top transition-transform duration-500 ease-out group-hover:rotate-[9deg]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={`/art/people/fx/seal-${kind}.png`} alt="" aria-hidden className="block w-full select-none drop-shadow-[0_3px_3px_rgba(40,30,10,0.35)]" />
+                    <span className="absolute inset-x-0 top-0 flex aspect-square items-center justify-center font-display text-[24px] font-semibold leading-none" style={{ color: kind === "bronze" ? "#f3e2c4" : kind === "silver" ? "#262b33" : "#3a2a08", textShadow: kind === "bronze" ? "0 1px 1px rgba(0,0,0,0.6)" : "0 1px 0 rgba(255,255,255,0.5)" }}>{m.room || "★"}</span>
+                  </span>
+                  <div className="border border-double border-[#2a2218]/45 px-3 pb-3 pt-2.5">
+                    <div className="font-system text-[8px] uppercase tracking-[0.3em] opacity-60">отель «Пионер» отмечает</div>
+                    <div className="mt-1.5 pr-12 font-display text-[22px] font-semibold leading-[1.05]">{m.title}</div>
+                    <div className="my-2 h-px w-10 bg-[#2a2218]/50" />
+                    <p className="font-display text-[14.5px] leading-snug">{m.text}</p>
+                  </div>
+                </div>
+              );
+            })}
             {g.draft && <p className="mt-4 font-hand text-[19px] leading-tight text-[#8f1d22]">Черновик. Сведения переписываются по новелле.</p>}
           </aside>
 
@@ -153,7 +159,7 @@ export function GuestCard({ g, src, color, ink, word, no, names, onOpen, onClose
             </div>
 
             {sheet === "about" && (
-              <div className={cn("mt-5", g.links?.length && "grid gap-x-8 gap-y-6 lg:grid-cols-[1fr_190px]")}>
+              <div className={cn("mt-5", g.links?.length && "grid gap-x-8 gap-y-6 lg:grid-cols-[1fr_215px]")}>
                <div>
                 {/* бланк: печатные графы, вписано от руки по линейкам */}
                 {g.registry.length > 0 && (
@@ -185,14 +191,18 @@ export function GuestCard({ g, src, color, ink, word, no, names, onOpen, onClose
                </div>
                 {/* поля: от руки о других гостях, имя открывает их карточку */}
                 {!!g.links?.length && (
-                  <div className="space-y-5 border-[#8f1d22]/35 pt-1 lg:border-l lg:pl-4">
+                  <div className="space-y-6 border-[#8f1d22]/35 pt-2 lg:border-l lg:pl-4">
                     {g.links.map((l, i) => (
-                      <div key={l.to + i} className="font-hand text-[21px] leading-[1.1] text-[#8f1d22]" style={{ rotate: `${i % 2 ? 1.2 : -1.6}deg` }}>
-                        <button onClick={() => onOpen(l.to)} className="underline decoration-[#8f1d22]/50 underline-offset-4 hover:decoration-[#8f1d22]">
-                          → {names[l.to] ?? l.to}
-                        </button>
-                        <div className="mt-0.5 text-[#2a2218]/85">{l.text}</div>
-                      </div>
+                      <button key={l.to + i} onClick={() => onOpen(l.to)} className="group block w-full text-left" style={{ rotate: `${i % 2 ? 1.2 : -1.6}deg` }}>
+                        <span className="flex items-end gap-2.5">
+                          <span className="relative block h-[66px] w-[52px] shrink-0 bg-[#f6f0de] p-[3px] shadow-[0_3px_7px_rgba(40,30,10,0.35)] transition-transform duration-300 ease-out group-hover:-translate-y-1 group-hover:rotate-[-5deg]" style={{ rotate: `${i % 2 ? -4 : 3}deg` }}>
+                            <span className="absolute -top-2 left-1/2 z-10 h-3.5 w-8 -translate-x-1/2 rotate-[-7deg] bg-[#e6d59a]/80 shadow-[0_1px_1px_rgba(40,30,10,0.2)]" />
+                            <span className="block h-full w-full bg-[#2a2218]/20 bg-cover bg-top" style={{ backgroundImage: faces[l.to] ? `url(${faces[l.to]})` : undefined }} />
+                          </span>
+                          <span className="pb-1 font-hand text-[23px] leading-none text-[#8f1d22] underline decoration-[#8f1d22]/45 underline-offset-4 group-hover:decoration-[#8f1d22]">{names[l.to] ?? l.to}</span>
+                        </span>
+                        <span className="mt-1.5 block font-hand text-[20px] leading-[1.1] text-[#2a2218]/85">{l.text}</span>
+                      </button>
                     ))}
                   </div>
                 )}
