@@ -22,7 +22,7 @@ export type Guest = {
   /** оборот: штампы номеров и отметки о смертях */
   back?: { rooms: { room: string; title?: string; result: string; role?: string; note?: string }[]; deaths: { room: string; cause: string }[] };
   /** пометки на полях о других гостях */
-  links?: { to: string; text: string }[];
+  links?: { to: string; bond?: string; text: string }[];
   /** что отель засчитал лично гостю */
   merits?: { title: string; room?: string; text: string }[];
 };
@@ -199,7 +199,10 @@ export function GuestCard({ g, src, color, ink, word, no, names, faces, onOpen, 
                             <span className="absolute -top-2 left-1/2 z-10 h-3.5 w-8 -translate-x-1/2 rotate-[-7deg] bg-[#e6d59a]/80 shadow-[0_1px_1px_rgba(40,30,10,0.2)]" />
                             <span className="block h-full w-full bg-[#2a2218]/20 bg-cover bg-top" style={{ backgroundImage: faces[l.to] ? `url(${faces[l.to]})` : undefined }} />
                           </span>
-                          <span className="pb-1 font-hand text-[23px] leading-none text-[#8f1d22] underline decoration-[#8f1d22]/45 underline-offset-4 group-hover:decoration-[#8f1d22]">{names[l.to] ?? l.to}</span>
+                          <span className="pb-0.5">
+                            {l.bond && <span className="block font-system text-[9px] uppercase tracking-[0.22em] text-[#2a2218]/60">{l.bond}</span>}
+                            <span className="mt-1 block font-hand text-[23px] leading-none text-[#8f1d22] underline decoration-[#8f1d22]/45 underline-offset-4 group-hover:decoration-[#8f1d22]">{names[l.to] ?? l.to}</span>
+                          </span>
                         </span>
                         <span className="mt-1.5 block font-hand text-[20px] leading-[1.1] text-[#2a2218]/85">{l.text}</span>
                       </button>
@@ -367,7 +370,7 @@ export function GuestCard({ g, src, color, ink, word, no, names, faces, onOpen, 
                       alt=""
                       aria-hidden
                       className="pointer-events-none absolute right-0 top-1/2 select-none mix-blend-multiply"
-                      style={{ width: 110 + c.deaths.length * 40, opacity: 0.3, transform: `translate(${34 + tilt(ci) * 3}%, -50%) rotate(${ci * 67}deg)` }}
+                      style={{ width: 110 + c.deaths.length * 40, opacity: 0.4, transform: `translate(${34 + tilt(ci) * 3}%, -50%) rotate(${ci * 67}deg)` }}
                     />
                   )}
                   <div className="relative font-display font-semibold leading-none">
