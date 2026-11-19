@@ -39,7 +39,6 @@ function draft(m: Meta, c: Character): Guest {
     name: shortName(c),
     registry: [
       { label: "Возраст", value: `${m.age} лет` },
-      { label: "В отеле", value: `с главы ${c.firstCh ?? facts[0]?.ch ?? "?"}` },
     ],
     about: facts.slice(0, 4).map((f) => ({ text: f.text, ch: f.ch ? [f.ch] : [] })),
     blessing: { name: c.stat ?? "", text: facts.filter((f) => /Благословен/i.test(f.text)).slice(0, 3).map((f) => ({ text: f.text, ch: f.ch ? [f.ch] : [] })), limits: [] },

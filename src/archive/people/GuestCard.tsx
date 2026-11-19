@@ -33,12 +33,6 @@ const INK = "#2a2218";
 const PAPER =
   "radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.35), transparent 55%), repeating-linear-gradient(0deg, rgba(90,70,40,0.035) 0 1px, transparent 1px 3px), linear-gradient(#ebe1c9, #e2d6ba)";
 
-const Ch = ({ ch }: { ch?: number[] | number }) => {
-  const list = ch === undefined ? [] : Array.isArray(ch) ? ch : [ch];
-  if (!list.length) return null;
-  return <sup className="ml-1 whitespace-nowrap font-system text-[10px] tracking-tight opacity-50">гл. {list.join(", ")}</sup>;
-};
-
 export function GuestCard({ g, src, color, ink, word, no, onClose }: { g: Guest; src: string | null; color: string; ink: string; word: string; no: number; onClose: () => void }) {
   const [sheet, setSheet] = useState<SheetId>("about");
   useEffect(() => {
@@ -122,7 +116,6 @@ export function GuestCard({ g, src, color, ink, word, no, onClose }: { g: Guest;
                 {g.about.map((p, i) => (
                   <p key={i} className={cn("font-display leading-[1.55]", i === 0 ? "text-[21px]" : "text-[18px]")}>
                     {p.text}
-                    <Ch ch={p.ch} />
                   </p>
                 ))}
                 {!g.about.length && <Empty text="Сведений о госте пока нет." />}
@@ -135,7 +128,6 @@ export function GuestCard({ g, src, color, ink, word, no, onClose }: { g: Guest;
                   {g.blessing.text.map((p, i) => (
                     <p key={i} className="font-display text-[18px] leading-[1.55]">
                       {p.text}
-                      <Ch ch={p.ch} />
                     </p>
                   ))}
                   {!g.blessing.text.length && <Empty text="Как работает Благословение, в карточку ещё не внесено." />}
@@ -150,7 +142,6 @@ export function GuestCard({ g, src, color, ink, word, no, onClose }: { g: Guest;
                             <span style={{ color: "#8f1d22" }}>{i + 1}.</span>
                             <span>
                               {p.text}
-                              <Ch ch={p.ch} />
                             </span>
                           </li>
                         ))}
@@ -182,7 +173,6 @@ export function GuestCard({ g, src, color, ink, word, no, onClose }: { g: Guest;
                       <h3 className="font-display text-[25px] font-semibold leading-tight">{l.name}</h3>
                       <p className="mt-1 max-w-[60ch] font-display text-[17px] leading-[1.5]">
                         {l.text}
-                        <Ch ch={l.ch} />
                       </p>
                     </div>
                   </article>
@@ -210,7 +200,6 @@ export function GuestCard({ g, src, color, ink, word, no, onClose }: { g: Guest;
                         </div>
                         <p className="max-w-[62ch] font-display text-[16px] leading-[1.45]">
                           {it.text}
-                          <Ch ch={it.ch} />
                         </p>
                       </div>
                     </li>
