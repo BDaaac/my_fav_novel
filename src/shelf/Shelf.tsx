@@ -131,8 +131,10 @@ function Exhibit({
 
       {/* книга */}
       <div className="relative" style={{ width: 2 * W, height: H + 24, perspective: 1800 }}>
+        {/* pointer-events-none: сама книга не ловит клики, иначе её плоскость перекрывает
+            титульный лист, который лежит чуть глубже в 3D; ссылка на листе включает их обратно */}
         <motion.div
-          className="absolute bottom-[14px] left-1/2"
+          className="pointer-events-none absolute bottom-[14px] left-1/2"
           style={{ width: W, height: H, marginLeft: -W / 2, transformStyle: "preserve-3d" }}
           initial={false}
           animate={{ x: open ? W / 2 : 0, y: open ? -6 : 0, rotateX: open ? 4 : 10, scale: open ? 1.04 : 1 }}
@@ -231,12 +233,12 @@ function Frontispiece({ book }: { book: Book }) {
           "radial-gradient(circle at 20% 30%, rgba(120,40,40,0.55), transparent 35%), radial-gradient(circle at 70% 60%, rgba(40,60,70,0.6), transparent 40%), radial-gradient(circle at 40% 85%, rgba(150,110,50,0.5), transparent 35%), #2a1814",
       }}
     >
-      <div className="absolute inset-[10%] flex flex-col bg-[#ece2c8] p-[7%] shadow-[0_2px_10px_rgba(0,0,0,0.45)]">
-        <div className="relative flex-1 overflow-hidden border border-[#8a7046]/50">
-          {book.scene && <Image src={book.scene} alt="" fill sizes="220px" className="object-cover sepia-[0.25]" />}
-        </div>
-        <p className="mt-[6%] text-center font-[family-name:var(--ff-press)] text-[10px] italic text-[#6b5432]">{book.short ?? book.title}</p>
-      </div>
+      {/* иллюстрация во весь форзац, как вклеенная гравюра: без паспарту, тонкая золотая линия по краю */}
+      {book.scene && <Image src={book.scene} alt="" fill sizes="260px" className="object-cover" />}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,transparent_45%,rgba(0,0,0,0.55))]" />
+      <div className="pointer-events-none absolute inset-[8px] border" style={{ borderColor: `${book.spine.band}90` }} />
+      {/* ярлык с подписью внизу */}
+      <p className="absolute bottom-[7%] left-1/2 w-max max-w-[80%] -translate-x-1/2 bg-[#ece2c8]/90 px-2.5 py-1 text-center font-[family-name:var(--ff-press)] text-[10px] italic text-[#4d3a22] shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{book.short ?? book.title}</p>
     </div>
   );
 }
@@ -272,7 +274,7 @@ function TitlePage({ book, open, still, compact }: { book: Book; open: boolean; 
           </dl>
           <Link
             href={book.href}
-            className="relative z-10 mt-auto border border-[#8a6a36] px-3 py-1.5 font-[family-name:var(--ff-press)] text-[clamp(10px,1vw,12px)] text-[#3b2a18] transition-colors hover:bg-[#8a6a36] hover:text-[#f3ead2]"
+            className="pointer-events-auto relative z-10 mt-auto border border-[#8a6a36] px-3 py-1.5 font-[family-name:var(--ff-press)] text-[clamp(10px,1vw,12px)] text-[#3b2a18] transition-colors hover:bg-[#8a6a36] hover:text-[#f3ead2]"
           >
             Войти в картотеку
           </Link>
