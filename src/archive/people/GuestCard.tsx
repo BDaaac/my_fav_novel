@@ -82,15 +82,7 @@ export function GuestCard({ g, src, color, ink, word, no, onClose }: { g: Guest;
             </div>
 
             <div className="mt-4 font-display text-[30px] font-semibold leading-none">{g.name}</div>
-            <dl className="mt-3 space-y-1.5">
-              {g.registry.map((r) => (
-                <div key={r.label} className="flex items-baseline gap-1.5 font-system text-[11.5px] leading-snug">
-                  <dt className="shrink-0 uppercase tracking-wider opacity-55">{r.label}</dt>
-                  <span className="mb-[3px] min-w-3 flex-1 border-b border-dotted border-[#2a2218]/45" />
-                  <dd className="max-w-[62%] text-right">{r.value}</dd>
-                </div>
-              ))}
-            </dl>
+            {g.blessing.name && <div className="mt-1.5 font-system text-[10px] uppercase tracking-[0.24em] opacity-60">Благословение · {g.blessing.name}</div>}
 
             {/* штампы */}
             <div className="mt-5 flex flex-wrap items-center gap-2">
@@ -112,13 +104,34 @@ export function GuestCard({ g, src, color, ink, word, no, onClose }: { g: Guest;
             </div>
 
             {sheet === "about" && (
-              <div className="mt-5 max-w-[66ch] space-y-4">
-                {g.about.map((p, i) => (
-                  <p key={i} className={cn("font-display leading-[1.55]", i === 0 ? "text-[21px]" : "text-[18px]")}>
-                    {p.text}
-                  </p>
-                ))}
-                {!g.about.length && <Empty text="Сведений о госте пока нет." />}
+              <div className="mt-5">
+                {/* бланк: печатные графы, вписано от руки по линейкам */}
+                {g.registry.length > 0 && (
+                  <dl className="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
+                    {g.registry.map((r) => (
+                      <div key={r.label} className={cn(r.value.length > 24 && "sm:col-span-2")}>
+                        <dt className="font-system text-[9px] uppercase tracking-[0.26em] opacity-55">{r.label}</dt>
+                        <dd className="font-hand text-[25px] leading-[32px] text-[#1d2a4a] [background-image:repeating-linear-gradient(transparent_0_31px,rgba(42,34,24,0.4)_31px_32px)]">{r.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+                {g.about.length > 0 && (
+                  <>
+                    <div className="mt-8 flex items-center gap-3 font-system text-[9px] uppercase tracking-[0.26em] opacity-55">
+                      <span>Заметки портье</span>
+                      <span className="h-px flex-1 bg-[#2a2218]/50" />
+                    </div>
+                    <div className="mt-3 max-w-[70ch] space-y-3">
+                      {g.about.map((p, i) => (
+                        <p key={i} className="font-display text-[18px] leading-[1.5]">
+                          {p.text}
+                        </p>
+                      ))}
+                    </div>
+                  </>
+                )}
+                {!g.about.length && !g.registry.length && <Empty text="Сведений о госте пока нет." />}
               </div>
             )}
 
