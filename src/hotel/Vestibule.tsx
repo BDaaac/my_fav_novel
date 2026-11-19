@@ -132,9 +132,6 @@ export function Vestibule({ rooms }: { rooms: RoomDoor[] }) {
           </nav>
           <p className="mt-6 h-12 max-w-sm font-display text-[17px] leading-snug opacity-65">{MENU[sel].hint}</p>
 
-          <div className="mt-6 font-system text-[10px] tracking-widest opacity-40">
-            {view === "menu" ? "↑ ↓ ВЫБОР · ENTER ВОЙТИ" : view === "rooms" ? "← → ДВЕРЬ · ENTER ВОЙТИ · ESC НАЗАД" : "ESC НАЗАД"}
-          </div>
         </div>
 
         {/* правая часть: сцена выбранного пункта */}

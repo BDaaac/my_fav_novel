@@ -221,8 +221,7 @@ export function GuestCard({ g, src, color, ink, word, no, onClose }: { g: Guest;
             )}
 
             {/* подпись портье внизу листа */}
-            <div className="mt-8 flex items-end justify-between gap-4 font-system text-[9px] uppercase tracking-[0.24em] opacity-55">
-              <span>лист {SHEETS.findIndex((s) => s.id === sheet) + 1} из {SHEETS.length} · ← →</span>
+            <div className="mt-8 flex items-end justify-end gap-4 font-system text-[9px] uppercase tracking-[0.24em] opacity-55">
               <span className="normal-case tracking-normal">
                 <span className="font-hand text-[20px] opacity-90" style={{ color: ink === "#e0cdb0" ? INK : INK }}>
                   принял портье

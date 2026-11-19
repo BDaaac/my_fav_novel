@@ -81,7 +81,7 @@ export function Chart() {
                             <dd className="font-hand text-[24px] leading-[24px]">{v}</dd>
                           </div>
                         ))}
-                        <div className="pt-8 font-system text-[11px] uppercase tracking-widest text-[#8c1c24]">история заражения · листайте →</div>
+                        <div className="pt-8 font-system text-[11px] uppercase tracking-widest text-[#8c1c24]">история заражения</div>
                       </dl>
                     ) : (
                       <div>
@@ -99,9 +99,7 @@ export function Chart() {
                 <button onClick={() => go(-1)} disabled={page === 0} className="px-2 py-1 disabled:opacity-25">
                   ← назад
                 </button>
-                <span className="opacity-60">
-                  лист {page + 1} из {pages}
-                </span>
+                <span />
                 {page < pages - 1 ? (
                   <button onClick={() => go(1)} className="px-2 py-1">
                     дальше →
