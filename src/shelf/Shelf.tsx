@@ -146,10 +146,22 @@ function Exhibit({
               разводит их края по высоте. */}
           <motion.div
             className="absolute inset-0"
-            style={{ background: book.spine.bg, borderRadius: "2px 4px 4px 2px" }}
+            style={{ background: book.spine.bg, borderRadius: "0 4px 4px 0" }}
             initial={false}
             animate={{ z: open ? -2 : -T }}
             transition={t}
+          />
+          {/* корешок раскрытой книги: одна кожаная полоса через шов, с выпуклым бликом */}
+          <motion.div
+            className="absolute inset-y-0"
+            style={{
+              left: -5,
+              width: 10,
+              background: `linear-gradient(90deg, rgba(0,0,0,0.45), rgba(255,240,215,0.10) 45%, rgba(0,0,0,0.35)), ${book.spine.bg}`,
+            }}
+            initial={false}
+            animate={{ z: open ? 0.5 : -T, opacity: open ? 1 : 0 }}
+            transition={{ ...t, opacity: { duration: still ? 0 : open ? 0.3 : 0.15, delay: open && !still ? 0.5 : 0 } }}
           />
           {/* блок листов: чуть меньше крышек, как у настоящей книги — по краям видна кожа переплёта */}
           <motion.div
@@ -161,8 +173,8 @@ function Exhibit({
               background:
                 "radial-gradient(ellipse at 70% 10%, rgba(255,255,255,0.35), transparent 60%), repeating-linear-gradient(0deg, rgba(110,85,45,0.035) 0 1px, transparent 1px 3px), linear-gradient(90deg,#e9dcbd,#efe4c8 18%,#ebdfc2)",
               borderRadius: "0 2px 2px 0",
-              // обрез листов справа и снизу: несколько тонких слоёв
-              boxShadow: "1px 1px 0 #d9caa6, 2px 2px 0 #cdbd96, 3px 3px 0 #d6c7a2, 4px 4px 0 #bfae86",
+              // книга раскрыта на титуле: все листы справа, их обрез чуть виден у внешнего края
+              boxShadow: "1px 0 0 #d9caa6, 2px 0 0 #c9b893, 3px 0 0 #d4c49f",
             }}
           >
             {/* тень у корешка: лист уходит в переплёт */}
