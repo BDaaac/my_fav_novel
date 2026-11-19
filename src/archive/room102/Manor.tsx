@@ -1,54 +1,14 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image";
 import { motion } from "motion/react";
-import { Mask, useRoom } from "./state";
+import { useStage } from "@/stage/Stage";
+import { Mask } from "./state";
 import { cn } from "@/lib/utils";
-
-/** Дождь: два слоя косых штрихов, двигаются силами компоновщика. */
-export function Rain({ strong }: { strong?: boolean }) {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-      {[0, 1].map((i) => (
-        <div
-          key={i}
-          className="rain102 absolute -inset-[20%]"
-          style={{
-            opacity: (strong ? 0.5 : 0.28) - i * 0.1,
-            backgroundImage: "repeating-linear-gradient(100deg, transparent 0 7px, rgba(200,220,215,0.5) 7px 8px, transparent 8px 19px)",
-            backgroundSize: i ? "140px 220px" : "90px 160px",
-            animationDuration: `${i ? 0.9 : 0.6}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
 
 /** Приезд (гл. 15): дорога, роли, дом между горой и озером. */
 export function Arrival() {
-  const { art } = useRoom();
-  const img = art("manor");
   return (
-    <section className="relative flex min-h-screen flex-col justify-end overflow-hidden bg-[#0d1211] text-[#dfe6e2]">
-      {img ? (
-        <Image src={img} alt="Особняк между горой и озером под дождём" fill priority sizes="100vw" className="object-cover" />
-      ) : (
-        // без арта: гора, дом и озеро силуэтами
-        <div className="absolute inset-0 [background:linear-gradient(#27302e,#151c1b_55%,#0c1110)]">
-          <div className="absolute inset-x-0 bottom-[38%] h-[46%] bg-[#0a0e0d] [clip-path:polygon(0_100%,18%_42%,34%_70%,52%_8%,70%_58%,84%_36%,100%_100%)]" />
-          <div className="absolute bottom-[38%] left-1/2 h-[16%] w-[26%] -translate-x-1/2 bg-[#070a09] [clip-path:polygon(0_100%,0_42%,10%_42%,10%_18%,22%_0,34%_18%,34%_42%,66%_42%,66%_18%,78%_0,90%_18%,90%_42%,100%_42%,100%_100%)]">
-            {[30, 46, 62].map((x) => (
-              <span key={x} className="absolute bottom-[18%] h-[14%] w-[4%] bg-[#d9a85a]/70 shadow-[0_0_14px_#d9a85a]" style={{ left: `${x}%` }} />
-            ))}
-          </div>
-          <div className="absolute inset-x-0 bottom-0 h-[38%] [background:linear-gradient(#1b2625,#0a0f0e)]" />
-          <div className="absolute bottom-[30%] left-1/2 h-[3px] w-[30%] -translate-x-1/2 bg-[#3a4744]/70" />
-        </div>
-      )}
-      <Rain />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0d1211] via-[#0d1211]/55 to-transparent" />
-
+    <section className="relative flex min-h-screen flex-col justify-end overflow-hidden text-[#dfe6e2]">
       <div className="relative mx-auto w-full max-w-6xl px-6 pb-16">
         <div className="font-system text-[12px] tracking-[0.3em] text-[#9fb8b0]">КОМНАТА ПРОКЛЯТИЙ · 1-Й ЭТАЖ · №102 · ГЛ. 14–25</div>
         <h1 className="mt-2 font-display text-[clamp(3rem,7vw,6.5rem)] font-semibold leading-none">Особняк Ужасов</h1>
@@ -72,7 +32,7 @@ export function Arrival() {
           </div>
         </div>
         <motion.div className="mt-10 font-system text-[11px] tracking-[0.25em] text-[#9fb8b0]" animate={{ y: [0, 6, 0] }} transition={{ duration: 2.4, repeat: Infinity }}>
-          ЛИСТАЙТЕ ВНИЗ · ДЕНЬ ПЕРВЫЙ
+          ДАЛЬШЕ · ДОМ ИЗНУТРИ
         </motion.div>
       </div>
     </section>
@@ -167,6 +127,7 @@ export function House() {
 
   const pick = (i: number) => {
     setDay(i);
+    useStage.getState().set({ rain: [0.3, 0.9, 1, 0.65, 0.45][i] });
     setLoc((Object.keys(DAYS[i].ev) as Loc[])[0]);
   };
   const cell = (l: Loc, extra?: string) => {
@@ -192,8 +153,7 @@ export function House() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-[#0d1211] text-[#dfe6e2]">
-      <Rain strong={day === 1 || day === 2} />
+    <section className="relative overflow-hidden text-[#dfe6e2]">
       <div className="relative mx-auto max-w-6xl px-6 py-24">
         <div className="font-system text-[12px] tracking-[0.3em] text-[#9fb8b0]">ДОМ В РАЗРЕЗЕ</div>
         <h2 className="mt-2 font-display text-5xl md:text-6xl">Четыре дня</h2>

@@ -30,9 +30,9 @@ const FATES: Fate[] = [
 ];
 
 export function Fates() {
-  const { fates, setFates } = useRoom();
+  const { fates, locked: lockedIds, lock } = useRoom();
+  const locked = new Set(lockedIds);
   const [pick, setPick] = useState<Record<string, { how?: string; gave?: string }>>({});
-  const [locked, setLocked] = useState<Set<string>>(new Set());
   const [flash, setFlash] = useState(0);
 
   const set = (id: string, k: "how" | "gave", v: string) => {
@@ -43,15 +43,13 @@ export function Fates() {
     if (right.length >= 3) {
       const l = new Set(locked);
       right.slice(0, 3).forEach((f) => l.add(f.id));
-      setLocked(l);
-      setFates(l.size);
+      lock([...l]);
       setFlash((x) => x + 1);
     }
   };
 
   return (
-    <section className="relative overflow-hidden bg-[#14110d] text-[#e6dcc6]">
-      <div className="pointer-events-none absolute inset-0 [background:radial-gradient(ellipse_at_50%_0%,rgba(201,178,122,0.12),transparent_60%)]" />
+    <section className="relative overflow-hidden text-[#e6dcc6]">
       <div className="relative mx-auto max-w-6xl px-6 py-24">
         <div className="font-system text-[12px] tracking-[0.3em] text-[#c9b27a]">КНИГА СУДЕБ · ГЛ. 16–25</div>
         <h2 className="mt-2 font-display text-5xl md:text-6xl">Кто, как и зачем</h2>
@@ -145,11 +143,10 @@ const WHAT = ["обыскать", "ждать ночи", "ударить в ко
 
 /** Записка Ынсоль (гл. 18) и то, что из неё вышло (гл. 20). */
 export function Note() {
-  const { art, bell, ring } = useRoom();
+  const { bell, ring } = useRoom();
   const [w, setW] = useState([0, 0, 0]);
   const [tried, setTried] = useState(0);
   const ok = w[0] === 2 && w[1] === 2 && w[2] === 2;
-  const img = art("bell");
   const row = (i: number, opts: string[]) => (
     <div className="flex flex-wrap gap-1.5">
       {opts.map((o, j) => (
@@ -160,8 +157,7 @@ export function Note() {
     </div>
   );
   return (
-    <section className="relative overflow-hidden bg-[#0d1211] text-[#dfe6e2]">
-      {img && <Image src={img} alt="" fill sizes="100vw" className="object-cover opacity-25" />}
+    <section className="relative overflow-hidden text-[#dfe6e2]">
       <div className="relative mx-auto grid max-w-6xl gap-10 px-6 py-24 lg:grid-cols-[320px_1fr]">
         <div>
           <motion.div initial={{ rotate: -4 }} whileHover={{ rotate: 0 }} className="mx-auto w-[260px] bg-[#efe6cf] p-6 text-[#2a2218] shadow-[0_18px_30px_rgba(0,0,0,0.6)]">

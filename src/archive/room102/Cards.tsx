@@ -83,9 +83,7 @@ export function Cards() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-[#0a0807] text-[#e6dcc6]">
-      {/* свеча */}
-      <motion.div className="pointer-events-none absolute left-1/2 top-[30%] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[#ffb45a]/15 blur-[90px]" animate={{ opacity: [0.8, 1, 0.7, 0.95, 0.8] }} transition={{ duration: 3.2, repeat: Infinity }} />
+    <section className="relative overflow-hidden text-[#e6dcc6]">
       <div className="relative mx-auto max-w-5xl px-6 py-24">
         <div className="font-system text-[12px] tracking-[0.3em] text-[#c9b27a]">НОЧЬ ТРЕТЬЕГО ДНЯ · ГЛ. 21</div>
         <h2 className="mt-2 font-display text-5xl md:text-6xl">Партия</h2>

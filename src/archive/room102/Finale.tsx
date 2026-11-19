@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { Blackout } from "../room101/story";
-import { Rain } from "./Manor";
 import { Mask, useRoom } from "./state";
 import { cn } from "@/lib/utils";
 
@@ -19,8 +18,7 @@ export function Hill() {
   const [fail, setFail] = useState(false);
   const left = Math.max(0, 3 - Math.max(0, step));
   return (
-    <section className="relative overflow-hidden bg-[#0d1211] text-[#dfe6e2]">
-      <Rain strong />
+    <section className="relative overflow-hidden text-[#dfe6e2]">
       <div className="relative mx-auto max-w-5xl px-6 py-24">
         <div className="font-system text-[12px] tracking-[0.3em] text-[#9fb8b0]">ДЕНЬ 4 · СКЛОН · ГЛ. 22–23</div>
         <h2 className="mt-2 font-display text-5xl md:text-6xl">Священник</h2>
@@ -128,7 +126,7 @@ export function Finale() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-[#070909] text-[#dfe6e2]">
+    <section className="relative overflow-hidden text-[#dfe6e2]">
       <div className="relative mx-auto max-w-6xl px-6 py-24">
         <div className="font-system text-[12px] tracking-[0.3em] text-[#9fb8b0]">ДЕНЬ 4 · ФИНАЛ · ГЛ. 23–24</div>
         <h2 className="mt-2 font-display text-5xl md:text-6xl">Жертва вместо дьявола</h2>
@@ -151,7 +149,6 @@ export function Finale() {
             {/* Собор: Гаин и статуи */}
             <div className="relative h-[340px] overflow-hidden border border-white/12 bg-[#101615]">
               {statue && <Image src={statue} alt="" fill sizes="50vw" className="object-cover opacity-40" />}
-              <Rain />
               <div className="absolute left-4 top-3 font-system text-[10px] uppercase tracking-widest text-[#9fb8b0]">Собор · Гаин</div>
               {/* статуи подходят */}
               <div className="absolute inset-x-6 bottom-16">

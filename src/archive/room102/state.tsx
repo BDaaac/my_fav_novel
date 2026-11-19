@@ -1,52 +1,93 @@
 "use client";
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useContext, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { useStage } from "@/stage/Stage";
+import { useCurtain } from "@/stage/Curtain";
+import { cn } from "@/lib/utils";
 
 /**
  * Номер 102 «Особняк Ужасов», первый заход (гл. 14–25).
- * Общее состояние страницы: звонил ли колокол, сколько судеб установлено, сведена ли партия вничью, чем кончилось.
- * Колокол — главный инструмент комнаты: его звон будит настоящие личности «слуг» и переписывает подписи на странице.
+ * Комната разбита на сцены-маршруты, поэтому прогресс живёт в хранилище и переживает переходы:
+ * звонил ли колокол, какие судьбы установлены, сведена ли партия вничью, совершён ли побег.
  */
-type S = {
-  art: (base: string) => string | null;
-  bell: boolean; // колокол найден и звонил
-  ring: () => void;
-  tolls: number; // сколько раз ударили (для анимаций)
-  fates: number; // установлено судеб (0–6)
-  setFates: (n: number) => void;
-  draw: boolean; // партия сведена вничью: понято, что надо лишать жертв
-  setDraw: (v: boolean) => void;
+type Store = {
+  tolls: number;
+  locked: string[];
+  draw: boolean;
   escaped: boolean;
+  ring: () => void;
+  lock: (ids: string[]) => void;
+  setDraw: (v: boolean) => void;
   setEscaped: (v: boolean) => void;
+  reset: () => void;
 };
-const Ctx = createContext<S | null>(null);
-export const useRoom = () => useContext(Ctx)!;
+const useStore = create<Store>()(
+  persist(
+    (set) => ({
+      tolls: 0,
+      locked: [],
+      draw: false,
+      escaped: false,
+      ring: () => set((s) => ({ tolls: s.tolls + 1 })),
+      lock: (ids) => set({ locked: ids }),
+      setDraw: (draw) => set({ draw }),
+      setEscaped: (escaped) => set({ escaped }),
+      reset: () => set({ tolls: 0, locked: [], draw: false, escaped: false }),
+    }),
+    { name: "room102", storage: createJSONStorage(() => sessionStorage), skipHydration: true },
+  ),
+);
 
-export function RoomProvider({ files, children }: { files: string[]; children: React.ReactNode }) {
-  const [tolls, setTolls] = useState(0);
-  const [fates, setFates] = useState(0);
-  const [draw, setDraw] = useState(false);
-  const [escaped, setEscaped] = useState(false);
-  const art = useCallback(
-    (base: string) => {
-      for (const ext of [".jpg", ".png", ".webp"]) if (files.includes(base + ext)) return `/art/102/${base}${ext}`;
-      return null;
-    },
-    [files],
-  );
-  const ring = useCallback(() => setTolls((t) => t + 1), []);
-  return (
-    <Ctx.Provider value={{ art, bell: tolls > 0, ring, tolls, fates, setFates, draw, setDraw, escaped, setEscaped }}>
-      {children}
-      <Hud />
-      {/* удар колокола: кольцо звука по всему экрану */}
-      {tolls > 0 && (
-        <motion.div key={tolls} className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center" initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ duration: 1.6 }}>
-          <motion.span className="h-40 w-40 rounded-full border-2 border-[#d9c27a]" initial={{ scale: 0.2 }} animate={{ scale: 14 }} transition={{ duration: 1.6, ease: "easeOut" }} />
-        </motion.div>
-      )}
-    </Ctx.Provider>
-  );
+/** Прогресс поднимается из sessionStorage уже в браузере. */
+export function useHydrateRoom() {
+  useEffect(() => {
+    void useStore.persist.rehydrate();
+  }, []);
+}
+
+const ArtCtx = createContext<string[]>([]);
+export const ArtProvider = ArtCtx.Provider;
+
+export function useRoom() {
+  const s = useStore();
+  const files = useContext(ArtCtx);
+  const art = (base: string) => {
+    for (const ext of [".jpg", ".png", ".webp"]) if (files.includes(base + ext)) return `/art/102/${base}${ext}`;
+    return null;
+  };
+  // колокол бьёт по всей сцене: волна и вспышка в шейдере
+  const ring = () => {
+    s.ring();
+    useStage.getState().shock();
+  };
+  return { ...s, art, ring, bell: s.tolls > 0, fates: s.locked.length };
+}
+
+// ───────────────────────── сцены ─────────────────────────
+
+export type SceneDef = { id: string; href: string; kicker: string; title: string; art: string; rain: number; dark: number };
+export const SCENES: SceneDef[] = [
+  { id: "arrival", href: "/archive/102", kicker: "ДЕНЬ 1 · ГЛ. 15", title: "Особняк Ужасов", art: "manor", rain: 0.85, dark: 0.3 },
+  { id: "house", href: "/archive/102/house", kicker: "ДОМ В РАЗРЕЗЕ · ГЛ. 16–24", title: "Четыре дня", art: "hall", rain: 0.3, dark: 0.62 },
+  { id: "fates", href: "/archive/102/fates", kicker: "КНИГА СУДЕБ · ГЛ. 16–25", title: "Кто, как и зачем", art: "library", rain: 0.12, dark: 0.55 },
+  { id: "note", href: "/archive/102/note", kicker: "ДЕНЬ 3 · ГЛ. 18, 20", title: "Четыре слова", art: "bell", rain: 0.65, dark: 0.55 },
+  { id: "cards", href: "/archive/102/cards", kicker: "НОЧЬ ТРЕТЬЕГО ДНЯ · ГЛ. 21", title: "Партия", art: "table", rain: 0.25, dark: 0.3 },
+  { id: "hill", href: "/archive/102/hill", kicker: "ДЕНЬ 4 · ГЛ. 22–23", title: "Священник", art: "hill", rain: 1, dark: 0.5 },
+  { id: "finale", href: "/archive/102/finale", kicker: "ФИНАЛ · ГЛ. 23–24", title: "Жертва вместо дьявола", art: "statue", rain: 0.7, dark: 0.6 },
+];
+
+/** Обёртка сцены: ставит свой арт и погоду на общий холст. */
+export function Scene({ id, children }: { id: string; children: React.ReactNode }) {
+  const { art } = useRoom();
+  const def = SCENES.find((s) => s.id === id)!;
+  const img = art(def.art);
+  useEffect(() => {
+    useStage.getState().set({ image: img, rain: def.rain, dark: def.dark });
+  }, [img, def.rain, def.dark]);
+  return <div className="relative z-10 min-h-screen pb-28">{children}</div>;
 }
 
 /** Подпись, которую переписывает колокол: роль → тот, кто под ней на самом деле. */
@@ -60,7 +101,7 @@ export function Mask({ role, truth, className }: { role: string; truth: string; 
 }
 
 /** Окно отеля: в этой комнате оно почти ничего не говорит. Плюс колокол в руке, когда он найден. */
-function Hud() {
+export function Hud() {
   const { bell, ring, fates, draw, escaped } = useRoom();
   return (
     <div className="fixed right-5 top-5 z-30 w-[290px] font-system text-[12px] text-[#7fd4ff]">
@@ -79,5 +120,40 @@ function Hud() {
         </button>
       )}
     </div>
+  );
+}
+
+/** Нижняя лента сцен: где ты, что пройдено, куда дальше. */
+export function SceneNav() {
+  const pathname = usePathname();
+  const go = useCurtain((s) => s.go);
+  const i = Math.max(0, SCENES.findIndex((s) => s.href === pathname));
+  const jump = (k: number) => {
+    const s = SCENES[k];
+    if (s && k !== i) go({ href: s.href, kicker: s.kicker, title: s.title });
+  };
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-center gap-4 bg-gradient-to-t from-[#050606] via-[#050606]/85 to-transparent px-6 pb-4 pt-10">
+      <button onClick={() => jump(i - 1)} disabled={i === 0} className="border border-white/25 px-3 py-1.5 font-system text-[12px] text-[#dfe6e2] transition hover:bg-white/10 disabled:opacity-20">
+        ←
+      </button>
+      <ol className="flex items-center gap-1.5">
+        {SCENES.map((s, k) => (
+          <li key={s.id}>
+            <button onClick={() => jump(k)} aria-label={s.title} aria-current={k === i} className="group relative flex h-8 items-center px-1.5">
+              <span className={cn("block h-[3px] transition-all duration-300", k === i ? "w-12 bg-[#c9b27a]" : k < i ? "w-6 bg-[#c9b27a]/45" : "w-6 bg-white/20 group-hover:bg-white/50")} />
+              <span className="pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap font-system text-[10px] tracking-wider text-[#dfe6e2] opacity-0 transition-opacity group-hover:opacity-100">{s.title}</span>
+            </button>
+          </li>
+        ))}
+      </ol>
+      <button
+        onClick={() => jump(i + 1)}
+        disabled={i === SCENES.length - 1}
+        className="border border-[#c9b27a] px-4 py-1.5 font-system text-[12px] tracking-widest text-[#e9dcb6] transition hover:bg-[#c9b27a]/15 disabled:opacity-20"
+      >
+        {SCENES[i + 1] ? `ДАЛЬШЕ · ${SCENES[i + 1].title.toUpperCase()}` : "КОНЕЦ"}
+      </button>
+    </nav>
   );
 }
