@@ -62,7 +62,7 @@ export function Holo({ children, className, style, foil = "foil", tilt = 16 }: {
   return (
     <motion.div
       className={className}
-      style={{ ...style, rotateX: still ? 0 : rotateX, rotateY: still ? 0 : rotateY, transformPerspective: 700, transformStyle: "preserve-3d" }}
+      style={{ ...style, rotateX, rotateY, transformPerspective: 700, transformStyle: "preserve-3d" }}
       onPointerMove={move}
       onPointerLeave={leave}
       onPointerCancel={leave}
@@ -86,7 +86,8 @@ export function Holo({ children, className, style, foil = "foil", tilt = 16 }: {
           mask: "linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)",
         }}
       />
-      {!still && SPARKS.map((p, i) => <Spark key={i} p={p} sx={sx} sy={sy} glow={glow} />)}
+      {/* разметка одинакова на сервере и в браузере: при «меньше движения» глушится только обработчик, звёзды остаются невидимыми */}
+      {SPARKS.map((p, i) => <Spark key={i} p={p} sx={sx} sy={sy} glow={glow} />)}
     </motion.div>
   );
 }
