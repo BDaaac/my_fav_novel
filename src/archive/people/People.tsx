@@ -48,9 +48,18 @@ function draft(m: Meta, c: Character): Guest {
   };
 }
 
-export function People({ art, guests }: { art: string[]; guests: Record<string, Guest> }) {
+type Floor = 1 | 2 | 3;
+
+export function People({ art, floors }: { art: Record<Floor, string[]>; floors: Record<Floor, Record<string, Guest>> }) {
   const [open, setOpen] = useState<string | null>(null);
-  const has = (id: string) => (art.includes(`${id}.jpg`) ? `/art/people/${id}.jpg` : null);
+  const [floor, setFloor] = useState<Floor>(1);
+  const guests = floors[floor];
+  const ready = ([1, 2, 3] as Floor[]).filter((f) => f === 1 || Object.keys(floors[f]).length > 0);
+  // портрет этажа; если его ещё нет, берётся ближайший снизу
+  const has = (id: string) => {
+    for (let f = floor; f >= 1; f--) if (art[f as Floor].includes(`${id}.jpg`)) return f === 1 ? `/art/people/${id}.jpg` : `/art/people/f${f}/${id}.jpg`;
+    return null;
+  };
   return (
     <main className="min-h-screen overflow-x-clip bg-[#0b0a09] pb-32 text-[#e9e1d0] [background-image:repeating-linear-gradient(90deg,transparent_0_118px,rgba(255,255,255,0.018)_118px_120px),radial-gradient(ellipse_at_50%_0%,#2a1410_0%,#0b0a09_60%)]">
       {/* стойка регистрации: лампа, латунная табличка, указатель этажа и ключи */}
@@ -66,7 +75,7 @@ export function People({ art, guests }: { art: string[]; guests: Record<string, 
         </div>
 
         <div className="relative mx-auto mt-8 flex w-fit flex-wrap items-end justify-center gap-x-12 gap-y-6">
-          <FloorDial />
+          <FloorDial floor={floor} ready={ready} onFloor={setFloor} />
           <KeyRack onOpen={setOpen} />
         </div>
       </header>
@@ -77,7 +86,7 @@ export function People({ art, guests }: { art: string[]; guests: Record<string, 
           <div className="h-3 rounded-full bg-gradient-to-b from-[#6a5a3a] to-[#2a2216] shadow-[0_6px_14px_rgba(0,0,0,0.6)]" />
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 md:gap-x-10">
             {row.map((m, i) => (
-              <Badge key={m.id} m={m} c={byId(m.id)} src={has(m.id)} i={r * 4 + i} paused={!!open} onOpen={() => setOpen(m.id)} />
+              <Badge key={m.id} m={m} c={byId(m.id)} src={has(m.id)} floor={floor} i={r * 4 + i} paused={!!open} onOpen={() => setOpen(m.id)} />
             ))}
           </div>
         </section>
@@ -86,37 +95,50 @@ export function People({ art, guests }: { art: string[]; guests: Record<string, 
       {open &&
         (() => {
           const m = GUESTS.find((g) => g.id === open)!;
-          return <GuestCard key={open} g={guests[open] ?? draft(m, byId(open))} src={has(open)} color={m.color} ink={m.ink} word={m.word} no={GUESTS.indexOf(m) + 1} names={Object.fromEntries(GUESTS.map((x) => [x.id, guests[x.id]?.name ?? shortName(byId(x.id))]))} faces={Object.fromEntries(GUESTS.map((x) => [x.id, has(x.id)]))} onOpen={setOpen} onClose={() => setOpen(null)} />;
+          return <GuestCard key={open + floor} floor={floor} g={guests[open] ?? draft(m, byId(open))} src={has(open)} color={m.color} ink={m.ink} word={m.word} no={GUESTS.indexOf(m) + 1} names={Object.fromEntries(GUESTS.map((x) => [x.id, guests[x.id]?.name ?? shortName(byId(x.id))]))} faces={Object.fromEntries(GUESTS.map((x) => [x.id, has(x.id)]))} onOpen={setOpen} onClose={() => setOpen(null)} />;
         })()}
     </main>
   );
 }
 
-/** Указатель лифта: стрелка стоит на первом этаже, остальные пока закрыты. */
-function FloorDial() {
+/** Указатель лифта: цифра этажа нажимается, стрелка переезжает; этаж без карточек закрыт. */
+function FloorDial({ floor, ready, onFloor }: { floor: Floor; ready: Floor[]; onFloor: (f: Floor) => void }) {
+  const angle = { 1: -60, 2: 0, 3: 60 } as const;
   return (
     <div className="text-center">
-      <svg viewBox="0 0 120 70" className="h-[70px] w-[120px]" aria-hidden>
+      <svg viewBox="0 0 120 70" className="h-[84px] w-[144px]" role="group" aria-label="Этаж">
         <path d="M10 62 A50 50 0 0 1 110 62" fill="none" stroke="#c9a227" strokeWidth="2" />
-        {[
-          { n: "1", a: -60, on: true },
-          { n: "2", a: 0, on: false },
-          { n: "3", a: 60, on: false },
-        ].map((f) => (
-          <g key={f.n} transform={`rotate(${f.a} 60 62)`} opacity={f.on ? 1 : 0.3}>
-            <line x1="60" y1="12" x2="60" y2="19" stroke="#c9a227" strokeWidth="2" />
-            <text x="60" y="32" textAnchor="middle" fontSize="13" fill="#e9e1d0" fontFamily="serif" transform={`rotate(${-f.a} 60 28)`}>
-              {f.n}
-            </text>
-          </g>
-        ))}
-        {/* стрелка стоит на первом этаже */}
-        <g style={{ transformBox: "view-box", transformOrigin: "60px 62px", transform: "rotate(-60deg)" }}>
-          <line x1="60" y1="62" x2="60" y2="20" stroke="#f3d98a" strokeWidth="2.5" strokeLinecap="round" />
+        {([1, 2, 3] as Floor[]).map((f) => {
+          const on = ready.includes(f);
+          return (
+            <g
+              key={f}
+              transform={`rotate(${angle[f]} 60 62)`}
+              opacity={on ? (f === floor ? 1 : 0.7) : 0.25}
+              className={on ? "cursor-pointer outline-none hover:opacity-100 focus-visible:opacity-100" : undefined}
+              role="button"
+              tabIndex={on ? 0 : -1}
+              aria-label={`${f}-й этаж`}
+              aria-pressed={f === floor}
+              aria-disabled={!on}
+              onClick={() => on && onFloor(f)}
+              onKeyDown={(e) => on && (e.key === "Enter" || e.key === " ") && onFloor(f)}
+            >
+              <line x1="60" y1="12" x2="60" y2="19" stroke="#c9a227" strokeWidth="2" />
+              {/* невидимая площадка, чтобы по цифре было легко попасть */}
+              <circle cx="60" cy="26" r="13" fill="transparent" />
+              <text x="60" y="32" textAnchor="middle" fontSize={f === floor ? 16 : 13} fontWeight={f === floor ? 700 : 400} fill={f === floor ? "#f3d98a" : "#e9e1d0"} fontFamily="serif" transform={`rotate(${-angle[f]} 60 28)`}>
+                {f}
+              </text>
+            </g>
+          );
+        })}
+        <g className="transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" style={{ transformBox: "view-box", transformOrigin: "60px 62px", transform: `rotate(${angle[floor]}deg)` }}>
+          <line x1="60" y1="62" x2="60" y2="38" stroke="#f3d98a" strokeWidth="2.5" strokeLinecap="round" />
         </g>
         <circle cx="60" cy="62" r="5" fill="#c9a227" />
       </svg>
-      <div className="mt-1 font-system text-[10px] tracking-[0.35em] text-[#e9e1d0]/60">1-Й ЭТАЖ</div>
+      <div className="mt-1 font-system text-[10px] tracking-[0.35em] text-[#e9e1d0]/60">{floor}-Й ЭТАЖ</div>
     </div>
   );
 }
@@ -149,7 +171,7 @@ function KeyRack({ onOpen }: { onOpen: (id: string) => void }) {
 }
 
 /** Пропуск на клипсе: маятник. Тянешь — раскачивается от скорости руки, отпускаешь — возвращается. */
-function Badge({ m, c, src, i, paused, onOpen }: { m: Meta; c: Character; src: string | null; i: number; paused: boolean; onOpen: () => void }) {
+function Badge({ m, c, src, floor, i, paused, onOpen }: { m: Meta; c: Character; src: string | null; floor: Floor; i: number; paused: boolean; onOpen: () => void }) {
   const x = useMotionValue(0);
   const v = useVelocity(x);
   const swing = useSpring(useTransform(v, [-1500, 1500], [28, -28]), { stiffness: 60, damping: 5, mass: 1.2 });
@@ -187,11 +209,11 @@ function Badge({ m, c, src, i, paused, onOpen }: { m: Meta; c: Character; src: s
       <div className="relative overflow-hidden rounded-md border border-black/60 shadow-[0_10px_18px_rgba(0,0,0,0.6)]" style={{ background: m.color }}>
         <div className="flex items-center justify-between bg-black/45 px-2.5 py-1">
           <span className="font-display text-[13px] font-semibold tracking-[0.25em] text-[#c9a227]">ПИОНЕР</span>
-          <span className="font-system text-[9px] tracking-widest opacity-70">ГОСТЬ · 1 ЭТ.</span>
+          <span className="font-system text-[9px] tracking-widest opacity-70">ГОСТЬ · {floor} ЭТ.</span>
         </div>
         <div className="relative aspect-[3/4] bg-black/40">
           {src ? (
-            <Image src={src} alt={shortName(c)} fill sizes="340px" unoptimized priority className="pointer-events-none object-cover" draggable={false} />
+            <Image key={src} src={src} alt={shortName(c)} fill sizes="340px" unoptimized priority className="pointer-events-none object-cover" draggable={false} />
           ) : (
             <div className="flex h-full items-center justify-center font-display text-7xl opacity-30">{shortName(c)[0]}</div>
           )}

@@ -6,36 +6,58 @@ import type { Guest } from "@/archive/people/GuestCard";
 export const metadata = { title: "Картотека · Гости отеля «Пионер»" };
 export const dynamic = "force-dynamic"; // карточки подхватываются из файлов без пересборки
 
-export default function ArchivePeople() {
-  let art: string[] = [];
+const arr = <T,>(v: unknown) => (Array.isArray(v) ? (v as T[]) : []);
+const ls = (dir: string) => {
   try {
-    art = fs.readdirSync(path.join(process.cwd(), "public/art/people"));
-  } catch {}
-  // тексты карточек: по файлу на гостя; битый или недописанный файл пропускаем
+    return fs.readdirSync(dir);
+  } catch {
+    return [];
+  }
+};
+
+/** Приводит карточку к полному виду: недописанные поля становятся пустыми. */
+function tidy(g: Guest): Guest {
+  return {
+    ...g,
+    registry: g.registry ?? [],
+    legacies: g.legacies ?? [],
+    items: g.items ?? [],
+    blessing: { ...g.blessing, text: g.blessing.text ?? [], limits: g.blessing.limits ?? [] },
+    back: g.back ? { rooms: arr(g.back.rooms), deaths: arr(g.back.deaths) } : undefined,
+    links: g.links ? arr<NonNullable<Guest["links"]>[number]>(g.links).filter((l) => l.to !== g.id) : undefined,
+    merits: g.merits ? arr(g.merits) : undefined,
+    feats: g.feats ? { best: g.feats.best?.title && g.feats.best.text ? g.feats.best : undefined, more: arr(g.feats.more) } : undefined,
+  };
+}
+
+/** Карточки одного этажа: по файлу на гостя; битый или недописанный файл пропускаем. */
+function readFloor(dir: string): Record<string, Guest> {
   const guests: Record<string, Guest> = {};
-  const dir = path.join(process.cwd(), "src/data/guests");
-  try {
-    for (const f of fs.readdirSync(dir)) {
+  for (const f of ls(dir)) {
+    if (!f.endsWith(".json")) continue;
+    try {
+      const g = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")) as Guest;
+      if (g?.id && Array.isArray(g.about) && g.blessing) guests[g.id] = tidy(g);
+    } catch {}
+  }
+  return guests;
+}
+
+export default function Catalogue() {
+  const data = path.join(process.cwd(), "src/data/guests");
+  const pics = path.join(process.cwd(), "public/art/people");
+
+  // первый этаж: основная карточка плюс оборот, пометки на полях и подвиги отдельными файлами
+  const first = readFloor(data);
+  const extra = (sub: string, apply: (g: Guest, d: Record<string, unknown>) => void) => {
+    for (const f of ls(path.join(data, sub))) {
       if (!f.endsWith(".json")) continue;
       try {
-        const g = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")) as Guest;
-        if (g?.id && Array.isArray(g.about) && g.blessing) guests[g.id] = { ...g, registry: g.registry ?? [], legacies: g.legacies ?? [], items: g.items ?? [], blessing: { ...g.blessing, text: g.blessing.text ?? [], limits: g.blessing.limits ?? [] } };
+        const d = JSON.parse(fs.readFileSync(path.join(data, sub, f), "utf8"));
+        if (first[d?.id]) apply(first[d.id], d);
       } catch {}
     }
-  } catch {}
-  // оборот, пометки на полях и вклад лежат отдельными файлами и подмешиваются к карточке
-  const extra = (sub: string, apply: (g: Guest, d: Record<string, unknown>) => void) => {
-    try {
-      for (const f of fs.readdirSync(path.join(dir, sub))) {
-        if (!f.endsWith(".json")) continue;
-        try {
-          const d = JSON.parse(fs.readFileSync(path.join(dir, sub, f), "utf8"));
-          if (guests[d?.id]) apply(guests[d.id], d);
-        } catch {}
-      }
-    } catch {}
   };
-  const arr = <T,>(v: unknown) => (Array.isArray(v) ? (v as T[]) : []);
   extra("back", (g, d) => (g.back = { rooms: arr(d.rooms), deaths: arr(d.deaths) }));
   extra("extra", (g, d) => {
     g.links = arr<NonNullable<Guest["links"]>[number]>(d.links).filter((l) => l.to !== g.id);
@@ -45,5 +67,9 @@ export default function ArchivePeople() {
     const best = d.best as NonNullable<Guest["feats"]>["best"];
     g.feats = { best: best?.title && best.text ? best : undefined, more: arr(d.more) };
   });
-  return <People art={art} guests={guests} />;
+
+  // второй и третий этажи: карточка этажа целиком в одном файле src/data/guests/f2|f3/<id>.json
+  const floors = { 1: first, 2: readFloor(path.join(data, "f2")), 3: readFloor(path.join(data, "f3")) };
+  const art = { 1: ls(pics), 2: ls(path.join(pics, "f2")), 3: ls(path.join(pics, "f3")) };
+  return <People art={art} floors={floors} />;
 }

@@ -47,7 +47,7 @@ const INK = "#2a2218";
 const PAPER =
   "radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.35), transparent 55%), repeating-linear-gradient(0deg, rgba(90,70,40,0.035) 0 1px, transparent 1px 3px), linear-gradient(#ebe1c9, #e2d6ba)";
 
-export function GuestCard({ g, src, color, ink, word, no, names, faces, onOpen, onClose }: { g: Guest; src: string | null; color: string; ink: string; word: string; no: number; names: Record<string, string>; faces: Record<string, string | null>; onOpen: (id: string) => void; onClose: () => void }) {
+export function GuestCard({ g, floor, src, color, ink, word, no, names, faces, onOpen, onClose }: { g: Guest; floor: number; src: string | null; color: string; ink: string; word: string; no: number; names: Record<string, string>; faces: Record<string, string | null>; onOpen: (id: string) => void; onClose: () => void }) {
   const [sheet, setSheet] = useState<SheetId>("about");
   const [back, setBack] = useState(false);
   useEffect(() => {
@@ -110,7 +110,7 @@ export function GuestCard({ g, src, color, ink, word, no, names, faces, onOpen, 
           {/* левая колонка: фото на скрепке и графы регистрации */}
           <aside className="relative border-b border-[#2a2218]/25 p-5 md:border-b-0 md:border-r">
             <div className="font-display text-[13px] font-semibold uppercase tracking-[0.32em]">Отель «Пионер»</div>
-            <div className="font-system text-[9px] uppercase tracking-[0.28em] opacity-60">карточка гостя · № 1-{String(no).padStart(2, "0")}</div>
+            <div className="font-system text-[9px] uppercase tracking-[0.28em] opacity-60">карточка гостя · № {floor}-{String(no).padStart(2, "0")}</div>
 
             <div className="relative mx-auto mt-5 w-[78%] rotate-[-1.5deg] bg-[#f6f0de] p-1.5 shadow-[0_6px_14px_rgba(40,30,10,0.35)]">
               {/* скрепка */}
@@ -124,7 +124,7 @@ export function GuestCard({ g, src, color, ink, word, no, names, faces, onOpen, 
             {/* штампы */}
             <div className="mt-5 flex flex-wrap items-center gap-2">
               <span className="rotate-[-5deg] border-2 px-2 py-0.5 font-system text-[10px] font-bold uppercase tracking-[0.2em]" style={{ borderColor: "#8f1d22", color: "#8f1d22" }}>
-                1-й этаж
+                {floor}-й этаж
               </span>
               <span className="rotate-[3deg] border px-2 py-0.5 font-system text-[10px] uppercase tracking-[0.2em] opacity-70">{word}</span>
             </div>
@@ -313,7 +313,7 @@ export function GuestCard({ g, src, color, ink, word, no, names, faces, onOpen, 
                         <div className="font-display text-[76px] font-semibold leading-[0.85] text-[#8f1d22]">{g.feats.best.room || "★"}</div>
                       </div>
                       <div>
-                        <div className="font-system text-[9px] uppercase tracking-[0.26em] opacity-55">главное дело на первом этаже</div>
+                        <div className="font-system text-[9px] uppercase tracking-[0.26em] opacity-55">главное дело на этаже</div>
                         <h3 className="mt-1 font-display text-[36px] font-semibold leading-[1.02]">{g.feats.best.title}</h3>
                         <p className="mt-3 max-w-[58ch] font-display text-[19px] leading-[1.5]">{g.feats.best.text}</p>
                       </div>
@@ -368,7 +368,7 @@ export function GuestCard({ g, src, color, ink, word, no, names, faces, onOpen, 
           <div className="relative mt-4 flex flex-wrap items-end justify-between gap-x-6">
             <div>
               <div className="font-display text-[30px] font-semibold leading-none">{g.name}</div>
-              <div className="mt-1.5 font-system text-[9px] uppercase tracking-[0.28em] opacity-60">отметки отеля · № 1-{String(no).padStart(2, "0")}</div>
+              <div className="mt-1.5 font-system text-[9px] uppercase tracking-[0.28em] opacity-60">отметки отеля · № {floor}-{String(no).padStart(2, "0")}</div>
             </div>
             <div className="flex items-end gap-6 font-system text-[9px] uppercase tracking-[0.26em]">
               <div className="text-right">
