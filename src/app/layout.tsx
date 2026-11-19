@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, JetBrains_Mono, Inter, Caveat, Rubik_Glitch, Rubik_Wet_Paint } from "next/font/google";
 import "./globals.css";
-import { SpoilerProvider } from "@/lib/spoiler";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -18,15 +17,15 @@ const wet = Rubik_Wet_Paint({ variable: "--ff-wet", subsets: ["latin", "cyrillic
 const inter = Inter({ variable: "--font-sans", subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
-  title: "Отель",
-  description: "Фан-сайт по новелле «Побег из отеля с привидениями»",
+  title: "Картотека",
+  description: "Картотека героев любимых новелл",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ru" className="dark">
       <body className={`${cormorant.variable} ${jetbrains.variable} ${inter.variable} ${caveat.variable} ${glitch.variable} ${wet.variable} grain antialiased`}>
-        <SpoilerProvider>{children}</SpoilerProvider>
+        {children}
       </body>
     </html>
   );
