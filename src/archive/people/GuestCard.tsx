@@ -96,8 +96,7 @@ export function GuestCard({ g, src, color, ink, word, no, onClose }: { g: Guest;
 
           {/* правая часть: открытый лист */}
           <section key={sheet} className="relative px-6 pb-8 pt-6 md:px-9">
-            <div className="flex items-start justify-between gap-4 border-b-2 border-[#2a2218] pb-2">
-              <h2 className="font-display text-[34px] font-semibold leading-none">{SHEETS.find((s) => s.id === sheet)!.label}</h2>
+            <div className="flex justify-end border-b-2 border-[#2a2218] pb-2">
               <button onClick={onClose} aria-label="Закрыть карточку" className="font-system text-[11px] uppercase tracking-widest opacity-60 hover:opacity-100">
                 убрать в картотеку ✕
               </button>
