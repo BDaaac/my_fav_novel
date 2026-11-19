@@ -56,6 +56,22 @@ export function GuestCard({ g, src, color, ink, word, no, names, onOpen, onClose
     return () => window.removeEventListener("keydown", k);
   }, [onClose, sheet]);
 
+  // оборот: заходы и смерти собираются по номерам, в порядке первого захода
+  const deaths = g.back?.deaths ?? [];
+  const cells: { room: string; title?: string; roles: string[]; visits: { result: string; note?: string }[]; deaths: string[] }[] = [];
+  const cell = (room: string) => {
+    let c = cells.find((x) => x.room === room);
+    if (!c) cells.push((c = { room, roles: [], visits: [], deaths: [] }));
+    return c;
+  };
+  for (const r of g.back?.rooms ?? []) {
+    const c = cell(r.room);
+    c.title ??= r.title;
+    if (r.role && !c.roles.includes(r.role)) c.roles.push(r.role);
+    c.visits.push({ result: r.result, note: r.note });
+  }
+  for (const d of deaths) cell(d.room).deaths.push(d.cause);
+
   const count: Record<SheetId, number | null> = { about: null, blessing: null, legacies: g.legacies.length, items: g.items.length };
 
   return (
@@ -288,53 +304,80 @@ export function GuestCard({ g, src, color, ink, word, no, names, onOpen, onClose
               убрать в картотеку ✕
             </button>
           </div>
-          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-x-6">
-            <div className="font-display text-[26px] font-semibold leading-none">{g.name}</div>
-            <div className="font-system text-[9px] uppercase tracking-[0.28em] opacity-60">отметки отеля · № 1-{String(no).padStart(2, "0")}</div>
+          {/* кровь стекает с линейки шапки: по потёку на каждую смерть */}
+          <div className="pointer-events-none relative h-0">
+            {deaths.map((_, i) => {
+              const r = rng(i * 7 + no * 13);
+              const w = 4 + r() * 5;
+              return <span key={i} className="absolute top-0 rounded-b-full bg-[#6b0b10] opacity-80 mix-blend-multiply" style={{ left: `${6 + ((i * 61 + no * 17) % 88)}%`, width: w, height: 16 + r() * 70 }} />;
+            })}
+          </div>
+          <svg width="0" height="0" className="absolute">
+            <filter id="blood-edge">
+              <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="3" seed={no} />
+              <feDisplacementMap in="SourceGraphic" scale="11" />
+            </filter>
+          </svg>
+
+          <div className="mt-3 flex flex-wrap items-end justify-between gap-x-6">
+            <div>
+              <div className="font-display text-[26px] font-semibold leading-none">{g.name}</div>
+              <div className="mt-1.5 font-system text-[9px] uppercase tracking-[0.28em] opacity-60">отметки отеля · № 1-{String(no).padStart(2, "0")}</div>
+            </div>
+            {deaths.length > 0 && (
+              <div className="flex items-end gap-3 text-[#7a0c12]">
+                <span className="pb-2 text-right font-system text-[9px] uppercase leading-relaxed tracking-[0.26em]">
+                  умирал
+                  <br />
+                  в номерах
+                </span>
+                <span className="font-wet text-[76px] leading-[0.8]">{deaths.length}</span>
+              </div>
+            )}
           </div>
 
-          {!g.back?.rooms.length && !g.back?.deaths.length ? (
+          {!cells.length ? (
             <div className="mt-10">
               <Empty text="Отметок на обороте пока нет." />
             </div>
           ) : (
-            <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_250px]">
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-                {g.back!.rooms.map((r, i) => (
-                  <div key={r.room + i} className="relative flex aspect-[4/3] items-center justify-center overflow-hidden border border-dashed border-[#2a2218]/30">
-                    <span className="absolute left-2 top-1 font-system text-[9px] uppercase tracking-[0.2em] opacity-45">номер</span>
-                    <span className="absolute bottom-0 right-2 font-display text-[54px] font-semibold leading-none opacity-[0.09]">{parseInt(r.room) || ""}</span>
-                    <div className="relative text-center" style={{ rotate: `${tilt(i)}deg`, color: STAMP[r.result] ?? INK }}>
-                      <div className="border-[3px] border-double px-2.5 py-1 opacity-85" style={{ borderColor: "currentColor" }}>
-                        <div className="font-system text-[9px] font-bold uppercase tracking-[0.2em]">{r.room}</div>
-                        <div className="font-system text-[15px] font-bold uppercase leading-none tracking-[0.18em]">{r.result}</div>
-                        {r.title && <div className="mx-auto mt-0.5 max-w-[150px] font-display text-[12px] leading-tight">{r.title}</div>}
-                      </div>
-                      {(r.role || r.note) && <div className="mt-1 font-hand text-[18px] leading-none text-[#1d2a4a]">{[r.role, r.note].filter(Boolean).join(" · ")}</div>}
-                    </div>
+            <div className="mt-6 gap-4 [column-fill:balance] sm:columns-2 xl:columns-3">
+              {cells.map((c, ci) => (
+                <div key={c.room} className="relative mb-4 break-inside-avoid overflow-hidden border border-dashed border-[#2a2218]/35 px-3 pb-3 pt-2">
+                  {/* чем больше смертей в номере, тем сильнее залита ячейка */}
+                  {c.deaths.length > 0 && <Blot seed={ci * 31 + no} size={110 + c.deaths.length * 45} className="absolute -bottom-8 -right-8 opacity-25" />}
+                  <span className="absolute -top-2 right-2 font-display text-[64px] font-semibold leading-none opacity-[0.08]">{parseInt(c.room) || ""}</span>
+                  <div className="relative">
+                    <div className="font-system text-[9px] uppercase tracking-[0.22em] opacity-55">номер {c.room}</div>
+                    {c.title && <div className="font-display text-[19px] font-semibold leading-tight">{c.title}</div>}
+                    {c.roles.length > 0 && <div className="font-hand text-[19px] leading-none text-[#1d2a4a]">{c.roles.join(", ")}</div>}
+
+                    {c.visits.length > 0 && (
+                      <ul className="mt-2.5 space-y-1.5">
+                        {c.visits.map((v, i) => (
+                          <li key={i} className="flex items-center gap-2.5">
+                            <span className="shrink-0 border-2 border-double px-1.5 py-0.5 font-system text-[10px] font-bold uppercase tracking-[0.16em] opacity-85" style={{ rotate: `${tilt(ci * 3 + i)}deg`, color: STAMP[v.result] ?? INK, borderColor: "currentColor" }}>
+                              {v.result}
+                            </span>
+                            {v.note && <span className="font-hand text-[17px] leading-[1.05] text-[#1d2a4a]">{v.note}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {c.deaths.length > 0 && (
+                      <ul className="mt-3 space-y-1 border-t border-[#7a0c12]/40 pt-2">
+                        {c.deaths.map((d, i) => (
+                          <li key={i} className="grid grid-cols-[26px_1fr] items-center gap-1.5">
+                            <Blot seed={ci * 17 + i * 5 + no} size={26} />
+                            <span className="font-hand text-[19px] leading-[1.05] text-[#7a0c12]">{d}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
-                ))}
-              </div>
-              <div>
-                <div className="flex items-center gap-3 font-system text-[9px] uppercase tracking-[0.26em] opacity-55">
-                  <span>Смерти · {g.back!.deaths.length}</span>
-                  <span className="h-px flex-1 bg-[#2a2218]/50" />
                 </div>
-                <ul className="mt-3 space-y-2.5">
-                  {g.back!.deaths.map((d, i) => (
-                    <li key={i} className="grid grid-cols-[22px_1fr] items-start gap-2">
-                      <span className="relative mt-1 block h-5 w-4" style={{ rotate: `${tilt(i + 3)}deg` }}>
-                        <span className="absolute left-1/2 top-0 h-5 w-[3px] -translate-x-1/2 bg-[#8f1d22]" />
-                        <span className="absolute left-0 top-[5px] h-[3px] w-4 bg-[#8f1d22]" />
-                      </span>
-                      <span className="font-hand text-[21px] leading-[1.1] text-[#1d2a4a]">
-                        <span className="font-system text-[11px] text-[#2a2218]/60">{d.room}</span> {d.cause}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                {!g.back!.deaths.length && <p className="mt-3 font-hand text-[21px] opacity-60">Ни одной.</p>}
-              </div>
+              ))}
             </div>
           )}
         </div>
@@ -342,6 +385,43 @@ export function GuestCard({ g, src, color, ink, word, no, names, onOpen, onClose
         </div>
       </motion.div>
     </div>
+  );
+}
+
+/** Детерминированный генератор: кляксы не должны прыгать между отрисовками. */
+function rng(seed: number) {
+  let t = (seed + 1) * 2654435761;
+  return () => {
+    t = Math.imul(t ^ (t >>> 15), 2246822507) ^ Math.imul(t ^ (t >>> 13), 3266489909);
+    return ((t ^= t >>> 16) >>> 0) / 4294967296;
+  };
+}
+
+/** Засохшая клякса крови: пятно с наплывами и брызгами, края рвёт общий фильтр оборота. */
+function Blot({ seed, size, className }: { seed: number; size: number; className?: string }) {
+  const r = rng(seed);
+  const lobes = Array.from({ length: 5 }, () => {
+    const a = r() * Math.PI * 2;
+    return { x: 50 + Math.cos(a) * 14, y: 50 + Math.sin(a) * 14, r: 9 + r() * 9 };
+  });
+  const drops = Array.from({ length: 7 }, () => {
+    const a = r() * Math.PI * 2;
+    const d = 32 + r() * 14;
+    return { x: 50 + Math.cos(a) * d, y: 50 + Math.sin(a) * d, r: 1.2 + r() * 2.8 };
+  });
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden className={cn("pointer-events-none mix-blend-multiply", className)}>
+      <g filter="url(#blood-edge)" fill="#6b0b10">
+        <circle cx="50" cy="50" r={18 + r() * 5} />
+        {lobes.map((c, i) => (
+          <circle key={i} cx={c.x} cy={c.y} r={c.r} />
+        ))}
+        {drops.map((c, i) => (
+          <circle key={"d" + i} cx={c.x} cy={c.y} r={c.r} />
+        ))}
+        <circle cx="50" cy="50" r="13" fill="#3d0508" opacity="0.45" />
+      </g>
+    </svg>
   );
 }
 
