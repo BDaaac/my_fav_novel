@@ -28,6 +28,11 @@ const GUESTS: Meta[] = [
   { id: "kim-sanghyun", age: "", word: "DILIGENTIA", color: "#3f4a2c", ink: "#d2e08c", from: 2 },
   { id: "miro", age: "", word: "CONSTANTIA", color: "#3a3352", ink: "#d7c8ff", from: 2 },
 ];
+// девиз следует за Благословением этажа: если оно сменилось, сменится и латынь на пропуске
+const LATIN: Record<string, string> = {
+  Мудрость: "SAPIENTIA", Храбрость: "FORTITUDO", Эмпатия: "EMPATHIA", Правосудие: "IUSTITIA", Удача: "FORTUNA",
+  Богатство: "DIVITIAE", Общение: "COMMUNIO", Тайна: "SUGGESTIO", Усердие: "DILIGENTIA", Неизменность: "CONSTANTIA",
+};
 const ALL = characters as unknown as Character[];
 const ITEMS = items as unknown as Item[];
 const byId = (id: string): Character | undefined => ALL.find((c) => c.id === id);
@@ -71,6 +76,7 @@ export function People({ art, floors }: { art: Record<Floor, string[]>; floors: 
   const nameOf = (id: string) => guests[id]?.name ?? floors[1][id]?.name ?? shortName(byId(id)) ?? id;
   const statOf = (id: string) => guests[id]?.blessing.name || byId(id)?.stat || "—";
   const ageOf = (m: Meta) => guests[m.id]?.registry.find((r) => r.label === "Возраст")?.value ?? years(m.age);
+  const onFloor = (m: Meta): Meta => ({ ...m, word: LATIN[guests[m.id]?.blessing.name ?? ""] ?? m.word });
   return (
     <main className="min-h-screen overflow-x-clip bg-[#0b0a09] pb-32 text-[#e9e1d0] [background-image:repeating-linear-gradient(90deg,transparent_0_118px,rgba(255,255,255,0.018)_118px_120px),radial-gradient(ellipse_at_50%_0%,#2a1410_0%,#0b0a09_60%)]">
       {/* стойка регистрации: лампа, латунная табличка, указатель этажа и ключи */}
@@ -97,7 +103,7 @@ export function People({ art, floors }: { art: Record<Floor, string[]>; floors: 
           <div className="h-3 rounded-full bg-gradient-to-b from-[#6a5a3a] to-[#2a2216] shadow-[0_6px_14px_rgba(0,0,0,0.6)]" />
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:gap-x-8 md:[grid-template-columns:repeat(var(--n),minmax(0,1fr))]" style={{ "--n": half } as React.CSSProperties}>
             {row.map((m, i) => (
-              <Badge key={m.id} m={m} name={nameOf(m.id)} stat={statOf(m.id)} age={ageOf(m)} src={has(m.id)} floor={floor} i={r * half + i} paused={!!open} onOpen={() => setOpen(m.id)} />
+              <Badge key={m.id} m={onFloor(m)} name={nameOf(m.id)} stat={statOf(m.id)} age={ageOf(m)} src={has(m.id)} floor={floor} i={r * half + i} paused={!!open} onOpen={() => setOpen(m.id)} />
             ))}
           </div>
         </section>
@@ -106,7 +112,7 @@ export function People({ art, floors }: { art: Record<Floor, string[]>; floors: 
       {open &&
         (() => {
           const m = GUESTS.find((g) => g.id === open)!;
-          return <GuestCard key={open + floor} floor={floor} g={guests[open] ?? draft(m, byId(open))} src={has(open)} color={m.color} ink={m.ink} word={m.word} no={GUESTS.indexOf(m) + 1} names={Object.fromEntries(GUESTS.map((x) => [x.id, nameOf(x.id)]))} faces={Object.fromEntries(GUESTS.map((x) => [x.id, has(x.id)]))} onOpen={setOpen} onClose={() => setOpen(null)} />;
+          return <GuestCard key={open + floor} floor={floor} g={guests[open] ?? draft(m, byId(open))} src={has(open)} color={m.color} ink={m.ink} word={onFloor(m).word} no={GUESTS.indexOf(m) + 1} names={Object.fromEntries(GUESTS.map((x) => [x.id, nameOf(x.id)]))} faces={Object.fromEntries(GUESTS.map((x) => [x.id, has(x.id)]))} onOpen={setOpen} onClose={() => setOpen(null)} />;
         })()}
     </main>
   );
