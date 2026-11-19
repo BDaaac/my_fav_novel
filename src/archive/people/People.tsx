@@ -75,7 +75,12 @@ export function People({ art, floors }: { art: Record<Floor, string[]>; floors: 
   const half = Math.ceil(list.length / 2);
   const nameOf = (id: string) => guests[id]?.name ?? floors[1][id]?.name ?? shortName(byId(id)) ?? id;
   const statOf = (id: string) => guests[id]?.blessing.name || byId(id)?.stat || "—";
-  const ageOf = (m: Meta) => guests[m.id]?.registry.find((r) => r.label === "Возраст")?.value ?? years(m.age);
+  // на пропуске только короткий возраст: «20 лет», «за сорок»; длинная запись остаётся в карточке, неизвестный — «???»
+  const ageOf = (m: Meta) => {
+    const raw = (guests[m.id]?.registry.find((r) => r.label === "Возраст")?.value ?? years(m.age)).trim();
+    if (raw && raw.length <= 12 && !raw.includes("?")) return raw;
+    return raw.match(/\d+ (год|года|лет)\b/)?.[0] ?? "???";
+  };
   const onFloor = (m: Meta): Meta => ({ ...m, word: LATIN[guests[m.id]?.blessing.name ?? ""] ?? m.word });
   return (
     <main className="min-h-screen overflow-x-clip bg-[#0b0a09] pb-32 text-[#e9e1d0] [background-image:repeating-linear-gradient(90deg,transparent_0_118px,rgba(255,255,255,0.018)_118px_120px),radial-gradient(ellipse_at_50%_0%,#2a1410_0%,#0b0a09_60%)]">
@@ -226,7 +231,7 @@ function Badge({ m, name, stat, age, src, floor, i, paused, onOpen }: { m: Meta;
       <div className="relative overflow-hidden rounded-md border border-black/60 shadow-[0_10px_18px_rgba(0,0,0,0.6)]" style={{ background: m.color }}>
         <div className="flex items-center justify-between bg-black/45 px-2.5 py-1">
           <span className="font-display text-[13px] font-semibold tracking-[0.25em] text-[#c9a227]">ПИОНЕР</span>
-          <span className="font-system text-[9px] tracking-widest opacity-70">ГОСТЬ · {floor} ЭТ.</span>
+          <span className="font-system text-[9px] tracking-widest opacity-70">{floor} ЭТАЖ</span>
         </div>
         <div className="relative aspect-[3/4] bg-black/40">
           {src ? (

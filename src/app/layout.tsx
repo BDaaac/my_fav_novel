@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, JetBrains_Mono, Inter, Caveat, Rubik_Glitch, Rubik_Wet_Paint } from "next/font/google";
+import { Cormorant_Garamond, JetBrains_Mono, Inter, Caveat, Rubik_Glitch, Rubik_Wet_Paint, Prata, Onest } from "next/font/google";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -15,6 +15,9 @@ const caveat = Caveat({ variable: "--font-caveat", subsets: ["latin", "cyrillic"
 const glitch = Rubik_Glitch({ variable: "--ff-glitch", subsets: ["latin", "cyrillic"], weight: "400" });
 const wet = Rubik_Wet_Paint({ variable: "--ff-wet", subsets: ["latin", "cyrillic"], weight: "400" });
 const inter = Inter({ variable: "--font-sans", subsets: ["latin", "cyrillic"] });
+// полка: книжный антиквенный заголовок и спокойный гротеск для подписей
+const prata = Prata({ variable: "--ff-book", subsets: ["latin", "cyrillic"], weight: "400" });
+const onest = Onest({ variable: "--ff-label", subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
   title: "Картотека",
@@ -24,7 +27,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ru" className="dark">
-      <body className={`${cormorant.variable} ${jetbrains.variable} ${inter.variable} ${caveat.variable} ${glitch.variable} ${wet.variable} grain antialiased`}>
+      <body className={`${cormorant.variable} ${jetbrains.variable} ${inter.variable} ${caveat.variable} ${glitch.variable} ${wet.variable} ${prata.variable} ${onest.variable} grain antialiased`}>
         {children}
       </body>
     </html>
