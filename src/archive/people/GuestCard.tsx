@@ -61,7 +61,8 @@ export function GuestCard({ g, src, color, ink, word, no, names, onOpen, onClose
   // оборот: заходы и смерти собираются по номерам, в порядке первого захода
   const deaths = g.back?.deaths ?? [];
   const cells: { room: string; title?: string; roles: string[]; visits: { result: string; note?: string }[]; deaths: string[] }[] = [];
-  const cell = (room: string) => {
+  const cell = (name: string) => {
+    const room = name.replace(/\s*Re$/i, "");
     let c = cells.find((x) => x.room === room);
     if (!c) cells.push((c = { room, roles: [], visits: [], deaths: [] }));
     return c;
@@ -309,7 +310,7 @@ export function GuestCard({ g, src, color, ink, word, no, names, onOpen, onClose
           {/* кровь натекла с верхнего края и стекает по листу; белый фон снимка гасится умножением */}
           {deaths.length > 0 && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src="/art/people/fx/drips.jpg" alt="" aria-hidden className="pointer-events-none absolute left-[30%] top-0 w-[min(400px,40%)] select-none mix-blend-multiply" style={{ opacity: Math.min(1, 0.55 + deaths.length * 0.06) }} />
+            <img src={`/art/people/fx/drips-${g.id}.jpg`} alt="" aria-hidden className="pointer-events-none absolute left-[46%] top-0 w-[min(470px,46%)] -translate-x-1/2 select-none mix-blend-multiply" />
           )}
 
           <div className="relative mt-4 flex flex-wrap items-end justify-between gap-x-6">
@@ -361,7 +362,6 @@ export function GuestCard({ g, src, color, ink, word, no, names, onOpen, onClose
                   )}
                   <div className="relative font-display font-semibold leading-none">
                     {parseInt(c.room) ? <span className="text-[38px]">{parseInt(c.room)}</span> : <span className="text-[19px]">{c.room}</span>}
-                    {/\bRe$/.test(c.room) && <span className="ml-1.5 align-top font-system text-[10px] font-normal uppercase tracking-[0.2em] opacity-60">повтор</span>}
                   </div>
                   <div className="relative">
                     {c.title && <div className="font-display text-[19px] font-semibold leading-tight">{c.title}</div>}
