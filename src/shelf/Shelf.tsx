@@ -137,17 +137,27 @@ function Exhibit({
           className="pointer-events-none absolute bottom-[14px] left-1/2"
           style={{ width: W, height: H, marginLeft: -W / 2, transformStyle: "preserve-3d" }}
           initial={false}
-          animate={{ x: open ? W / 2 : 0, y: open ? -6 : 0, rotateX: open ? 3 : 10, scale: open ? 1.04 : 1 }}
+          animate={{ x: open ? W / 2 : 0, y: open ? -6 : 0, rotateX: open ? 0 : 10, scale: open ? 1.04 : 1 }}
           transition={t}
           whileHover={open || still ? undefined : { y: -6, rotateX: 6 }}
         >
-          {/* блок страниц и задняя крышка */}
-          <div className="absolute inset-0" style={{ transform: `translateZ(${-T}px)`, background: book.spine.bg, borderRadius: 3 }} />
+          {/* Закрытая книга имеет толщину: задняя крышка и листы уходят вглубь.
+              Раскрытая лежит плашмя: всё в одной плоскости со створкой, иначе перспектива
+              разводит их края по высоте. */}
+          <motion.div
+            className="absolute inset-0"
+            style={{ background: book.spine.bg, borderRadius: "2px 4px 4px 2px" }}
+            initial={false}
+            animate={{ z: open ? -2 : -T }}
+            transition={t}
+          />
           {/* блок листов: чуть меньше крышек, как у настоящей книги — по краям видна кожа переплёта */}
-          <div
+          <motion.div
             className="absolute bottom-[5px] left-0 right-[5px] top-[5px]"
+            initial={false}
+            animate={{ z: open ? -1 : -T / 2 }}
+            transition={t}
             style={{
-              transform: `translateZ(${-T / 2}px)`,
               background:
                 "radial-gradient(ellipse at 70% 10%, rgba(255,255,255,0.35), transparent 60%), repeating-linear-gradient(0deg, rgba(110,85,45,0.035) 0 1px, transparent 1px 3px), linear-gradient(90deg,#e9dcbd,#efe4c8 18%,#ebdfc2)",
               borderRadius: "0 2px 2px 0",
@@ -158,16 +168,17 @@ function Exhibit({
             {/* тень у корешка: лист уходит в переплёт */}
             <div className="pointer-events-none absolute inset-y-0 left-0 w-[14%] bg-[linear-gradient(90deg,rgba(60,40,20,0.38),rgba(60,40,20,0.12)_45%,transparent)]" />
             <TitlePage book={book} open={open} still={still} compact={k < 0.8} />
-          </div>
-          {/* край страниц сбоку */}
+          </motion.div>
+          {/* край страниц сбоку: виден только у закрытой книги */}
           <div
-            className="absolute right-0 top-[4px]"
+            className="absolute right-0 top-[4px] transition-opacity duration-300"
             style={{
               width: T,
               height: H - 8,
               transformOrigin: "right center",
               transform: `rotateY(90deg) translateX(${T / 2}px)`,
               background: "repeating-linear-gradient(90deg,#e2d4b2 0 1px,#c4b38d 1px 2px)",
+              opacity: open ? 0 : 1,
             }}
           />
           {/* крышка: лицо — обложка, изнанка — фронтиспис */}
@@ -175,7 +186,7 @@ function Exhibit({
             className="absolute inset-0"
             style={{ transformStyle: "preserve-3d", transformOrigin: "left center" }}
             initial={false}
-            animate={{ rotateY: open ? -179 : 0 }}
+            animate={{ rotateY: open ? -180 : 0 }}
             transition={t}
           >
             <Cover book={book} />
