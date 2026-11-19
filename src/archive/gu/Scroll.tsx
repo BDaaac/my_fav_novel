@@ -4,6 +4,7 @@ import { animate, motion, useMotionValue, useSpring, useTransform, useVelocity }
 import type { Cultivator } from "@/data/gu/types";
 import { VOLUMES } from "@/data/gu/types";
 import { GuCard } from "./GuCard";
+import { Holo } from "../Holo";
 import { jadeOf, NUM_HAN, ROMAN, rankNo } from "./jade";
 
 /**
@@ -227,7 +228,8 @@ function Token({ h, src, i, paused, onOpen }: { h: Cultivator; src: string | nul
         </svg>
 
         {/* сам жетон: арка сверху, вырезанная рамка, отверстие под шнур */}
-        <div
+        <Holo
+          foil="pearl"
           className="relative overflow-hidden px-3 pb-3 pt-5 text-center"
           style={{
             borderRadius: "48% 48% 12px 12px / 20% 20% 12px 12px",
@@ -264,7 +266,7 @@ function Token({ h, src, i, paused, onOpen }: { h: Cultivator; src: string | nul
           </div>
           {/* блик полировки */}
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_38%,oklch(1_0_0/0.13)_48%,transparent_58%)]" />
-        </div>
+        </Holo>
 
         {/* кисть под жетоном */}
         <svg aria-hidden viewBox="0 0 20 46" className="mx-auto -mt-0.5 block h-[46px] w-5">

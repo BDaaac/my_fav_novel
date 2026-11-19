@@ -6,6 +6,7 @@ import characters from "@/data/characters.json";
 import items from "@/data/items.json";
 import type { Character, Item } from "@/data/types";
 import { GuestCard, type Guest } from "./GuestCard";
+import { Holo } from "../Holo";
 
 /**
  * Гости отеля «Пионер»: пропуска на клипсах. Каждый качается сам, его можно схватить и качнуть;
@@ -228,7 +229,7 @@ function Badge({ m, name, stat, age, src, floor, i, paused, onOpen }: { m: Meta;
       {/* ремешок и клипса */}
       <div className="absolute left-1/2 top-0 h-10 w-3 -translate-x-1/2 bg-gradient-to-b from-[#1b1712] to-[#3a3226]" />
       <div className="absolute left-1/2 top-8 h-4 w-9 -translate-x-1/2 rounded-sm bg-gradient-to-b from-[#9a8a6a] to-[#4a4030] shadow" />
-      <div className="relative overflow-hidden rounded-md border border-black/60 shadow-[0_10px_18px_rgba(0,0,0,0.6)]" style={{ background: m.color }}>
+      <Holo className="relative overflow-hidden rounded-md border border-black/60 shadow-[0_10px_18px_rgba(0,0,0,0.6)]" style={{ background: m.color }}>
         <div className="flex items-center justify-between bg-black/45 px-2.5 py-1">
           <span className="font-display text-[13px] font-semibold tracking-[0.25em] text-[#c9a227]">ПИОНЕР</span>
           <span className="font-system text-[9px] tracking-widest opacity-70">{floor} ЭТАЖ</span>
@@ -255,7 +256,7 @@ function Badge({ m, name, stat, age, src, floor, i, paused, onOpen }: { m: Meta;
             <span className="text-right">{age}</span>
           </div>
         </div>
-      </div>
+      </Holo>
       </div>
     </motion.div>
   );
