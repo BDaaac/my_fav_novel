@@ -31,7 +31,6 @@ export function Scroll({ vols, art }: { vols: Record<Vol, Record<string, Cultiva
   };
   const names = Object.fromEntries(heroes.map((h) => [h.id, h.name]));
   const faces = Object.fromEntries(heroes.map((h) => [h.id, face(h.id)]));
-  const seen = (id: string) => ready.filter((n) => vols[n]?.[id]);
   const V = VOLUMES.find((v) => v.n === vol)!;
 
   return (
@@ -83,12 +82,9 @@ export function Scroll({ vols, art }: { vols: Record<Vol, Record<string, Cultiva
         <GuCard
           key={open + vol}
           h={vols[vol][open]}
-          vol={vol}
           src={face(open)}
-          vols={seen(open)}
           names={names}
           faces={faces}
-          onVol={setVol}
           onOpen={(id) => vols[vol]?.[id] && setOpen(id)}
           onClose={() => setOpen(null)}
         />

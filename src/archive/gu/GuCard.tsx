@@ -1,15 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import type { Cultivator } from "@/data/gu/types";
-import { VOLUMES } from "@/data/gu/types";
 import { jadeOf, ROMAN, rankNo } from "./jade";
 
 /**
  * Карточка героя: свиток на рисовой бумаге между двумя деревянными валиками.
  * Разворачивается сверху вниз; закладки — листы: сведения, апертура, черви Гу, деяния.
- * Над свитком — тома, в которых герой есть: каждый том — своя карточка.
+ * Том выбирается на дощечках над свитком героев; карточка показывает героя в этом томе.
  */
 const SHEETS = [
   { id: "about", label: "Сведения" },
@@ -26,7 +26,7 @@ const PAPER =
 
 const FATE = { alive: "Жив", dead: "Погиб", unknown: "Неизвестно" } as const;
 
-export function GuCard({ h, vol, src, vols, names, faces, onVol, onOpen, onClose }: { h: Cultivator; vol: number; src: string | null; vols: number[]; names: Record<string, string>; faces: Record<string, string | null>; onVol: (n: number) => void; onOpen: (id: string) => void; onClose: () => void }) {
+export function GuCard({ h, src, names, faces, onOpen, onClose }: { h: Cultivator; src: string | null; names: Record<string, string>; faces: Record<string, string | null>; onOpen: (id: string) => void; onClose: () => void }) {
   const [sheet, setSheet] = useState<SheetId>("about");
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
@@ -42,26 +42,12 @@ export function GuCard({ h, vol, src, vols, names, faces, onVol, onOpen, onClose
   const r = rankNo(h.rank);
   const count: Record<SheetId, number | null> = { about: null, aperture: null, gu: h.gu.length, deeds: h.moments.length || null };
 
-  return (
+  // в body, а не внутри свитка: свиток — отдельный слой (isolate), и табличка «Зал музея» иначе лежала бы поверх карточки
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[oklch(0.12_0.012_205/0.96)] p-4 md:p-8" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="relative my-auto w-[min(1060px,100%)]">
-        {/* тома героя */}
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5">
-            {VOLUMES.map(({ n }) => {
-              const has = vols.includes(n);
-              return (
-                <button
-                  key={n}
-                  disabled={!has}
-                  onClick={() => onVol(n)}
-                  className={cn("rounded-[2px] px-2.5 py-1 font-book text-[11px] uppercase tracking-[0.2em] transition-colors", n === vol ? "bg-[oklch(0.72_0.1_80)] text-[oklch(0.18_0.02_60)]" : has ? "text-[oklch(0.85_0.04_85)] hover:bg-[oklch(0.72_0.1_80/0.2)]" : "text-[oklch(0.85_0.04_85/0.25)]")}
-                >
-                  Том {ROMAN[n]}
-                </button>
-              );
-            })}
-          </div>
+        {/* том уже выбран на дощечках над свитком — здесь только «свернуть» */}
+        <div className="mb-3 flex justify-end">
           <button onClick={onClose} aria-label="Закрыть карточку" className="font-book text-[11px] uppercase tracking-[0.25em] text-[oklch(0.85_0.04_85/0.6)] hover:text-[oklch(0.9_0.04_85)]">
             свернуть свиток ✕
           </button>
@@ -282,7 +268,8 @@ export function GuCard({ h, vol, src, vols, names, faces, onVol, onOpen, onClose
         {/* нижний валик */}
         <Roller />
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
