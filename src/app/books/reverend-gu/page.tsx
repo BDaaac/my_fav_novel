@@ -57,8 +57,21 @@ export default function GuArchive() {
   const art = Object.fromEntries(VOLUMES.map(({ n }) => [n, ls(path.join(pics, `v${n}`))]));
   return (
     <>
-      <Link href="/" className="fixed left-5 top-5 z-40 font-book text-[11px] uppercase tracking-[0.3em] text-[oklch(0.9_0.02_95/0.55)] transition-colors hover:text-[oklch(0.9_0.02_95)]">
-        ← В зал музея
+      {/* возврат в музей: маленькая лакированная табличка с киноварной печатью 归 — «вернуться» */}
+      <Link
+        href="/"
+        aria-label="Вернуться в зал музея"
+        className="group fixed left-4 top-4 z-40 flex items-center gap-2.5 rounded-[3px] py-1.5 pl-1.5 pr-3.5 opacity-80 transition-[opacity,transform] duration-300 ease-out hover:-translate-y-0.5 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none md:left-6 md:top-6"
+        style={{
+          background: "linear-gradient(oklch(0.2 0.02 40 / 0.92), oklch(0.13 0.015 40 / 0.92))",
+          boxShadow: "inset 0 0 0 1px oklch(0.72 0.1 80 / 0.6), 0 8px 18px oklch(0.06 0.01 200 / 0.6)",
+        }}
+      >
+        <span className="flex h-7 w-7 items-center justify-center rounded-[2px] bg-[oklch(0.5_0.17_28)] font-brush text-[17px] leading-none text-[oklch(0.95_0.02_80)] transition-transform duration-300 group-hover:rotate-[-6deg]">归</span>
+        <span className="leading-none">
+          <span className="block font-kurale text-[15px] text-[oklch(0.84_0.1_82)]">Зал музея</span>
+          <span className="mt-0.5 block font-book text-[8.5px] uppercase tracking-[0.3em] text-[oklch(0.78_0.09_80/0.6)]">вернуться</span>
+        </span>
       </Link>
       <Scroll vols={vols} art={art} />
     </>
