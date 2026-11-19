@@ -27,7 +27,6 @@ export type Book = {
   height?: number;
 };
 
-const GOLD = "#c9a24a";
 const EASE = [0.22, 1, 0.36, 1] as const;
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
@@ -61,7 +60,7 @@ export function Shelf({ books }: { books: Book[] }) {
       <Wall />
 
       <header className="relative z-10 flex flex-col items-center px-4 pt-10 text-center sm:pt-12">
-        <p className="flex items-center gap-3 text-[11px] uppercase tracking-[0.45em] text-[#c9a24a] sm:text-[12px]">
+        <p className="flex items-center gap-3 whitespace-nowrap text-[10px] uppercase tracking-[0.3em] text-[#c9a24a] sm:text-[12px] sm:tracking-[0.45em]">
           <span className="h-px w-8 bg-[#c9a24a]/60 sm:w-16" />
           Постоянная экспозиция
           <span className="h-px w-8 bg-[#c9a24a]/60 sm:w-16" />
@@ -75,7 +74,8 @@ export function Shelf({ books }: { books: Book[] }) {
       </header>
 
       <section aria-label="Экспонаты" className="relative z-10 mt-8 overflow-x-auto overflow-y-visible pb-6 [scrollbar-width:none] sm:mt-10 [&::-webkit-scrollbar]:hidden">
-        <div className="mx-auto flex w-max items-start gap-[clamp(40px,8vw,120px)] px-6">
+        {/* на телефоне экспонаты висят друг под другом, на широком экране — в ряд */}
+        <div className="mx-auto flex flex-col items-center gap-14 px-6 sm:w-max sm:flex-row sm:items-start sm:gap-[clamp(40px,8vw,120px)]">
           {books.map((b, i) => (
             <Exhibit
               key={b.slug}
@@ -137,21 +137,26 @@ function Exhibit({
           className="pointer-events-none absolute bottom-[14px] left-1/2"
           style={{ width: W, height: H, marginLeft: -W / 2, transformStyle: "preserve-3d" }}
           initial={false}
-          animate={{ x: open ? W / 2 : 0, y: open ? -6 : 0, rotateX: open ? 4 : 10, scale: open ? 1.04 : 1 }}
+          animate={{ x: open ? W / 2 : 0, y: open ? -6 : 0, rotateX: open ? 3 : 10, scale: open ? 1.04 : 1 }}
           transition={t}
           whileHover={open || still ? undefined : { y: -6, rotateX: 6 }}
         >
           {/* блок страниц и задняя крышка */}
           <div className="absolute inset-0" style={{ transform: `translateZ(${-T}px)`, background: book.spine.bg, borderRadius: 3 }} />
+          {/* блок листов: чуть меньше крышек, как у настоящей книги — по краям видна кожа переплёта */}
           <div
-            className="absolute inset-y-[4px] right-0 w-full"
+            className="absolute bottom-[5px] left-0 right-[5px] top-[5px]"
             style={{
               transform: `translateZ(${-T / 2}px)`,
-              background: "linear-gradient(90deg,#efe4c8,#e6d8b6)",
-              boxShadow: "inset 0 0 0 1px rgba(80,60,30,0.25)",
+              background:
+                "radial-gradient(ellipse at 70% 10%, rgba(255,255,255,0.35), transparent 60%), repeating-linear-gradient(0deg, rgba(110,85,45,0.035) 0 1px, transparent 1px 3px), linear-gradient(90deg,#e9dcbd,#efe4c8 18%,#ebdfc2)",
               borderRadius: "0 2px 2px 0",
+              // обрез листов справа и снизу: несколько тонких слоёв
+              boxShadow: "1px 1px 0 #d9caa6, 2px 2px 0 #cdbd96, 3px 3px 0 #d6c7a2, 4px 4px 0 #bfae86",
             }}
           >
+            {/* тень у корешка: лист уходит в переплёт */}
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-[14%] bg-[linear-gradient(90deg,rgba(60,40,20,0.38),rgba(60,40,20,0.12)_45%,transparent)]" />
             <TitlePage book={book} open={open} still={still} compact={k < 0.8} />
           </div>
           {/* край страниц сбоку */}
@@ -170,7 +175,7 @@ function Exhibit({
             className="absolute inset-0"
             style={{ transformStyle: "preserve-3d", transformOrigin: "left center" }}
             initial={false}
-            animate={{ rotateY: open ? -172 : 0 }}
+            animate={{ rotateY: open ? -179 : 0 }}
             transition={t}
           >
             <Cover book={book} />
@@ -229,16 +234,17 @@ function Frontispiece({ book }: { book: Book }) {
       style={{
         backfaceVisibility: "hidden",
         transform: "rotateY(180deg)",
-        background:
-          "radial-gradient(circle at 20% 30%, rgba(120,40,40,0.55), transparent 35%), radial-gradient(circle at 70% 60%, rgba(40,60,70,0.6), transparent 40%), radial-gradient(circle at 40% 85%, rgba(150,110,50,0.5), transparent 35%), #2a1814",
+        // кожа крышки, загнутая внутрь
+        background: `linear-gradient(135deg, rgba(255,230,190,0.08), transparent 40%), ${book.spine.bg}`,
       }}
     >
-      {/* иллюстрация во весь форзац, как вклеенная гравюра: без паспарту, тонкая золотая линия по краю */}
-      {book.scene && <Image src={book.scene} alt="" fill sizes="260px" className="object-cover" />}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,transparent_45%,rgba(0,0,0,0.55))]" />
-      <div className="pointer-events-none absolute inset-[8px] border" style={{ borderColor: `${book.spine.band}90` }} />
-      {/* ярлык с подписью внизу */}
-      <p className="absolute bottom-[7%] left-1/2 w-max max-w-[80%] -translate-x-1/2 bg-[#ece2c8]/90 px-2.5 py-1 text-center font-[family-name:var(--ff-press)] text-[10px] italic text-[#4d3a22] shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{book.short ?? book.title}</p>
+      {/* вклеенная иллюстрация: на ширину листа, по краям остаётся кромка кожи */}
+      <div className="absolute bottom-[5px] left-[5px] right-0 top-[5px] overflow-hidden rounded-l-[2px]">
+        {book.scene && <Image src={book.scene} alt="" fill sizes="260px" className="object-cover" />}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_45%_40%,transparent_50%,rgba(0,0,0,0.45))]" />
+        {/* тень у корешка справа: створка уходит в переплёт */}
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-[16%] bg-[linear-gradient(270deg,rgba(0,0,0,0.6),rgba(0,0,0,0.18)_45%,transparent)]" />
+      </div>
     </div>
   );
 }
