@@ -4,7 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
-/** Книга на полке. Новую новеллу добавляют одной записью в src/data/shelf.json. */
+/**
+ * Главная: музей любимых новелл.
+ * Каждая новелла — экспонат на стене зала: старинная книга на латунной подставке под лампой-подсветкой,
+ * под ней латунная табличка с номером. Клик снимает книгу «со стены»: она раскрывается — слева фронтиспис
+ * (картина книги), справа титульный лист с описанием и входом в картотеку. Второй клик или Esc — обратно.
+ * Анимируются только transform и opacity. Новую новеллу добавляют одной записью в src/data/shelf.json.
+ */
 export type Book = {
   slug: string;
   title: string;
@@ -15,258 +21,382 @@ export type Book = {
   facts: { label: string; value: string }[];
   href: string;
   cover: string | null;
+  /** картина книги, 16:9 — во фронтисписе */
+  scene?: string | null;
   spine: { bg: string; band: string; ink: string };
   height?: number;
 };
 
-const PER_SHELF = 12;
-const BOOK = "var(--ff-book), serif";
-const LABEL = "var(--ff-label), sans-serif";
-// мягкое торможение без отскока
+const GOLD = "#c9a24a";
 const EASE = [0.22, 1, 0.36, 1] as const;
-
-const plural = (n: number, one: string, few: string, many: string) =>
-  n % 10 === 1 && n % 100 !== 11 ? one : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? few : many;
-// толщина корешка растёт с числом глав, но в разумных пределах
-const thickness = (b: Book) => Math.round(Math.min(84, Math.max(44, b.chapters / 16)));
+const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
 export function Shelf({ books }: { books: Book[] }) {
-  const [open, setOpen] = useState<string | null>(null);
-  const still = useReducedMotion() ?? false;
-  const book = books.find((b) => b.slug === open);
+  const [sel, setSel] = useState<number | null>(null);
+  const [k, setK] = useState(1);
+  const [mounted, setMounted] = useState(false);
+  const reduce = useReducedMotion();
+  const still = mounted && !!reduce;
 
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(null);
-    window.addEventListener("keydown", onKey);
-    const overflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = overflow;
+    setMounted(true);
+    const fit = () => {
+      const byW = window.innerWidth < 640 ? 0.68 : window.innerWidth < 1024 ? 0.85 : 1;
+      const byH = Math.max(0.6, (window.innerHeight - 330) / 430);
+      setK(Math.min(byW, byH));
     };
-  }, [open]);
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
 
-  const rows = Array.from({ length: Math.max(1, Math.ceil(books.length / PER_SHELF)) }, (_, i) => books.slice(i * PER_SHELF, (i + 1) * PER_SHELF));
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => e.key === "Escape" && setSel(null);
+    window.addEventListener("keydown", on);
+    return () => window.removeEventListener("keydown", on);
+  }, []);
 
   return (
-    <main
-      className="min-h-screen overflow-x-clip pb-28 text-[oklch(0.9_0.012_80)]"
-      style={{
-        background:
-          "radial-gradient(ellipse 70% 55% at 50% -8%, oklch(0.34 0.03 70 / 0.55), transparent 70%), oklch(0.185 0.006 60)",
-      }}
-    >
-      <header className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-6 px-8 pt-14">
-        <div className="max-w-xl">
-          <p className="text-[11px] uppercase tracking-[0.38em] text-[oklch(0.68_0.02_75)]" style={{ fontFamily: LABEL }}>
-            Библиотека
-          </p>
-          <h1 className="mt-3 text-5xl leading-[1.05] md:text-6xl" style={{ fontFamily: BOOK }}>
-            Книжная полка
-          </h1>
-          <p className="mt-5 text-[15px] leading-relaxed text-[oklch(0.75_0.015_75)]" style={{ fontFamily: LABEL }}>
-            Архивы героев любимых новелл. Вытащите книгу с полки, чтобы открыть её картотеку.
-          </p>
-        </div>
-        <p className="text-[13px] text-[oklch(0.6_0.015_75)]" style={{ fontFamily: LABEL }}>
-          {books.length} {plural(books.length, "книга", "книги", "книг")} на полке
+    <main className="relative min-h-svh overflow-hidden text-[#eadfc6]" style={{ background: "#160d0b" }}>
+      <Wall />
+
+      <header className="relative z-10 flex flex-col items-center px-4 pt-10 text-center sm:pt-12">
+        <p className="flex items-center gap-3 text-[11px] uppercase tracking-[0.45em] text-[#c9a24a] sm:text-[12px]">
+          <span className="h-px w-8 bg-[#c9a24a]/60 sm:w-16" />
+          Постоянная экспозиция
+          <span className="h-px w-8 bg-[#c9a24a]/60 sm:w-16" />
+        </p>
+        <h1 className="mt-4 font-[family-name:var(--ff-press)] text-[clamp(32px,5.6vw,60px)] leading-none text-[#f0e3c3]">
+          Музей любимых новелл
+        </h1>
+        <p className="mt-3 font-[family-name:var(--ff-press)] text-[15px] italic text-[#b9a77f] sm:text-[17px]">
+          Зал первый · архивы героев
         </p>
       </header>
 
-      {rows.map((row, r) => (
-        <section key={r} className="mx-auto mt-12 max-w-6xl px-8" aria-label={rows.length > 1 ? `Полка ${r + 1}` : "Полка"}>
-          {/* задняя стенка ниши: книги стоят в глубине, свет падает сверху */}
-          <div
-            className="relative flex min-h-[420px] items-end gap-[3px] rounded-t-[2px] px-6 pt-10"
-            style={{
-              background: "linear-gradient(180deg, oklch(0.13 0.006 60) 0%, oklch(0.16 0.007 60) 100%)",
-              boxShadow: "inset 0 24px 40px -12px oklch(0.05 0 0 / 0.8), inset 0 -2px 0 oklch(0.1 0 0)",
-            }}
-          >
-            {row.map((b) =>
-              open === b.slug ? (
-                // книгу вытащили: на полке остаётся щель
-                <div key={b.slug} style={{ width: thickness(b), height: b.height ?? 360 }} aria-hidden />
-              ) : (
-                <Spine key={b.slug} b={b} still={still} onOpen={() => setOpen(b.slug)} />
-              ),
-            )}
-            <Bookend />
-          </div>
-          <Plank />
-        </section>
-      ))}
+      <section aria-label="Экспонаты" className="relative z-10 mt-8 overflow-x-auto overflow-y-visible pb-6 [scrollbar-width:none] sm:mt-10 [&::-webkit-scrollbar]:hidden">
+        <div className="mx-auto flex w-max items-start gap-[clamp(40px,8vw,120px)] px-6">
+          {books.map((b, i) => (
+            <Exhibit
+              key={b.slug}
+              book={b}
+              n={ROMAN[i] ?? String(i + 1)}
+              open={sel === i}
+              dimmed={sel !== null && sel !== i}
+              onToggle={() => setSel(sel === i ? null : i)}
+              k={k}
+              still={still}
+            />
+          ))}
+        </div>
+      </section>
 
-      <AnimatePresence>{book && <Opened key={book.slug} b={book} still={still} onClose={() => setOpen(null)} />}</AnimatePresence>
+      <Rope />
     </main>
   );
 }
 
-function Spine({ b, still, onOpen }: { b: Book; still: boolean; onOpen: () => void }) {
-  const w = thickness(b);
-  const h = b.height ?? 360;
-  const { bg, band, ink } = b.spine;
-  return (
-    <motion.button
-      type="button"
-      layoutId={`book-${b.slug}`}
-      onClick={onOpen}
-      aria-label={`${b.title}: открыть`}
-      whileHover={still ? undefined : { y: -14 }}
-      whileFocus={still ? undefined : { y: -14 }}
-      transition={{ duration: 0.35, ease: EASE }}
-      className="group relative shrink-0 cursor-pointer rounded-[3px] outline-none focus-visible:ring-2 focus-visible:ring-[oklch(0.85_0.06_80)] focus-visible:ring-offset-4 focus-visible:ring-offset-[oklch(0.15_0.006_60)]"
-      style={{
-        width: w,
-        height: h,
-        // скруглённый корешок: тень по краям, блик чуть левее середины
-        background: `linear-gradient(90deg, color-mix(in oklch, ${bg} 55%, black) 0%, ${bg} 14%, color-mix(in oklch, ${bg} 82%, white) 42%, ${bg} 70%, color-mix(in oklch, ${bg} 60%, black) 100%)`,
-        boxShadow: "6px 0 14px -6px oklch(0.05 0 0 / 0.8), 0 2px 0 oklch(0.05 0 0 / 0.6)",
-      }}
-    >
-      {[22, 30].map((t) => (
-        <span key={`t${t}`} className="absolute inset-x-0 h-px" style={{ top: t, background: band, opacity: 0.85 }} />
-      ))}
-      {[22, 30].map((t) => (
-        <span key={`b${t}`} className="absolute inset-x-0 h-px" style={{ bottom: t, background: band, opacity: 0.85 }} />
-      ))}
-      {/* заголовок на корешке читается снизу вверх, как на русских книгах */}
-      <span
-        className="absolute inset-x-0 top-12 bottom-12 flex items-center justify-center overflow-hidden text-[15px] leading-none tracking-[0.06em]"
-        style={{ color: ink, fontFamily: BOOK, writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-      >
-        {b.short ?? b.title}
-      </span>
-      <span
-        className="absolute inset-x-0 bottom-[38px] text-center text-[9px] tracking-[0.12em]"
-        style={{ color: band, fontFamily: LABEL }}
-        aria-hidden
-      >
-        {b.chapters}
-      </span>
-    </motion.button>
-  );
-}
+/** экспонат: лампа, книга на подставке, консоль и табличка */
+function Exhibit({
+  book,
+  n,
+  open,
+  dimmed,
+  onToggle,
+  k,
+  still,
+}: {
+  book: Book;
+  n: string;
+  open: boolean;
+  dimmed: boolean;
+  onToggle: () => void;
+  k: number;
+  still: boolean;
+}) {
+  const W = 236 * k;
+  const H = 330 * k;
+  const T = 26 * k; // толщина блока
+  const t = { duration: still ? 0 : 0.9, ease: EASE };
 
-function Opened({ b, still, onClose }: { b: Book; still: boolean; onClose: () => void }) {
-  const { bg, band, ink } = b.spine;
-  const fade = still ? { duration: 0 } : { duration: 0.45, ease: EASE };
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex justify-center overflow-y-auto overscroll-contain px-6 py-10"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={fade}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={`title-${b.slug}`}
+      className="relative flex flex-col items-center"
+      style={{ width: Math.max(2 * W + 40, 320) }}
+      initial={false}
+      animate={{ opacity: dimmed ? 0.35 : 1 }}
+      transition={{ duration: still ? 0 : 0.5 }}
     >
-      <button type="button" aria-label="Вернуть книгу на полку" onClick={onClose} className="fixed inset-0 cursor-default bg-[oklch(0.08_0.004_60/0.86)]" />
+      <Lamp lit={open} w={W} still={still} />
 
-      {/* my-auto центрирует, пока помещается, и даёт прокрутку, когда окно ниже книги */}
-      <div className="relative my-auto grid w-full max-w-4xl items-center gap-10 md:grid-cols-[minmax(0,320px)_1fr]">
+      {/* книга */}
+      <div className="relative" style={{ width: 2 * W, height: H + 24, perspective: 1800 }}>
         <motion.div
-          layoutId={`book-${b.slug}`}
-          transition={still ? { duration: 0 } : { duration: 0.6, ease: EASE }}
-          className="relative mx-auto aspect-[2/3] w-full max-w-[min(320px,60vw)] overflow-hidden rounded-[4px]"
-          style={{ background: bg, boxShadow: "0 30px 70px -20px oklch(0.02 0 0 / 0.9), inset 4px 0 0 color-mix(in oklch, " + bg + " 60%, black)" }}
+          className="absolute bottom-[14px] left-1/2"
+          style={{ width: W, height: H, marginLeft: -W / 2, transformStyle: "preserve-3d" }}
+          initial={false}
+          animate={{ x: open ? W / 2 : 0, y: open ? -6 : 0, rotateX: open ? 4 : 10, scale: open ? 1.04 : 1 }}
+          transition={t}
+          whileHover={open || still ? undefined : { y: -6, rotateX: 6 }}
         >
-          {b.cover && (
-            <motion.div className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ ...fade, delay: still ? 0 : 0.25 }}>
-              <Image src={b.cover} alt="" fill sizes="340px" className="object-cover" priority />
-            </motion.div>
-          )}
-          <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-[oklch(0.08_0.01_20/0.85)] to-transparent" />
-          <motion.p
-            className="absolute inset-x-6 top-7 text-[26px] leading-[1.1]"
-            style={{ color: ink, fontFamily: BOOK }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ ...fade, delay: still ? 0 : 0.3 }}
+          {/* блок страниц и задняя крышка */}
+          <div className="absolute inset-0" style={{ transform: `translateZ(${-T}px)`, background: book.spine.bg, borderRadius: 3 }} />
+          <div
+            className="absolute inset-y-[4px] right-0 w-full"
+            style={{
+              transform: `translateZ(${-T / 2}px)`,
+              background: "linear-gradient(90deg,#efe4c8,#e6d8b6)",
+              boxShadow: "inset 0 0 0 1px rgba(80,60,30,0.25)",
+              borderRadius: "0 2px 2px 0",
+            }}
           >
-            {b.title}
-          </motion.p>
-          <span className="absolute inset-x-6 top-[22px] h-px" style={{ background: band, opacity: 0.6 }} />
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: still ? 0 : 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0 }}
-          transition={{ ...fade, delay: still ? 0 : 0.2 }}
-          className="relative"
-        >
-          <p className="text-[11px] uppercase tracking-[0.38em] text-[oklch(0.68_0.02_75)]" style={{ fontFamily: LABEL }}>
-            Книга
-          </p>
-          <h2 id={`title-${b.slug}`} className="mt-3 text-4xl leading-[1.1]" style={{ fontFamily: BOOK }}>
-            {b.title}
-          </h2>
-          <p className="mt-5 max-w-[56ch] text-[15px] leading-relaxed text-[oklch(0.78_0.015_75)]" style={{ fontFamily: LABEL }}>
-            {b.blurb}
-          </p>
-
-          <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-4" style={{ fontFamily: LABEL }}>
-            {b.facts.map((f) => (
-              <div key={f.label}>
-                <dt className="text-[11px] uppercase tracking-[0.2em] text-[oklch(0.6_0.015_75)]">{f.label}</dt>
-                <dd className="mt-1 text-2xl" style={{ fontFamily: BOOK }}>
-                  {f.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
-
-          <div className="mt-10 flex flex-wrap items-center gap-6" style={{ fontFamily: LABEL }}>
-            <Link
-              href={b.href}
-              className="inline-flex items-center gap-3 rounded-[3px] px-6 py-3 text-[14px] tracking-[0.04em] transition-[filter] hover:brightness-125 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[oklch(0.85_0.06_80)]"
-              style={{ background: bg, color: ink, boxShadow: `inset 0 0 0 1px ${band}` }}
-            >
-              {b.archive}
-              <span aria-hidden>→</span>
-            </Link>
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-[13px] text-[oklch(0.65_0.015_75)] underline-offset-4 transition-colors hover:text-[oklch(0.9_0.012_80)] hover:underline focus-visible:text-[oklch(0.9_0.012_80)] focus-visible:underline focus-visible:outline-none"
-            >
-              Вернуть на полку
-            </button>
+            <TitlePage book={book} open={open} still={still} compact={k < 0.8} />
           </div>
+          {/* край страниц сбоку */}
+          <div
+            className="absolute right-0 top-[4px]"
+            style={{
+              width: T,
+              height: H - 8,
+              transformOrigin: "right center",
+              transform: `rotateY(90deg) translateX(${T / 2}px)`,
+              background: "repeating-linear-gradient(90deg,#e2d4b2 0 1px,#c4b38d 1px 2px)",
+            }}
+          />
+          {/* крышка: лицо — обложка, изнанка — фронтиспис */}
+          <motion.div
+            className="absolute inset-0"
+            style={{ transformStyle: "preserve-3d", transformOrigin: "left center" }}
+            initial={false}
+            animate={{ rotateY: open ? -172 : 0 }}
+            transition={t}
+          >
+            <Cover book={book} />
+            <Frontispiece book={book} />
+          </motion.div>
         </motion.div>
+
+        {/* кнопка поверх книги: открыть / вернуть на место */}
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-pressed={open}
+          aria-label={open ? `${book.title}: закрыть` : `${book.title}: открыть`}
+          className="absolute bottom-[14px] cursor-pointer focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#c9a24a]"
+          style={open ? { left: 0, width: W, height: H } : { left: W / 2, width: W, height: H }}
+        />
+
+        <Cradle w={W} />
       </div>
+
+      <Console w={W} />
+      <Plaque n={n} book={book} />
     </motion.div>
   );
 }
 
-/** Металлический упор, чтобы книги не падали. */
-function Bookend() {
+/** обложка: картина в золотой рамке-тиснении, корешок с бинтами слева */
+function Cover({ book }: { book: Book }) {
   return (
-    <div className="relative ml-1 h-[150px] w-[12px] shrink-0" aria-hidden>
-      <div
-        className="absolute inset-0 rounded-t-[2px]"
-        style={{ background: "linear-gradient(90deg, oklch(0.32 0.004 60), oklch(0.5 0.006 60) 45%, oklch(0.28 0.004 60))" }}
-      />
-      <div className="absolute bottom-0 left-0 h-[6px] w-[46px] rounded-r-[2px]" style={{ background: "oklch(0.36 0.005 60)" }} />
+    <div className="absolute inset-0 overflow-hidden rounded-r-[4px] rounded-l-[2px] shadow-[0_24px_50px_rgba(0,0,0,0.6)]" style={{ backfaceVisibility: "hidden", background: book.spine.bg }}>
+      {book.cover ? (
+        <Image src={book.cover} alt="" fill sizes="260px" className="object-cover" priority />
+      ) : (
+        <div className="flex h-full items-center justify-center p-6 text-center font-[family-name:var(--ff-press)] text-2xl" style={{ color: book.spine.ink }}>
+          {book.title}
+        </div>
+      )}
+      <div className="pointer-events-none absolute inset-[8px] border" style={{ borderColor: `${book.spine.band}b0` }} />
+      <div className="pointer-events-none absolute inset-[12px] border" style={{ borderColor: `${book.spine.band}50` }} />
+      {/* шарнир и бинты корешка */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-[18px]" style={{ background: `linear-gradient(90deg, ${book.spine.bg}, rgba(0,0,0,0.55) 70%, rgba(255,236,200,0.12))` }} />
+      {[0.12, 0.88].map((y) => (
+        <div key={y} className="pointer-events-none absolute left-0 h-[5px] w-[18px]" style={{ top: `${y * 100}%`, background: book.spine.band, opacity: 0.8 }} />
+      ))}
+      {/* потёртость и блик лампы */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,226,170,0.08),transparent_55%),radial-gradient(ellipse_at_50%_120%,rgba(0,0,0,0.45),transparent_60%)]" />
     </div>
   );
 }
 
-/** Дубовая доска полки с передней кромкой и тенью под ней. */
-function Plank() {
+/** изнанка крышки: форзац под мрамор и фронтиспис — картина книги под папиросной бумагой */
+function Frontispiece({ book }: { book: Book }) {
   return (
-    <div className="relative" aria-hidden>
-      <div className="h-[10px]" style={{ background: "linear-gradient(180deg, oklch(0.52 0.06 62), oklch(0.44 0.055 58))" }} />
+    <div
+      className="absolute inset-0 overflow-hidden rounded-l-[4px]"
+      style={{
+        backfaceVisibility: "hidden",
+        transform: "rotateY(180deg)",
+        background:
+          "radial-gradient(circle at 20% 30%, rgba(120,40,40,0.55), transparent 35%), radial-gradient(circle at 70% 60%, rgba(40,60,70,0.6), transparent 40%), radial-gradient(circle at 40% 85%, rgba(150,110,50,0.5), transparent 35%), #2a1814",
+      }}
+    >
+      <div className="absolute inset-[10%] flex flex-col bg-[#ece2c8] p-[7%] shadow-[0_2px_10px_rgba(0,0,0,0.45)]">
+        <div className="relative flex-1 overflow-hidden border border-[#8a7046]/50">
+          {book.scene && <Image src={book.scene} alt="" fill sizes="220px" className="object-cover sepia-[0.25]" />}
+        </div>
+        <p className="mt-[6%] text-center font-[family-name:var(--ff-press)] text-[10px] italic text-[#6b5432]">{book.short ?? book.title}</p>
+      </div>
+    </div>
+  );
+}
+
+/** титульный лист: проступает, когда крышка открыта */
+function TitlePage({ book, open, still, compact }: { book: Book; open: boolean; still: boolean; compact: boolean }) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="absolute inset-0 flex flex-col items-center px-[9%] py-[8%] text-center text-[#3b2a18]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { delay: still ? 0 : 0.45, duration: still ? 0 : 0.5 } }}
+          exit={{ opacity: 0, transition: { duration: still ? 0 : 0.15 } }}
+        >
+          <span className="text-[9px] uppercase tracking-[0.35em] text-[#8a6a36]">Новелла</span>
+          <h2 className="mt-2 font-[family-name:var(--ff-press)] text-[clamp(15px,1.7vw,20px)] font-bold leading-[1.15]">{book.title}</h2>
+          <span className="my-2 flex items-center gap-2 text-[#8a6a36]">
+            <span className="h-px w-6 bg-current" />
+            <span className="size-[5px] rotate-45 border border-current" />
+            <span className="h-px w-6 bg-current" />
+          </span>
+          <p className={`font-[family-name:var(--ff-press)] text-[clamp(10px,1vw,12px)] italic leading-[1.5] text-[#4d3a22] ${compact ? "line-clamp-5" : ""}`}>{book.blurb}</p>
+          {/* на телефоне страница мала: факты остаются на табличке под книгой */}
+          <dl className={`${compact ? "hidden" : ""} mb-3 mt-auto w-full space-y-[3px] text-[clamp(9px,0.9vw,11px)]`}>
+            {book.facts.map((f) => (
+              <div key={f.label} className="flex items-baseline gap-1">
+                <dt className="text-[#6b5432]">{f.label}</dt>
+                <span aria-hidden className="mb-[3px] flex-1 border-b border-dotted border-[#8a6a36]/50" />
+                <dd className="font-[family-name:var(--ff-press)] font-bold">{f.value}</dd>
+              </div>
+            ))}
+          </dl>
+          <Link
+            href={book.href}
+            className="relative z-10 mt-auto border border-[#8a6a36] px-3 py-1.5 font-[family-name:var(--ff-press)] text-[clamp(10px,1vw,12px)] text-[#3b2a18] transition-colors hover:bg-[#8a6a36] hover:text-[#f3ead2]"
+          >
+            Войти в картотеку
+          </Link>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/** лампа-подсветка над экспонатом: латунный козырёк на кронштейне и конус света */
+function Lamp({ lit, w, still }: { lit: boolean; w: number; still: boolean }) {
+  return (
+    <div aria-hidden className="pointer-events-none relative flex flex-col items-center" style={{ height: 70 }}>
+      <svg width="160" height="46" viewBox="0 0 160 46" fill="none">
+        <path d="M80 0v18" stroke="#8a6a36" strokeWidth="3" />
+        <circle cx="80" cy="4" r="5" fill="#b08a40" />
+        <path d="M24 26h112l-8 14H32z" fill="url(#hood)" />
+        <rect x="22" y="22" width="116" height="5" rx="2" fill="#c9a24a" />
+        <defs>
+          <linearGradient id="hood" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stopColor="#8a6a36" />
+            <stop offset="1" stopColor="#3e2c14" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <motion.div
+        className="absolute left-1/2 top-[40px] -translate-x-1/2 blur-[14px]"
+        style={{ width: w * 2, height: 470 }}
+        initial={false}
+        animate={{ opacity: lit ? 1 : 0.7 }}
+        transition={{ duration: still ? 0 : 0.6 }}
+      >
+        {/* размытие на родителе, обрезка на ребёнке — так у конуса мягкие края */}
+        <div
+          className="h-full w-full"
+          style={{
+            clipPath: "polygon(38% 0, 62% 0, 100% 100%, 0 100%)",
+            background: "linear-gradient(180deg, rgba(255,222,165,0.6), rgba(255,214,150,0.22) 55%, transparent)",
+          }}
+        />
+      </motion.div>
+    </div>
+  );
+}
+
+/** латунная подставка: полоса с бортиком, на которую опирается книга */
+function Cradle({ w }: { w: number }) {
+  return (
+    <div aria-hidden className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2" style={{ width: w * 1.25 }}>
+      <div className="mx-auto h-[6px] w-[86%] rounded-t-[2px] bg-[linear-gradient(180deg,#f0d48e,#a8843c)]" />
+      <div className="h-[10px] rounded-[2px] bg-[linear-gradient(180deg,#c9a24a,#6e5226)] shadow-[0_6px_14px_rgba(0,0,0,0.6)]" />
+    </div>
+  );
+}
+
+/** деревянная консоль на стене под подставкой */
+function Console({ w }: { w: number }) {
+  return (
+    <div aria-hidden className="relative" style={{ width: w * 1.5 }}>
+      <div className="h-[16px] rounded-[2px] bg-[linear-gradient(180deg,#6b4428,#3a2414)] shadow-[0_10px_24px_rgba(0,0,0,0.55)]" />
+      <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="mx-auto block h-[34px] w-[46%]">
+        <path d="M0 0h100C92 8 80 12 66 14 58 16 54 26 50 40 46 26 42 16 34 14 20 12 8 8 0 0z" fill="#2c1b0f" />
+        <path d="M14 3c14 6 26 7 36 7s22-1 36-7" stroke="#c9a24a" strokeOpacity=".35" fill="none" />
+      </svg>
+    </div>
+  );
+}
+
+/** латунная табличка экспоната */
+function Plaque({ n, book }: { n: string; book: Book }) {
+  return (
+    <div className="mt-6 min-w-[240px] max-w-[320px] rounded-[3px] bg-[linear-gradient(160deg,#e6c77a,#b08a40_45%,#d9b866_70%,#8a6a2e)] p-[3px] shadow-[0_8px_20px_rgba(0,0,0,0.5)]">
+      <div className="rounded-[2px] border border-[#5a4218]/40 px-5 py-3 text-center text-[#2e200c]">
+        <p className="text-[10px] uppercase tracking-[0.4em]">Экспонат № {n}</p>
+        <p className="mt-1 font-[family-name:var(--ff-press)] text-[16px] font-bold leading-tight">{book.title}</p>
+        <p className="mt-1 font-[family-name:var(--ff-press)] text-[12px] italic">
+          {book.chapters} глав{book.facts[0] ? ` · ${book.facts[0].value} ${book.facts[0].label}` : ""}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/** стена зала: тёмно-винные шпалеры с узором, золотой молдинг, деревянная панель внизу */
+function Wall() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0">
       <div
-        className="h-[16px]"
+        className="absolute inset-0"
         style={{
-          background: "linear-gradient(180deg, oklch(0.4 0.05 56), oklch(0.3 0.04 52))",
-          boxShadow: "0 18px 26px -8px oklch(0.05 0 0 / 0.75), inset 0 1px 0 oklch(0.6 0.06 65 / 0.5)",
+          backgroundColor: "#2a1215",
+          backgroundImage:
+            "radial-gradient(circle at 50% 50%, rgba(201,162,74,0.07) 0 6px, transparent 7px), radial-gradient(circle at 0 0, rgba(201,162,74,0.05) 0 3px, transparent 4px), radial-gradient(circle at 100% 100%, rgba(201,162,74,0.05) 0 3px, transparent 4px), repeating-linear-gradient(90deg, rgba(0,0,0,0.12) 0 1px, transparent 1px 64px)",
+          backgroundSize: "64px 64px, 64px 64px, 64px 64px, auto",
         }}
       />
+      {/* верхний карниз и общий полумрак */}
+      <div className="absolute inset-x-0 top-0 h-[10px] bg-[linear-gradient(180deg,#4a2e1a,#24150b)]" />
+      <div className="absolute inset-x-0 top-[10px] h-px bg-[#c9a24a]/40" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_50%_45%,transparent,rgba(8,4,3,0.75))]" />
+      {/* панель снизу */}
+      <div className="absolute inset-x-0 bottom-0 h-[90px]">
+        <div className="h-px bg-[#c9a24a]/45" />
+        <div className="h-[5px] bg-[linear-gradient(180deg,#6b4428,#3a2414)]" />
+        <div className="h-full bg-[linear-gradient(180deg,#24150c,#120a06)]" />
+      </div>
+    </div>
+  );
+}
+
+/** музейное ограждение: латунные столбики и бархатный канат */
+function Rope() {
+  return (
+    <div aria-hidden className="pointer-events-none relative z-10 -mt-2 h-[90px]">
+      <svg viewBox="0 0 1000 90" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
+        <path d="M60 22C260 70 340 70 500 22S740 70 940 22" stroke="#6e1420" strokeWidth="7" fill="none" strokeLinecap="round" />
+        <path d="M60 20C260 68 340 68 500 20S740 68 940 20" stroke="#b0303c" strokeOpacity=".35" strokeWidth="2" fill="none" />
+      </svg>
+      {["6%", "50%", "94%"].map((x) => (
+        <div key={x} className="absolute top-[8px] -translate-x-1/2" style={{ left: x }}>
+          <div className="mx-auto size-[14px] rounded-full bg-[radial-gradient(circle_at_35%_35%,#f3d98f,#9a7834)]" />
+          <div className="mx-auto h-[66px] w-[6px] bg-[linear-gradient(90deg,#6e5226,#e6c77a,#6e5226)]" />
+        </div>
+      ))}
     </div>
   );
 }

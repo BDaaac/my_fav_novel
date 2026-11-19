@@ -144,6 +144,9 @@
   --font-hand: var(--font-caveat);
   --font-glitch: var(--ff-glitch);
   --font-wet: var(--ff-wet);
+  --font-kurale: var(--ff-kurale);
+  --font-book: var(--ff-literata);
+  --font-brush: var(--ff-brush);
 }
 
 :root {
@@ -213,3 +216,31 @@ body {
 @keyframes rain102 { from { transform: translate3d(0, -160px, 0); } to { transform: translate3d(-28px, 0, 0); } }
 .rain102 { animation: rain102 0.6s linear infinite; will-change: transform; }
 @media (prefers-reduced-motion: reduce) { .rain102 { animation: none; } }
+
+/* полка: пылинки в луче лампы */
+@keyframes mote {
+  from { transform: translate3d(0, 0, 0); opacity: 0.2; }
+  to { transform: translate3d(14px, -40px, 0); opacity: 0.8; }
+}
+
+/* полка: живая книга едва покачивается */
+/* ===== «Преподобный Гу»: туман по низу фона ===== */
+@keyframes guMist {
+  from { transform: translate3d(-6%, 0, 0); }
+  to { transform: translate3d(6%, 0, 0); }
+}
+.gu-mist {
+  background:
+    radial-gradient(ellipse 30% 40% at 20% 80%, oklch(0.75 0.02 190 / 0.13), transparent 70%),
+    radial-gradient(ellipse 35% 35% at 60% 90%, oklch(0.75 0.02 190 / 0.11), transparent 70%),
+    radial-gradient(ellipse 25% 30% at 90% 75%, oklch(0.75 0.02 190 / 0.1), transparent 70%);
+  filter: blur(18px);
+  animation: guMist 26s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) { .gu-mist { animation: none; } }
+
+@keyframes bookIdle {
+  0%, 100% { transform: rotateY(0deg) translateY(0); }
+  50% { transform: rotateY(7deg) translateY(-8px); }
+}

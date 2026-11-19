@@ -7,13 +7,32 @@
     "chapters": 1168,
     "archive": "Картотека гостей отеля «Пионер»",
     "facts": [
-      { "label": "Гостей в картотеке", "value": "10" },
-      { "label": "Этажей", "value": "3" },
-      { "label": "Глав прочитано", "value": "1168" }
+      { "label": "гостей в картотеке", "value": "10" },
+      { "label": "этажа отеля", "value": "3" },
+      { "label": "главы прочитаны", "value": "1168" }
     ],
     "href": "/books/escape-hotel",
     "cover": "/art/books/escape-hotel.jpg",
+    "scene": "/art/books/escape-hotel-scene.jpg",
     "spine": { "bg": "#4a1219", "band": "#b08a2e", "ink": "#ecd9a8" },
     "height": 372
+  },
+  {
+    "slug": "reverend-gu",
+    "title": "Преподобный Гу",
+    "short": "Преподобный Гу",
+    "blurb": "Фан Юань возвращается на пятьсот лет назад, в юность в клане Гу Юэ на горе Цин Мао, и снова идёт путём мастера Гу, где черви Гу — сила, а сердце не знает сожалений.",
+    "chapters": 2334,
+    "archive": "Свиток героев по томам",
+    "facts": [
+      { "label": "томов", "value": "5" },
+      { "label": "глав в новелле", "value": "2334" },
+      { "label": "том в свитке", "value": "1" }
+    ],
+    "href": "/books/reverend-gu",
+    "cover": "/art/books/reverend-gu.jpg",
+    "scene": "/art/books/reverend-gu-scene.jpg",
+    "spine": { "bg": "#16302a", "band": "#b08a2e", "ink": "#e6dcc0" },
+    "height": 380
   }
 ]
