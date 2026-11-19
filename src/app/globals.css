@@ -208,3 +208,8 @@ body {
   will-change: transform;
 }
 @media (prefers-reduced-motion: reduce) { .sway { animation: none; } }
+
+/* ===== Номер 102: дождь ===== */
+@keyframes rain102 { from { transform: translate3d(0, -160px, 0); } to { transform: translate3d(-28px, 0, 0); } }
+.rain102 { animation: rain102 0.6s linear infinite; will-change: transform; }
+@media (prefers-reduced-motion: reduce) { .rain102 { animation: none; } }

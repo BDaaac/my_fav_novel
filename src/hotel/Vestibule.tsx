@@ -37,7 +37,7 @@ export function Vestibule({ rooms }: { rooms: RoomDoor[] }) {
     const r = byId[n];
     if (n === "105") return { n, href: "/room/105", kind: "rest", title: "Комната Отдыха", solved: false, runs: 0 };
     if (!r) return { n, href: null, kind: "locked", title: "□□□", solved: false, runs: 0 };
-    return { n, href: n === "101" ? "/archive/101" : `/room/${n}`, kind: r.type === "mission" ? "mission" : "curse", title: r.title.split(" / ")[0], solved: r.solved, runs: r.runs };
+    return { n, href: n === "101" || n === "102" ? `/archive/${n}` : `/room/${n}`, kind: r.type === "mission" ? "mission" : "curse", title: r.title.split(" / ")[0], solved: r.solved, runs: r.runs };
   });
 
   const go = useCallback(
