@@ -29,6 +29,8 @@ export type Guest = {
 
 const STAMP: Record<string, string> = { Побег: "#1f4a7a", Решение: "#8f1d22", Провал: "#3b362e" };
 const tilt = (i: number) => ((i * 37) % 11) - 5;
+/** Колонки ведомости на обороте: номер, комната, попытки, смерти. */
+const ROW = "grid gap-x-5 gap-y-2 md:grid-cols-[92px_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1.2fr)]";
 
 const SHEETS = [
   { id: "about", label: "Сведения" },
@@ -304,36 +306,31 @@ export function GuestCard({ g, src, color, ink, word, no, names, onOpen, onClose
               убрать в картотеку ✕
             </button>
           </div>
-          {/* кровь стекает с линейки шапки: по потёку на каждую смерть */}
-          <div className="pointer-events-none relative h-0">
-            {deaths.map((_, i) => {
-              const r = rng(i * 7 + no * 13);
-              const w = 4 + r() * 5;
-              return <span key={i} className="absolute top-0 rounded-b-full bg-[#6b0b10] opacity-80 mix-blend-multiply" style={{ left: `${6 + ((i * 61 + no * 17) % 88)}%`, width: w, height: 16 + r() * 70 }} />;
-            })}
-          </div>
-          <svg width="0" height="0" className="absolute">
-            <filter id="blood-edge">
-              <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="3" seed={no} />
-              <feDisplacementMap in="SourceGraphic" scale="11" />
-            </filter>
-          </svg>
+          {/* кровь натекла с верхнего края и стекает по листу; белый фон снимка гасится умножением */}
+          {deaths.length > 0 && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src="/art/people/fx/drips.jpg" alt="" aria-hidden className="pointer-events-none absolute left-[30%] top-0 w-[min(400px,40%)] select-none mix-blend-multiply" style={{ opacity: Math.min(1, 0.55 + deaths.length * 0.06) }} />
+          )}
 
-          <div className="mt-3 flex flex-wrap items-end justify-between gap-x-6">
+          <div className="relative mt-4 flex flex-wrap items-end justify-between gap-x-6">
             <div>
-              <div className="font-display text-[26px] font-semibold leading-none">{g.name}</div>
+              <div className="font-display text-[30px] font-semibold leading-none">{g.name}</div>
               <div className="mt-1.5 font-system text-[9px] uppercase tracking-[0.28em] opacity-60">отметки отеля · № 1-{String(no).padStart(2, "0")}</div>
             </div>
-            {deaths.length > 0 && (
-              <div className="flex items-end gap-3 text-[#7a0c12]">
-                <span className="pb-2 text-right font-system text-[9px] uppercase leading-relaxed tracking-[0.26em]">
-                  умирал
-                  <br />
-                  в номерах
-                </span>
-                <span className="font-wet text-[76px] leading-[0.8]">{deaths.length}</span>
+            <div className="flex items-end gap-6 font-system text-[9px] uppercase tracking-[0.26em]">
+              <div className="text-right">
+                <div className="font-display text-[44px] font-semibold leading-[0.9] tracking-normal">{cells.filter((c) => c.visits.length).length}</div>
+                <div className="mt-1 opacity-60">номеров</div>
               </div>
-            )}
+              <div className="text-right">
+                <div className="font-display text-[44px] font-semibold leading-[0.9] tracking-normal">{cells.reduce((n, c) => n + c.visits.length, 0)}</div>
+                <div className="mt-1 opacity-60">попыток</div>
+              </div>
+              <div className="text-right text-[#7a0c12]">
+                <div className="font-display text-[44px] font-semibold leading-[0.9] tracking-normal">{deaths.length}</div>
+                <div className="mt-1">смертей</div>
+              </div>
+            </div>
           </div>
 
           {!cells.length ? (
@@ -341,41 +338,56 @@ export function GuestCard({ g, src, color, ink, word, no, names, onOpen, onClose
               <Empty text="Отметок на обороте пока нет." />
             </div>
           ) : (
-            <div className="mt-6 gap-4 [column-fill:balance] sm:columns-2 xl:columns-3">
+            <div className="relative mt-6">
+              {/* ведомость: строка на номер, по порядку заходов */}
+              <div className={cn(ROW, "border-b-2 border-[#2a2218] pb-1.5 font-system text-[9px] uppercase tracking-[0.26em] opacity-60 max-md:hidden")}>
+                <span>номер</span>
+                <span>комната · кем был</span>
+                <span>попытки</span>
+                <span>смерти</span>
+              </div>
               {cells.map((c, ci) => (
-                <div key={c.room} className="relative mb-4 break-inside-avoid overflow-hidden border border-dashed border-[#2a2218]/35 px-3 pb-3 pt-2">
-                  {/* чем больше смертей в номере, тем сильнее залита ячейка */}
-                  {c.deaths.length > 0 && <Blot seed={ci * 31 + no} size={110 + c.deaths.length * 45} className="absolute -bottom-8 -right-8 opacity-25" />}
-                  <span className="absolute -top-2 right-2 font-display text-[64px] font-semibold leading-none opacity-[0.08]">{parseInt(c.room) || ""}</span>
-                  <div className="relative">
-                    <div className="font-system text-[9px] uppercase tracking-[0.22em] opacity-55">номер {c.room}</div>
-                    {c.title && <div className="font-display text-[19px] font-semibold leading-tight">{c.title}</div>}
-                    {c.roles.length > 0 && <div className="font-hand text-[19px] leading-none text-[#1d2a4a]">{c.roles.join(", ")}</div>}
-
-                    {c.visits.length > 0 && (
-                      <ul className="mt-2.5 space-y-1.5">
-                        {c.visits.map((v, i) => (
-                          <li key={i} className="flex items-center gap-2.5">
-                            <span className="shrink-0 border-2 border-double px-1.5 py-0.5 font-system text-[10px] font-bold uppercase tracking-[0.16em] opacity-85" style={{ rotate: `${tilt(ci * 3 + i)}deg`, color: STAMP[v.result] ?? INK, borderColor: "currentColor" }}>
-                              {v.result}
-                            </span>
-                            {v.note && <span className="font-hand text-[17px] leading-[1.05] text-[#1d2a4a]">{v.note}</span>}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-
-                    {c.deaths.length > 0 && (
-                      <ul className="mt-3 space-y-1 border-t border-[#7a0c12]/40 pt-2">
-                        {c.deaths.map((d, i) => (
-                          <li key={i} className="grid grid-cols-[26px_1fr] items-center gap-1.5">
-                            <Blot seed={ci * 17 + i * 5 + no} size={26} />
-                            <span className="font-hand text-[19px] leading-[1.05] text-[#7a0c12]">{d}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                <div key={c.room} className={cn(ROW, "relative overflow-hidden border-b border-[#2a2218]/30 py-3.5")}>
+                  {/* пятно под смертями: чем их больше в номере, тем оно крупнее */}
+                  {c.deaths.length > 0 && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={c.deaths.length > 1 ? "/art/people/fx/splat.jpg" : "/art/people/fx/stain.jpg"}
+                      alt=""
+                      aria-hidden
+                      className="pointer-events-none absolute right-0 top-1/2 select-none mix-blend-multiply"
+                      style={{ width: 110 + c.deaths.length * 40, opacity: 0.3, transform: `translate(${34 + tilt(ci) * 3}%, -50%) rotate(${ci * 67}deg)` }}
+                    />
+                  )}
+                  <div className="relative font-display font-semibold leading-none">
+                    {parseInt(c.room) ? <span className="text-[38px]">{parseInt(c.room)}</span> : <span className="text-[19px]">{c.room}</span>}
+                    {/\bRe$/.test(c.room) && <span className="ml-1.5 align-top font-system text-[10px] font-normal uppercase tracking-[0.2em] opacity-60">повтор</span>}
                   </div>
+                  <div className="relative">
+                    {c.title && <div className="font-display text-[19px] font-semibold leading-tight">{c.title}</div>}
+                    {c.roles.length > 0 && <div className="mt-0.5 font-hand text-[20px] leading-none text-[#1d2a4a]">{c.roles.join(", ")}</div>}
+                  </div>
+                  <ol className="relative space-y-1.5">
+                    {c.visits.map((v, i) => (
+                      <li key={i} className="grid grid-cols-[14px_84px_1fr] items-center gap-2">
+                        <span className="font-system text-[10px] opacity-45">{i + 1}</span>
+                        <span className="justify-self-start border-2 border-double px-1.5 py-0.5 font-system text-[10px] font-bold uppercase tracking-[0.14em] opacity-85" style={{ rotate: `${tilt(ci * 3 + i) / 2}deg`, color: STAMP[v.result] ?? INK, borderColor: "currentColor" }}>
+                          {v.result}
+                        </span>
+                        {v.note && <span className="font-hand text-[18px] leading-[1.05] text-[#1d2a4a]">{v.note}</span>}
+                      </li>
+                    ))}
+                  </ol>
+                  <ul className="relative space-y-1">
+                    {c.deaths.map((d, i) => (
+                      <li key={i} className="grid grid-cols-[24px_1fr] items-center gap-1.5">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/art/people/fx/drop.jpg" alt="" aria-hidden className="h-6 w-6 select-none mix-blend-multiply" style={{ rotate: `${(ci * 5 + i) * 83}deg` }} />
+                        <span className="font-hand text-[20px] leading-[1.05] text-[#4f070b]">{d}</span>
+                      </li>
+                    ))}
+                    {!c.deaths.length && <li className="font-system text-[11px] opacity-35">—</li>}
+                  </ul>
                 </div>
               ))}
             </div>
@@ -385,43 +397,6 @@ export function GuestCard({ g, src, color, ink, word, no, names, onOpen, onClose
         </div>
       </motion.div>
     </div>
-  );
-}
-
-/** Детерминированный генератор: кляксы не должны прыгать между отрисовками. */
-function rng(seed: number) {
-  let t = (seed + 1) * 2654435761;
-  return () => {
-    t = Math.imul(t ^ (t >>> 15), 2246822507) ^ Math.imul(t ^ (t >>> 13), 3266489909);
-    return ((t ^= t >>> 16) >>> 0) / 4294967296;
-  };
-}
-
-/** Засохшая клякса крови: пятно с наплывами и брызгами, края рвёт общий фильтр оборота. */
-function Blot({ seed, size, className }: { seed: number; size: number; className?: string }) {
-  const r = rng(seed);
-  const lobes = Array.from({ length: 5 }, () => {
-    const a = r() * Math.PI * 2;
-    return { x: 50 + Math.cos(a) * 14, y: 50 + Math.sin(a) * 14, r: 9 + r() * 9 };
-  });
-  const drops = Array.from({ length: 7 }, () => {
-    const a = r() * Math.PI * 2;
-    const d = 32 + r() * 14;
-    return { x: 50 + Math.cos(a) * d, y: 50 + Math.sin(a) * d, r: 1.2 + r() * 2.8 };
-  });
-  return (
-    <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden className={cn("pointer-events-none mix-blend-multiply", className)}>
-      <g filter="url(#blood-edge)" fill="#6b0b10">
-        <circle cx="50" cy="50" r={18 + r() * 5} />
-        {lobes.map((c, i) => (
-          <circle key={i} cx={c.x} cy={c.y} r={c.r} />
-        ))}
-        {drops.map((c, i) => (
-          <circle key={"d" + i} cx={c.x} cy={c.y} r={c.r} />
-        ))}
-        <circle cx="50" cy="50" r="13" fill="#3d0508" opacity="0.45" />
-      </g>
-    </svg>
   );
 }
 
