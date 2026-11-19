@@ -173,26 +173,14 @@ function Exhibit({
               background:
                 "radial-gradient(ellipse at 70% 10%, rgba(255,255,255,0.35), transparent 60%), repeating-linear-gradient(0deg, rgba(110,85,45,0.035) 0 1px, transparent 1px 3px), linear-gradient(90deg,#e9dcbd,#efe4c8 18%,#ebdfc2)",
               borderRadius: "0 2px 2px 0",
-              // книга раскрыта на титуле: все листы справа, их обрез чуть виден у внешнего края
-              boxShadow: "1px 0 0 #d9caa6, 2px 0 0 #c9b893, 3px 0 0 #d4c49f",
+              // обрез листов виден только у раскрытой книги; у закрытой сбоку одна кожа переплёта
+              boxShadow: open ? "1px 0 0 #d9caa6, 2px 0 0 #c9b893, 3px 0 0 #d4c49f" : "none",
             }}
           >
             {/* тень у корешка: лист уходит в переплёт */}
             <div className="pointer-events-none absolute inset-y-0 left-0 w-[14%] bg-[linear-gradient(90deg,rgba(60,40,20,0.38),rgba(60,40,20,0.12)_45%,transparent)]" />
             <TitlePage book={book} open={open} still={still} compact={k < 0.8} />
           </motion.div>
-          {/* край страниц сбоку: виден только у закрытой книги */}
-          <div
-            className="absolute right-0 top-[4px] transition-opacity duration-300"
-            style={{
-              width: T,
-              height: H - 8,
-              transformOrigin: "right center",
-              transform: `rotateY(90deg) translateX(${T / 2}px)`,
-              background: "repeating-linear-gradient(90deg,#e2d4b2 0 1px,#c4b38d 1px 2px)",
-              opacity: open ? 0 : 1,
-            }}
-          />
           {/* крышка: лицо — обложка, изнанка — фронтиспис */}
           <motion.div
             className="absolute inset-0"
