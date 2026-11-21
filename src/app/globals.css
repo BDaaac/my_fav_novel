@@ -244,3 +244,15 @@ body {
   0%, 100% { transform: rotateY(0deg) translateY(0); }
   50% { transform: rotateY(7deg) translateY(-8px); }
 }
+
+@keyframes museumMote {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  20% { opacity: 0.42; }
+  80% { opacity: 0.24; }
+  100% { transform: translate3d(var(--mote-dx, 10px), var(--mote-dy, -30px), 0); opacity: 0; }
+}
+.museum-mote {
+  animation: museumMote 13s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+@media (prefers-reduced-motion: reduce) { .museum-mote { animation: none; opacity: 0; } }
