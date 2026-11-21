@@ -1,0 +1,71 @@
+/* Сцена «Мой дом ужасов»: кадр 1586×992, всё в одной системе координат */
+.hs{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:#0c0908}
+.hs-fill{position:fixed;inset:-80px;background:url(/art/horror/scene/scene.webp) center/cover;filter:blur(30px) brightness(.4) saturate(.8)}
+.hs-view{position:relative;overflow:hidden;box-shadow:0 0 80px 30px rgba(8,6,5,.85)}
+.hs-stage{position:absolute;left:0;top:0;transform-origin:0 0;background:url(/art/horror/scene/scene.webp) 0 0/1586px 992px}
+.hs-stage img{display:block;width:100%;height:100%;user-select:none}
+
+.hs-home{position:fixed;left:16px;top:14px;z-index:20;font:italic 600 14px var(--ff-press),serif;color:#d9cdbb;text-decoration:none;background:rgba(18,13,11,.7);padding:6px 12px}
+.hs-home:hover{color:#fff;background:rgba(110,14,18,.85)}
+.hs-home:focus-visible,.hs-tab:focus-visible,.hs-arrow:focus-visible,.hs-card:focus-visible{outline:none}
+.hs-card:focus-visible .hs-cardbox{outline:3px solid #e8c48a;outline-offset:-6px}
+
+.hs-title{position:absolute;margin:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+.hs-lamp{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;z-index:8;animation:hs-flicker 7s infinite steps(1)}
+.hs-cold{position:absolute;left:0;top:0;pointer-events:none;z-index:9;background:radial-gradient(ellipse 75% 70% at 52% 48%,transparent 55%,rgba(6,8,12,.45))}
+@keyframes hs-flicker{0%,100%{opacity:1}41%{opacity:.82}42%{opacity:1}73%{opacity:.9}74%{opacity:1}}
+
+/* таблички домов */
+.hs-tab{position:absolute;padding:0;border:0;background:none;cursor:pointer;display:block}
+.hs-tab img{position:absolute;inset:0;filter:drop-shadow(0 6px 8px rgba(0,0,0,.6))}
+.hs-tab span{position:relative;display:grid;place-items:center;height:100%;padding-right:12%;font:italic 400 32px/1 var(--ff-press),serif;color:#776d66;text-shadow:0 1px 0 rgba(0,0,0,.6)}
+.hs-tab.on span{font-size:40px;color:#1c1512;text-shadow:none;padding-right:22%;mix-blend-mode:multiply}
+.hs-tab:not(.on):hover span{color:#b9ada2}
+.hs-under{position:relative;z-index:2;display:grid;grid-template-columns:52px 1fr 52px;align-items:center;gap:8px;width:100%;max-width:560px;padding:14px 16px 24px;box-sizing:border-box}
+.hs-under .hs-arrow{position:relative;width:52px;height:106px}
+.hs-under .hs-arrow.next{grid-column:3;grid-row:1}
+.hs-tabs-inline{display:grid;grid-template-columns:1fr 1fr;gap:14px 8px;grid-column:2;grid-row:1}
+.hs-tabs-inline .hs-tab{position:relative;width:100%;height:48px}
+.hs-tabs-inline .hs-tab span{font-size:22px;padding-right:0}
+.hs-tabs-inline .hs-tab.on span{font-size:24px;padding-right:10%}
+
+/* снимки: карточка = рамка с кнопкой + окно с портретом + полоска с именем, поворот у всей карточки */
+.hs-card{display:contents;color:inherit}
+.hs-cardbox{position:absolute;z-index:2;transform-origin:50% 50%}
+.hs-cardbox>img,.hs-cardbox>span{position:absolute}
+.hs-frame{inset:0;width:100%;height:100%;z-index:2;pointer-events:none;user-select:none}
+.hs-window{z-index:1;overflow:hidden;background:#211c1a;animation:hs-develop .6s ease-out both}
+.hs-window img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%;filter:grayscale(1) sepia(.3) contrast(1.12) brightness(.66);transition:filter .25s}
+/* портрет утоплен в бумагу: тень по краям окна и лёгкий блик */
+.hs-window::after{content:"";position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 0 1px rgba(20,12,8,.55),inset 0 3px 6px rgba(0,0,0,.6),inset 0 0 22px rgba(20,12,8,.7);
+  background:radial-gradient(ellipse at 30% 20%,rgba(255,235,210,.06),transparent 60%)}
+.hs-window.empty{background:radial-gradient(ellipse at 50% 40%,#3a3330,#201b19)}
+.hs-slip{z-index:3;animation:hs-fade .45s ease-out both}
+.hs-slip img{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 3px 3px rgba(0,0,0,.55))}
+.hs-slip b{position:relative;display:grid;place-items:center;height:100%;padding:6px 16px 0;font:italic 400 27px/1 var(--ff-press),serif;color:#1f1713;text-align:center;transform:rotate(-3deg);mix-blend-mode:multiply}
+.hs-card.live{cursor:pointer}
+.hs-card.live:hover .hs-window img{filter:grayscale(.6) sepia(.3) contrast(1.08) brightness(1)}
+.hs-card.live:hover .hs-slip b{color:#6d0d12}
+/* снимок «проявляется» в своей рамке — карточка с места не сдвигается */
+@keyframes hs-develop{from{opacity:0;filter:brightness(2.2) blur(2px)}to{opacity:1;filter:none}}
+@keyframes hs-fade{from{opacity:0}to{opacity:1}}
+
+.hs-board{position:absolute;inset:0;z-index:2}
+.hs-desk{position:absolute;left:0;z-index:7;pointer-events:none;background-image:url(/art/horror/scene/scene.webp)}
+
+/* стрелки */
+.hs-arrow{position:absolute;z-index:4;padding:0;border:0;background:none;cursor:pointer;transition:filter .2s}
+.hs-arrow:hover:not(:disabled){filter:brightness(1.18) drop-shadow(0 0 8px rgba(255,190,120,.35))}
+.hs-arrow:disabled{cursor:default;filter:brightness(.35) saturate(.4)}
+
+.hs-empty{position:relative;z-index:2;margin:14px 16px 0;font:italic 18px var(--ff-press),serif;color:#b8ab9c}
+.narrow{justify-content:flex-start;padding-top:52px}
+
+/* пока окно не замерено: сцена и подписи скрыты, раздача снимков ждёт */
+.hs-view,.hs-under{transition:opacity .25s ease}
+.hs:not(.ready) .hs-view,.hs:not(.ready) .hs-under{opacity:0}
+.hs:not(.ready) .hs-window,.hs:not(.ready) .hs-slip{animation-play-state:paused}
+
+@media (prefers-reduced-motion:reduce){.hs-window,.hs-slip{animation:none}.hs-lamp{animation:none}}

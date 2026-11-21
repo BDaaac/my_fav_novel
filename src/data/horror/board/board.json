@@ -1,0 +1,166 @@
+{
+  "houses": [
+    {
+      "id": "living",
+      "label": "Живые",
+      "side": "living"
+    },
+    {
+      "id": "ghost",
+      "label": "Призраки",
+      "side": "ghost"
+    },
+    {
+      "id": "enemy",
+      "label": "Враги",
+      "side": "enemy"
+    },
+    {
+      "id": "patient",
+      "label": "Пациенты",
+      "side": "patient"
+    }
+  ],
+  "characters": [
+    {
+      "id": "chen-ge",
+      "name": "Чэнь Гэ"
+    },
+    {
+      "id": "xu-wan",
+      "name": "Сюй Вань"
+    },
+    {
+      "id": "uncle-xu",
+      "name": "Дядя Сюй"
+    },
+    {
+      "id": "white-cat",
+      "name": "Белая кошка"
+    },
+    {
+      "id": "zhang-ya",
+      "name": "Чжан Я"
+    },
+    {
+      "id": "qin-xiaoxiao",
+      "name": "Цинь Сяосяо"
+    },
+    {
+      "id": "pen-spirit",
+      "name": "Дух Ручки"
+    },
+    {
+      "id": "li-sanbao",
+      "name": "Ли Саньбао"
+    },
+    {
+      "id": "meng-nan-boy",
+      "name": "Мальчик за дверью"
+    },
+    {
+      "id": "meng-nan",
+      "name": "Мэн Нань"
+    },
+    {
+      "id": "mirror-monster",
+      "name": "Существо в зеркале"
+    },
+    {
+      "id": "director-luo",
+      "name": "Директор Ло"
+    },
+    {
+      "id": "luo-ruoyu",
+      "name": "Ло Жоюй"
+    },
+    {
+      "id": "doctor-gao",
+      "name": "Доктор Гао"
+    },
+    {
+      "id": "he-san",
+      "name": "Хэ Сан"
+    },
+    {
+      "id": "gao-ru-xue",
+      "name": "Гао Жу Сюэ"
+    },
+    {
+      "id": "fang-yu",
+      "name": "Фан Юй"
+    },
+    {
+      "id": "fang-aunt",
+      "name": "Тётя Фан Юя"
+    },
+    {
+      "id": "zhang-peng",
+      "name": "Чжан Пэн"
+    },
+    {
+      "id": "wang-qi",
+      "name": "Ван Ци"
+    },
+    {
+      "id": "qin-family",
+      "name": "Семья Цинь"
+    },
+    {
+      "id": "old-director",
+      "name": "Старый директор"
+    },
+    {
+      "id": "nurse-ghost",
+      "name": "Медсестра-призрак"
+    },
+    {
+      "id": "twisted-face",
+      "name": "Искажённое лицо"
+    },
+    {
+      "id": "xu-tong",
+      "name": "Сюй Тун"
+    },
+    {
+      "id": "two-faced",
+      "name": "Существо с двумя лицами"
+    },
+    {
+      "id": "xiao-du",
+      "name": "Сяо Ду"
+    },
+    {
+      "id": "wang-shenglong",
+      "name": "Ван Шэнлун"
+    },
+    {
+      "id": "sealed-class",
+      "name": "Класс Му Ян"
+    },
+    {
+      "id": "liu-dao",
+      "name": "Лю Дао"
+    },
+    {
+      "id": "qin-guang",
+      "name": "Цинь Гуан"
+    },
+    {
+      "id": "he-feng",
+      "name": "Хэ Фэн"
+    },
+    {
+      "id": "captain-yan",
+      "name": "Капитан Янь"
+    },
+    {
+      "id": "wang-xin",
+      "name": "Ван Синь"
+    },
+    {
+      "id": "crying-tape",
+      "name": "Плачущая Лента"
+    }
+  ]
+}

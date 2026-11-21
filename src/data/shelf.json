@@ -34,5 +34,24 @@
     "scene": "/art/books/reverend-gu-scene.jpg",
     "spine": { "bg": "#1b2232", "band": "#a9b4c8", "ink": "#e6e9f0" },
     "height": 380
+  },
+  {
+    "slug": "my-house-of-horrors",
+    "title": "Мой дом ужасов",
+    "short": "Мой дом ужасов",
+    "blurb": "Чэнь Гэ достаётся от пропавших родителей Дом ужасов в Парке Нового Века и чёрный телефон, который однажды ночью сам объявляет его владельцем дома с привидениями.",
+    "chapters": 185,
+    "archive": "Доска досье Дома ужасов",
+    "facts": [
+      { "label": "героев на доске", "value": "35" },
+      { "label": "раздела доски", "value": "4" },
+      { "label": "глав прочитано", "value": "185" }
+    ],
+    "href": "/books/my-house-of-horrors",
+    "cover": "/art/books/my-house-of-horrors-cover-door.jpg",
+    "coverPos": "bottom",
+    "scene": "/art/books/my-house-of-horrors-scene.jpg",
+    "spine": { "bg": "#2a0d10", "band": "#b3262c", "ink": "#ecd9c4" },
+    "height": 376
   }
 ]

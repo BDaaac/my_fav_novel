@@ -6,7 +6,6 @@ import type { Cultivator } from "@/data/gu/types";
 import { VOLUMES } from "@/data/gu/types";
 
 export const metadata = { title: "Свиток героев · Преподобный Гу" };
-export const dynamic = "force-dynamic"; // карточки подхватываются из файлов без пересборки
 
 const arr = <T,>(v: unknown) => (Array.isArray(v) ? (v as T[]) : []);
 const ls = (dir: string) => {

@@ -21,6 +21,8 @@ export type Book = {
   facts: { label: string; value: string }[];
   href: string;
   cover: string | null;
+  /** какую часть обложки держать в кадре, если она не влезает целиком (CSS object-position), по умолчанию верх */
+  coverPos?: string;
   /** картина книги, 16:9 — во фронтисписе */
   scene?: string | null;
   spine: { bg: string; band: string; ink: string };
@@ -218,7 +220,7 @@ function Cover({ book }: { book: Book }) {
   return (
     <div className="absolute inset-0 overflow-hidden rounded-r-[4px] rounded-l-[2px] shadow-[0_24px_50px_rgba(0,0,0,0.6)]" style={{ backfaceVisibility: "hidden", background: book.spine.bg }}>
       {book.cover ? (
-        <Image src={book.cover} alt="" fill sizes="260px" className="object-cover object-top" priority />
+        <Image src={book.cover} alt="" fill sizes="260px" className="object-cover" style={{ objectPosition: book.coverPos ?? "top" }} priority />
       ) : (
         <div className="flex h-full items-center justify-center p-6 text-center font-[family-name:var(--ff-press)] text-2xl" style={{ color: book.spine.ink }}>
           {book.title}

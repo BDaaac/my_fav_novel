@@ -5,7 +5,6 @@ import { People } from "@/archive/people/People";
 import type { Guest } from "@/archive/people/GuestCard";
 
 export const metadata = { title: "Картотека · Гости отеля «Пионер»" };
-export const dynamic = "force-dynamic"; // карточки подхватываются из файлов без пересборки
 
 const arr = <T,>(v: unknown) => (Array.isArray(v) ? (v as T[]) : []);
 const ls = (dir: string) => {
