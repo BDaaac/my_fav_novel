@@ -255,4 +255,23 @@ body {
   animation: museumMote 13s ease-in-out infinite;
   will-change: transform, opacity;
 }
-@media (prefers-reduced-motion: reduce) { .museum-mote { animation: none; opacity: 0; } }
+@keyframes vitrineEmber {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 0.92; transform: scale(1.04); }
+}
+.vitrine-ember {
+  animation: vitrineEmber 6.5s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+@keyframes vitrineMist {
+  from { transform: translate3d(-7%, 0, 0); }
+  to { transform: translate3d(7%, 0, 0); }
+}
+.vitrine-mist {
+  animation: vitrineMist 18s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .museum-mote, .vitrine-ember, .vitrine-mist { animation: none; }
+  .museum-mote { opacity: 0; }
+}

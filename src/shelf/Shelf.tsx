@@ -43,6 +43,7 @@ function plural(n: number, one: string, few: string, many: string) {
 
 export function Shelf({ books, hallBg = "/art/museum/hall-bg.jpg" }: { books: Book[]; hallBg?: string | null }) {
   const [sel, setSel] = useState<number | null>(null);
+  const [hovered, setHovered] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
   const reduce = useReducedMotion();
   const still = mounted && !!reduce;
@@ -131,6 +132,8 @@ export function Shelf({ books, hallBg = "/art/museum/hall-bg.jpg" }: { books: Bo
               n={ROMAN[i] ?? String(i + 1)}
               active={sel === i}
               dimmed={sel !== null && sel !== i}
+              peerDimmed={sel === null && hovered !== null && hovered !== i}
+              onHover={(on) => setHovered(on ? i : hovered === i ? null : hovered)}
               onSelect={() => setSel(i)}
               still={still}
             />

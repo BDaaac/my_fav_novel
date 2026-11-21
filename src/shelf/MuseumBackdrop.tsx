@@ -2,10 +2,10 @@
 import Image from "next/image";
 
 /**
- * Архитектурный фон зала музея редких книг:
- * сплошная стена из тёмного мореного ореха с резным потолочным карнизом сверху
- * и паркетным дубовым полом снизу — без лишних рамок и CSS-полос, чтобы встроенный
- * музейный шкаф-витрина с книгами стоял в одном пространстве с залом.
+ * Архитектурное окружение зала тёмного литературного музея:
+ * стена из мореного ореха с резным карнизом и паркетом, тонкая фактура штукатурки/дерева,
+ * декоративные горизонтальные молдинги, мягкие боковые тени пилястр и тёплый отблеск
+ * витрин на дубовом полу.
  */
 
 const MOTES = [
@@ -23,7 +23,7 @@ const MOTES = [
 
 export function MuseumBackdrop({ hallBg, still }: { hallBg?: string | null; still: boolean }) {
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden bg-[#0a0604]">
+    <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden bg-[#090504]">
       {/* Резервная фактура тёмного ореха, если внешнее изображение отсутствует */}
       <div
         className="absolute inset-0"
@@ -36,18 +36,53 @@ export function MuseumBackdrop({ hallBg, still }: { hallBg?: string | null; stil
 
       {/* Фотографический зал: резной потолочный карниз, сплошная ореховая стена и дубовый пол */}
       {hallBg && (
-        <div className="absolute inset-0 opacity-[0.86]">
+        <div className="absolute inset-0 opacity-[0.88]">
           <Image src={hallBg} alt="" fill priority sizes="100vw" className="object-cover object-center" />
         </div>
       )}
 
-      {/* Мягкая галерейная светотень: подсвечивает центр зала и аккуратно уводит края в полумрак */}
+      {/* Деликатная вертикальная фактура ореховых досок и тканого настенного полотна */}
+      <div
+        className="absolute inset-0 opacity-[0.26]"
+        style={{
+          backgroundImage: [
+            "repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.24) 0 1px, rgba(235, 206, 152, 0.025) 1px 2px, transparent 2px 96px)",
+            "repeating-linear-gradient(0deg, rgba(255, 236, 200, 0.014) 0 1px, transparent 1px 4px)",
+          ].join(", "),
+        }}
+      />
+
+      {/* Декоративные настенные молдинги и архитектурные фризовые линии, встроенные в стену */}
+      <div className="absolute inset-x-0 top-[29.5%] hidden md:block">
+        <div className="h-px bg-[linear-gradient(90deg,transparent_4%,rgba(222,190,130,0.16)_20%,rgba(238,210,156,0.22)_50%,rgba(222,190,130,0.16)_80%,transparent_96%)]" />
+        <div className="h-[5px] bg-[linear-gradient(180deg,rgba(46,29,18,0.42),rgba(10,6,4,0.58))]" />
+        <div className="h-px bg-[linear-gradient(90deg,transparent_6%,rgba(218,186,126,0.09)_24%,rgba(218,186,126,0.12)_50%,rgba(218,186,126,0.09)_76%,transparent_94%)]" />
+      </div>
+
+      {/* Боковые архитектурные тени пилястр зала (создают глубину пространства) */}
+      <div
+        className="absolute inset-y-0 left-0 w-[14vw] max-w-[200px]"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(5, 3, 2, 0.88) 0%, rgba(12, 7, 5, 0.42) 52%, transparent 100%)",
+        }}
+      />
+      <div
+        className="absolute inset-y-0 right-0 w-[14vw] max-w-[200px]"
+        style={{
+          background:
+            "linear-gradient(270deg, rgba(5, 3, 2, 0.88) 0%, rgba(12, 7, 5, 0.42) 52%, transparent 100%)",
+        }}
+      />
+
+      {/* Мягкая галерейная светотень: верхняя закарнизная подсветка, фокус в центре, тёплый отблеск на паркете */}
       <div
         className="absolute inset-0"
         style={{
           background: [
-            "radial-gradient(ellipse 68% 48% at 50% 24%, rgba(255, 224, 168, 0.08), transparent 68%)",
-            "radial-gradient(ellipse 92% 84% at 50% 48%, transparent 38%, rgba(6, 3, 2, 0.78) 100%)",
+            "radial-gradient(ellipse 64% 30% at 50% 6%, rgba(255, 224, 166, 0.12), transparent 68%)",
+            "radial-gradient(ellipse 76% 42% at 50% 94%, rgba(212, 162, 92, 0.09), transparent 72%)",
+            "radial-gradient(ellipse 92% 84% at 50% 48%, transparent 36%, rgba(5, 3, 2, 0.82) 100%)",
           ].join(", "),
         }}
       />

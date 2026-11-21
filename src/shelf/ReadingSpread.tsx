@@ -68,7 +68,7 @@ export function ReadingSpread({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: still ? 0 : 0.32 }}
+      transition={{ duration: still ? 0 : 0.38, ease: EASE }}
     >
       {/* Бархатное затемнение зала, тёплый свет лампы и очертания кожаного бювара читального стола */}
       <div
@@ -88,7 +88,13 @@ export function ReadingSpread({
       </div>
 
       {/* Верхняя панель стола осмотра */}
-      <div className="relative z-10 mb-4 flex w-full max-w-[860px] items-center justify-between gap-4 text-[#d5be90]">
+      <motion.div
+        className="relative z-10 mb-4 flex w-full max-w-[860px] items-center justify-between gap-4 text-[#d5be90]"
+        initial={still ? false : { opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={still ? undefined : { opacity: 0, y: -6 }}
+        transition={{ duration: still ? 0 : 0.42, ease: EASE }}
+      >
         <div className="flex items-center gap-3 font-system text-[10px] uppercase tracking-[0.34em] text-[#bfa26b]/85">
           <span>Читальный стол</span>
           <span className="h-px w-6 bg-[#bfa26b]/35" />
@@ -105,10 +111,16 @@ export function ReadingSpread({
           <span>Вернуть в витрину</span>
           <X className="size-3.5 text-[#c7a96b]" />
         </button>
-      </div>
+      </motion.div>
 
-      {/* Сцена раскрытой книги */}
-      <div className="relative z-10 flex w-full max-w-[960px] items-center justify-center gap-3 sm:gap-5">
+      {/* Сцена раскрытой книги с плавным подъёмом на читальный стол */}
+      <motion.div
+        className="relative z-10 flex w-full max-w-[960px] items-center justify-center gap-3 sm:gap-5"
+        initial={still ? false : { opacity: 0, y: 24, scale: 0.94 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={still ? undefined : { opacity: 0, y: 16, scale: 0.96 }}
+        transition={{ duration: still ? 0 : 0.48, ease: EASE }}
+      >
         {total > 1 && (
           <button
             type="button"
@@ -338,7 +350,7 @@ export function ReadingSpread({
             <ChevronRight className="size-5" />
           </button>
         )}
-      </div>
+      </motion.div>
 
       {/* Мобильная навигация между томами */}
       {total > 1 && (
