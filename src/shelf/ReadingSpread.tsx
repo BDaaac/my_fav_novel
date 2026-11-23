@@ -143,7 +143,8 @@ export function ReadingSpread({
           />
 
           <motion.div
-            className="relative h-full w-1/2"
+            /* Сам контейнер лежит в плоскости z=0 и перехватывал бы клики по странице за ним (z=-1) */
+            className="pointer-events-none relative h-full w-1/2"
             style={{ transformStyle: "preserve-3d", marginLeft: "25%" }}
             initial={false}
             animate={{ x: opened ? "50%" : "0%" }}
@@ -161,7 +162,7 @@ export function ReadingSpread({
 
             {/* Правая страница — хлопковая бумага + золочёный обрез листов */}
             <div
-              className="absolute bottom-[8px] left-0 right-[8px] top-[8px] overflow-hidden rounded-r-[3px]"
+              className="pointer-events-auto absolute bottom-[8px] left-0 right-[8px] top-[8px] overflow-hidden rounded-r-[3px]"
               style={{
                 background: [
                   "radial-gradient(ellipse 75% 45% at 72% 8%, rgba(255, 252, 240, 0.56), transparent 62%)",
