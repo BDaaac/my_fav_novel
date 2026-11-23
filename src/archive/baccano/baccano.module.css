@@ -1,0 +1,399 @@
+/* «Шумиха!» — справки информационного агентства.
+   1930: медовый свет, бумага, сургучно-красные печати. 1931: ночь, латунь, ар-деко. */
+
+.cap {
+  font: 400 11px/1.4 var(--bc-mono), monospace;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+.fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- плёночное зерно ---------- */
+.desk::after,
+.case::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ================= СТОЛ: выбор дела ================= */
+.desk {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  color: #f1dfb8;
+  font-family: var(--bc-serif), serif;
+  background: #0d0805;
+  padding: 0 16px 80px;
+}
+/* стол агентства — нарисованный фон; папки лежат в пятне света лампы */
+.deskBg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.deskBg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgb(8 5 3 / 0.55), rgb(8 5 3 / 0.1) 32%, transparent 60%, rgb(8 5 3 / 0.45)),
+    radial-gradient(ellipse 80% 70% at 55% 55%, transparent 55%, rgb(8 5 3 / 0.5));
+}
+.cover {
+  object-fit: cover;
+}
+/* латунная табличка — тихая навигация в углу стола */
+/* возврат в зал музея — общая навигация (NavLink), здесь только место на столе */
+.deskNav { position: absolute; z-index: 5; left: clamp(10px, 5vw, 64px); top: 10px; }
+
+.deskHead {
+  position: relative;
+  text-align: center;
+  padding-top: 64px;
+}
+.deskHead .cap { color: #c9a66a; }
+.deskTitle {
+  font: 500 clamp(52px, 7.4vw, 90px) / 1 var(--bc-display), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 16px;
+  text-shadow: 0 4px 30px rgb(0 0 0 / 0.5);
+}
+.deskTitle i {
+  font-weight: 400;
+  color: #d9a441;
+}
+.deskSub {
+  font: italic 19px var(--bc-serif), serif;
+  color: #cbb38a;
+  margin-top: 14px;
+}
+
+.folders {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(36px, 6vw, 84px);
+  margin-top: 46px;
+  flex-wrap: wrap;
+}
+
+/* Папка — ссылка; внутри один объект в общих координатах (проценты от картона). */
+.folder {
+  --tilt: 0deg;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  display: block;
+  width: min(380px, 86vw);
+  container-type: inline-size;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.folderObj {
+  position: relative;
+  display: block;
+  rotate: var(--tilt);
+  transition: rotate 0.5s var(--ease), translate 0.5s var(--ease);
+}
+.folder:hover .folderObj,
+.folder:focus-visible .folderObj {
+  rotate: calc(var(--tilt) * 0.4);
+  translate: 0 -8px;
+}
+/* левая папка лежит дальше от лампы справа — чуть темнее */
+.f1930 .folderObj { filter: brightness(0.9); }
+
+/* картон: узкая контактная тень + мягкая, падающая влево-вниз (лампа справа сверху) */
+.folderBase {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(-2px 3px 2px rgb(0 0 0 / 0.6)) drop-shadow(-16px 20px 18px rgb(0 0 0 / 0.45));
+  transition: filter 0.5s var(--ease);
+}
+.folder:hover .folderBase {
+  filter: drop-shadow(-3px 5px 3px rgb(0 0 0 / 0.5)) drop-shadow(-26px 34px 26px rgb(0 0 0 / 0.42));
+}
+.folder:focus-visible .folderBase {
+  filter: drop-shadow(0 0 2px #f3c86a) drop-shadow(0 0 1px #f3c86a) drop-shadow(-26px 34px 26px rgb(0 0 0 / 0.42));
+}
+
+/* наклейка нарисована на картоне — текст ложится в её прямоугольник */
+.label {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 3.7cqw;
+  color: #2a1e14;
+}
+.f1930 .label { left: 18%; top: 13.4%; width: 59.5%; height: 18.6%; }
+.f1931 .label { left: 18.6%; top: 15.6%; width: 55.6%; height: 15.8%; }
+.labelNo {
+  font: 400 2.8cqw var(--bc-mono), monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #7a2418;
+}
+.labelTitle {
+  font: 500 6cqw/1.02 var(--bc-display), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 1.3cqw;
+}
+.f1931 .labelTitle { font-size: 4.5cqw; letter-spacing: 0.06em; }
+.labelDate {
+  font: 400 2.35cqw var(--bc-mono), monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #5c4630;
+  margin-top: 1.3cqw;
+}
+
+/* снимок места: фотобумага с белым полем, слегка неровный обрез */
+.snap {
+  position: absolute;
+  left: 10%;
+  top: 35.5%;
+  width: 73%;
+  padding: 1.9cqw;
+  background: linear-gradient(200deg, #f3ecdc, #e2d8c2);
+  rotate: -2.2deg;
+  clip-path: polygon(0 0.6%, 22% 0, 51% 0.5%, 78% 0, 100% 0.4%, 99.7% 38%, 100% 71%, 99.6% 100%, 64% 99.4%, 31% 100%, 0.3% 99.5%, 0 62%, 0.4% 30%);
+}
+/* тень снимка — отдельным слоем под ним, чтобы обрез clip-path её не срезал */
+.snapShadow {
+  position: absolute;
+  left: 10%;
+  top: 35.5%;
+  width: 73%;
+  height: 33.46cqw; /* поле 1.9cqw ×2 + снимок 21:9 шириной 69.2cqw */
+  rotate: -2.2deg;
+  box-shadow: -2px 3px 3px rgb(0 0 0 / 0.35), -6px 10px 12px rgb(0 0 0 / 0.18);
+}
+.snapImg {
+  position: relative;
+  display: block;
+  aspect-ratio: 21 / 9;
+  overflow: hidden;
+}
+.snapImg img { filter: sepia(0.15) contrast(1.05); }
+.snapImg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(225deg, rgb(255 230 180 / 0.12), transparent 50%, rgb(0 0 0 / 0.18));
+}
+/* скрепка держит верхний край снимка: половина на картоне, половина на фото */
+.clip {
+  position: absolute;
+  left: 63%;
+  top: 30.6%;
+  width: 19.5cqw;
+  height: auto;
+  rotate: 90deg;
+  filter: drop-shadow(-1px 2px 1px rgb(0 0 0 / 0.45));
+}
+
+/* машинописная вырезка с описанием, подклеена к обложке */
+.slip {
+  position: absolute;
+  left: 11%;
+  top: 64%;
+  width: 76%;
+  rotate: 0.9deg;
+  filter: drop-shadow(-1px 2px 2px rgb(0 0 0 / 0.3));
+}
+.slip span {
+  display: block;
+  padding: 2.6cqw 3.4cqw;
+  background: linear-gradient(210deg, #f4ecda, #e6dcc5);
+  color: #2b2016;
+  font: 3.55cqw/1.42 var(--bc-serif), serif;
+  clip-path: polygon(0.4% 0, 30% 1.5%, 63% 0, 100% 1.2%, 99.5% 50%, 100% 98.6%, 70% 100%, 34% 98.8%, 0 100%, 0.5% 48%);
+}
+.slip i {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-style: normal;
+}
+
+/* пометка в углу и штамп тома */
+.note {
+  position: absolute;
+  left: 11%;
+  bottom: 6.5%;
+  font: 400 3.15cqw/1.5 var(--bc-mono), monospace;
+  letter-spacing: 0.08em;
+}
+.f1930 .note { color: #2a1c10; }
+.f1931 .note { color: #e8dcc2; }
+.noteOpen {
+  display: block;
+  opacity: 0;
+  translate: -4px 0;
+  transition: opacity 0.35s, translate 0.35s;
+}
+.folder:hover .noteOpen,
+.folder:focus-visible .noteOpen {
+  opacity: 1;
+  translate: 0 0;
+}
+@media (hover: none) {
+  .noteOpen { opacity: 1; translate: 0 0; }
+}
+.folderStamp {
+  position: absolute;
+  right: 9%;
+  bottom: 6.5%;
+  rotate: -9deg;
+  border: 0.7cqw solid;
+  border-radius: 0.6cqw;
+  padding: 1cqw 2.6cqw;
+  font: 400 3.4cqw var(--bc-mono), monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  /* неровный оттиск резинового штампа */
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.4 1.55'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.4 1.55'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.f1930 .folderStamp { color: #93181a; }
+.f1931 .folderStamp { color: #d04a52; }
+
+/* ================= СТРАНИЦА ДЕЛА ================= */
+.case {
+  --page: #e9dcc0;
+  --ink: #2a1e14;
+  --soft: #5c4630;
+  --accent: #9e1b1b;
+  --gold: #a5731f;
+  --heroInk: #f1dfb8;
+  --card: #f3ead6;
+  --chip: #dccaa0;
+  --chipOn: #2a1e14;
+  --chipOnInk: #f1dfb8;
+  --place: #dfcfaa;
+  /* глубина наплыва: на столько иллюстрация заходит на стол архива и растворяется в нём */
+  --ov: 280px;
+  position: relative;
+  min-height: 100dvh;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--bc-serif), serif;
+}
+.case[data-case="1931"] {
+  --page: #0b1322;
+  --ink: #efe4cc;
+  --soft: #b8c4d6;
+  --accent: #e0545d;
+  --gold: #c79a4b;
+  --heroInk: #efe4cc;
+  --card: #e9dec5;
+  --chip: #16243a;
+  --chipOn: #c79a4b;
+  --chipOnInk: #0b1322;
+  --place: #13203a;
+  background: linear-gradient(#0b1322, #070c15);
+}
+
+.caseNav {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px clamp(10px, 5vw, 64px);
+}
+.hero {
+  position: relative;
+  z-index: 1;
+  /* наплыв: низ иллюстрации лежит поверх начала стола (case.module.css → .board) */
+  margin-bottom: calc(-1 * var(--ov));
+  min-height: clamp(560px, 43vw, 780px);
+  display: flex;
+  align-items: flex-end;
+  color: var(--heroInk);
+  overflow: hidden;
+  padding: 120px clamp(16px, 5vw, 70px) 56px;
+}
+.heroScene {
+  object-fit: cover;
+  object-position: 70% 50%;
+}
+/* Иллюстрация не обрывается кромкой и не затемняется к низу: она растворяется по маске,
+   и сквозь неё проступает стол. Маска начинается ровно там, где под ней уже есть стол. */
+.heroScene,
+.hero::after {
+  -webkit-mask-image: linear-gradient(#000 calc(100% - var(--ov) + 6px), rgb(0 0 0 / 0.5) calc(100% - var(--ov) * 0.45), transparent);
+  mask-image: linear-gradient(#000 calc(100% - var(--ov) + 6px), rgb(0 0 0 / 0.5) calc(100% - var(--ov) * 0.45), transparent);
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(10 6 4 / 0.7), rgb(10 6 4 / 0.2) 55%, transparent);
+}
+.case[data-case="1931"] .hero::after {
+  background: linear-gradient(90deg, rgb(5 9 18 / 0.55), transparent 55%);
+}
+.heroText {
+  position: relative;
+  z-index: 1;
+  max-width: 820px;
+  animation: rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes rise {
+  from { opacity: 0; translate: 0 18px; }
+}
+.heroText .cap { color: #d9a441; }
+.case[data-case="1931"] .heroText .cap { color: #c79a4b; }
+.heroTitle {
+  font: 500 clamp(44px, 6.6vw, 86px) / 1.02 var(--bc-display), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 16px;
+}
+.case[data-case="1931"] .heroTitle {
+  font: 300 clamp(42px, 6.4vw, 84px) / 1.06 var(--bc-deco), sans-serif;
+  letter-spacing: 0.1em;
+}
+.heroLead {
+  font: italic 20px/1.5 var(--bc-serif), serif;
+  margin-top: 18px;
+  opacity: 0.88;
+}
+
+/* ================= телефон ================= */
+@media (max-width: 760px) {
+  /* на телефоне заголовок ложится на сам рисунок — затемняем сцену ровнее */
+  .case { --ov: 170px; }
+  .hero::after { background: linear-gradient(rgb(10 6 4 / 0.35), rgb(10 6 4 / 0.72) 38%, rgb(10 6 4 / 0.82)); }
+  .case[data-case="1931"] .hero::after { background: linear-gradient(rgb(5 9 18 / 0.3), rgb(5 9 18 / 0.7) 38%, rgb(5 9 18 / 0.85)); }
+  .heroScene { object-position: 80% 30%; }
+  .heroText { text-shadow: 0 2px 14px rgb(0 0 0 / 0.6); }
+  .deskHead { padding-top: 70px; }
+  .folders { margin-top: 30px; gap: 40px; }
+  .hero { min-height: 520px; padding-bottom: 40px; }
+  .heroLead { font-size: 17px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroText { animation: none; }
+  .folderObj, .folderBase, .noteOpen { transition: none; }
+}

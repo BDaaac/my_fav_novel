@@ -275,3 +275,9 @@ body {
   .museum-mote, .vitrine-ember, .vitrine-mist { animation: none; }
   .museum-mote { opacity: 0; }
 }
+
+/* Зал галереи: ряд витрин прокручивается вбок, когда не помещается; полоса прокрутки — тонкая латунная */
+.hall-row { scrollbar-width: thin; scrollbar-color: rgb(199 169 107 / 0.45) transparent; }
+.hall-row::-webkit-scrollbar { height: 6px; }
+.hall-row::-webkit-scrollbar-thumb { background: rgb(199 169 107 / 0.45); border-radius: 3px; }
+.hall-row::-webkit-scrollbar-track { background: transparent; }

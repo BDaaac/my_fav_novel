@@ -53,5 +53,23 @@
     "scene": "/art/books/my-house-of-horrors-scene.jpg",
     "spine": { "bg": "#2a0d10", "band": "#b3262c", "ink": "#ecd9c4" },
     "height": 376
+  },
+  {
+    "slug": "baccano",
+    "title": "Шумиха!",
+    "short": "Шумиха!",
+    "blurb": "Сухой закон и Великая депрессия. Эликсир бессмертия, разлитый по бутылкам, гуляет по Манхэттену 1930 года, а через год трансконтинентальный экспресс «Флайинг Пуссифут» уходит из Чикаго в Нью-Йорк без остановок.",
+    "chapters": 26,
+    "archive": "Справки информационного агентства",
+    "facts": [
+      { "label": "справок в картотеке", "value": "27" },
+      { "label": "дела", "value": "2" },
+      { "label": "тома прочитано", "value": "3" }
+    ],
+    "href": "/books/baccano",
+    "cover": "/art/books/baccano-cover.jpg",
+    "scene": "/art/books/baccano-scene.jpg",
+    "spine": { "bg": "#101a33", "band": "#c79a4b", "ink": "#efe4cc" },
+    "height": 376
   }
 ]

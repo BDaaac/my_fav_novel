@@ -123,20 +123,28 @@ export function Shelf({ books, hallBg = "/art/museum/hall-bg.jpg" }: { books: Bo
       </header>
 
       {/* Ряд отдельных напольных музейных витрин-тумб с просторным интервалом между ними */}
-      <section aria-label="Экспонаты" className="relative z-10 mx-auto mt-auto w-full max-w-[1440px] px-6 pb-8 pt-6 sm:px-10 sm:pb-12 sm:pt-8">
-        <div className="flex flex-wrap items-end justify-center gap-x-12 gap-y-12 lg:gap-x-16 xl:gap-x-24">
+      {/* Витрины стоят одним рядом вдоль стены зала, слева направо, и никогда не уходят во второй ряд.
+          Пока ряд помещается, интервал между тумбами делится поровну (не больше музейных 96 px);
+          когда томов больше, чем вмещает экран, зал прокручивается вбок — как проход вдоль стены. */}
+      <section aria-label="Экспонаты" className="relative z-10 mx-auto mt-auto w-full max-w-[1760px] pb-2 pt-0 sm:pb-4">
+        <div
+          tabIndex={-1}
+          className="hall-row flex snap-x snap-proximity items-end overflow-x-auto overscroll-x-contain px-[max(24px,calc(50%-139px))] pb-10 pt-12 [justify-content:safe_center] sm:px-10"
+          style={{ gap: `clamp(28px, calc((100% - ${books.length} * 300px) / ${Math.max(1, books.length - 1)}), 96px)` }}
+        >
           {books.map((b, i) => (
-            <VitrineStand
-              key={b.slug}
-              book={b}
-              n={ROMAN[i] ?? String(i + 1)}
-              active={sel === i}
-              dimmed={sel !== null && sel !== i}
-              peerDimmed={sel === null && hovered !== null && hovered !== i}
-              onHover={(on) => setHovered(on ? i : hovered === i ? null : hovered)}
-              onSelect={() => setSel(i)}
-              still={still}
-            />
+            <div key={b.slug} className="shrink-0 snap-center">
+              <VitrineStand
+                book={b}
+                n={ROMAN[i] ?? String(i + 1)}
+                active={sel === i}
+                dimmed={sel !== null && sel !== i}
+                peerDimmed={sel === null && hovered !== null && hovered !== i}
+                onHover={(on) => setHovered(on ? i : hovered === i ? null : hovered)}
+                onSelect={() => setSel(i)}
+                still={still}
+              />
+            </div>
           ))}
         </div>
       </section>

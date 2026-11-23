@@ -1,0 +1,35 @@
+/* Единая навигация «Шумихи»: тот же гротеск, что у заголовков разделов, в светлом начертании.
+   Без рамки, фона, табличек и свечения. Область нажатия — не меньше 44 px по высоте. */
+.nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 300 13px/1 var(--bc-display), sans-serif;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgb(236 217 176 / 0.86);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.7);
+  transition: translate 0.2s cubic-bezier(0.25, 0.8, 0.3, 1);
+}
+.nav svg { flex: none; width: 26px; height: 9px; filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.7)); }
+/* наведение: строка подаётся в сторону движения; ссылка без стрелки — чуть вверх */
+.nav:hover { translate: 0 -2px; }
+.nav[data-back]:hover { translate: -4px 0; }
+.nav:active { translate: 0 0; }
+.nav[data-back]:active { translate: -7px 0; }
+/* удвоенный селектор: внутри досье общий красный контур фокуса не должен перебивать этот */
+.nav.nav:focus-visible { outline: 1.5px solid currentColor; outline-offset: 2px; }
+
+@media (max-width: 760px) {
+  .nav { font-size: 12px; letter-spacing: 0.22em; gap: 10px; }
+  .nav svg { width: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav { transition: none; }
+}

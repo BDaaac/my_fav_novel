@@ -1,0 +1,441 @@
+/*
+ * Картотека — неподвижный шкаф с выдвижными ящиками.
+ * Слои: корпус (без transform) → проём → коробка ящика (едет по Z) → содержимое → активная карточка.
+ * Перспектива задаётся один раз на .scene: глаз над шкафом, по центру; камера не двигается.
+ * У всех предков ящика — preserve-3d; opacity/filter/overflow на них не ставить (сплющивают 3D).
+ * Наведение — без свечения: предмет физически подаётся вперёд или приподнимается.
+ */
+
+.room {
+  --slide: cubic-bezier(0.22, 0.82, 0.3, 1.03); /* естественное замедление с лёгкой инерцией */
+  --soft: cubic-bezier(0.25, 0.8, 0.3, 1);
+  --t-drawer: 560ms;
+  --t-card: 300ms;
+  --t-press: 110ms;
+  --cols: 4;
+  --gap: 8px;
+  /* ширина ящика — из ширины раздела; остальная геометрия пропорциональна ей (те же числа в Cabinet.tsx) */
+  --dw: calc((min(1240px, 100vw - 2 * clamp(16px, 5vw, 70px)) - 76px) / 4);
+  --dh: calc(var(--dw) * 0.647);
+  --pull: calc(var(--dw) * 0.93);
+  --depth: calc(var(--dw) * 1.22);
+  --wall: calc(var(--dw) * 0.37);
+  --lip: max(10px, calc(var(--dw) * 0.053));
+  --ch: calc(var(--dh) * 0.86);
+  --tabh: calc(var(--dw) * 0.068);
+  --persp: calc(var(--dw) * 8);
+  --eye: calc(var(--dw) * -3.3);
+  position: relative;
+  color: #ecd9b0;
+}
+
+.scene {
+  position: relative;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding-top: 40px;
+  perspective: var(--persp);
+  perspective-origin: 50% var(--eye);
+}
+
+/* 1. НЕПОДВИЖНЫЙ КОРПУС — у него нет transform, состояние его не меняет */
+.carcass {
+  position: relative;
+  padding: 50px 18px 20px;
+  transform-style: preserve-3d;
+  background: linear-gradient(#2e1b0c, #180e06);
+  box-shadow: inset 0 2px 0 rgb(255 210 150 / 0.12), 0 40px 60px -20px rgb(0 0 0 / 0.8);
+}
+.carcass::after {
+  content: "";
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  bottom: -26px;
+  height: 26px;
+  background: radial-gradient(ellipse 50% 100% at 50% 0, rgb(0 0 0 / 0.65), transparent);
+  pointer-events: none;
+}
+.plaque {
+  position: absolute;
+  left: 50%;
+  top: -18px;
+  translate: -50% 0;
+  width: 300px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+}
+.plaque span {
+  position: relative;
+  font: 500 12.5px var(--bc-display), sans-serif;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #3a2808;
+}
+.front:focus-visible { outline: 2px solid #e7c27a; outline-offset: 3px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), var(--dw));
+  gap: var(--gap);
+  padding: var(--gap);
+  background: #0a0603;
+  transform-style: preserve-3d;
+}
+
+/* 2. НЕЗАВИСИМЫЙ ЯЩИК: проём в корпусе + коробка, которая едет по оси Z */
+.bay {
+  position: relative;
+  width: var(--dw);
+  height: var(--dh);
+  transform-style: preserve-3d;
+}
+/* темнота проёма — чуть глубже фасада, чтобы нажатая панель не проваливалась за неё */
+.bay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateZ(-8px);
+  background: radial-gradient(ellipse 80% 70% at 50% 60%, #120a04, #030201);
+}
+.box {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+  transition: transform 220ms var(--soft);
+}
+.bay[data-open] .box { transform: translateZ(var(--pull)); transition: transform var(--t-drawer) var(--slide); }
+.bay[data-closing] .box { transition: transform var(--t-drawer) var(--soft); }
+/* наведение: ящик чуть подаётся вперёд на направляющих — без подсветки */
+.bay:not([data-open]):not([data-closing]):not(.blank):hover .box { transform: translateZ(7px); }
+
+.pl {
+  position: absolute;
+  backface-visibility: hidden;
+  pointer-events: none;
+  background-image: var(--wood);
+  background-size: calc(var(--dw) * 0.9) auto;
+}
+/* дно, стенки, задняя стенка: коробка соединена с передней панелью и уходит в корпус */
+.floor {
+  left: 10px;
+  right: 10px;
+  top: calc(var(--dh) - 12px - var(--depth));
+  height: var(--depth);
+  transform-origin: bottom;
+  transform: rotateX(90deg);
+  background-image: linear-gradient(rgb(10 6 2 / 0.92), rgb(20 12 5 / 0.6) 35%, rgb(30 18 8 / 0.28)), var(--wood);
+}
+/* стенки двусторонние: у крайних ящиков видна наружная сторона, иначе сквозь неё светит дно.
+   Материал — то же тёмное дерево, что у фасада: светлая стенка рядом с ним читается как свечение */
+.wl,
+.wr {
+  backface-visibility: visible;
+  top: calc(var(--dh) - 12px - var(--wall));
+  width: var(--depth);
+  height: var(--wall);
+  transform-origin: left;
+  transform: rotateY(90deg);
+}
+.wl {
+  left: 10px;
+  background-image: linear-gradient(90deg, rgb(38 20 9 / 0.78), rgb(16 9 4 / 0.9) 55%, rgb(5 3 1 / 0.96)), var(--wood);
+}
+.wr {
+  left: calc(var(--dw) - 10px - var(--depth));
+  transform-origin: right;
+  transform: rotateY(-90deg);
+  background-image: linear-gradient(270deg, rgb(38 20 9 / 0.78), rgb(16 9 4 / 0.9) 55%, rgb(5 3 1 / 0.96)), var(--wood);
+}
+.rim {
+  left: 10px;
+  right: 10px;
+  top: calc(var(--dh) - 12px - var(--wall));
+  height: var(--wall);
+  transform: translateZ(calc(-1 * var(--depth)));
+  background-image: linear-gradient(rgb(8 5 2 / 0.75), rgb(8 5 2 / 0.75)), var(--wood);
+}
+/* торец передней панели */
+.lip {
+  left: 0;
+  right: 0;
+  top: calc(-1 * var(--lip));
+  height: var(--lip);
+  transform-origin: bottom;
+  transform: rotateX(90deg);
+  background-image: linear-gradient(rgb(70 40 15 / 0.2), rgb(20 10 4 / 0.55)), var(--wood);
+}
+/* тень выдвинутого ящика на фасад ниже: растёт вместе с выдвижением */
+.cast {
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  top: 100%;
+  height: 70%;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateZ(0.5px);
+  background: linear-gradient(rgb(0 0 0 / 0.75), rgb(0 0 0 / 0.35) 40%, transparent);
+  transition: opacity var(--t-drawer) var(--soft);
+}
+.bay[data-open] .cast { opacity: 1; }
+
+/* передняя панель с ручкой — единственная кнопка ящика */
+.front {
+  position: absolute;
+  inset: 0;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  /* фасад стоит чуть впереди плоскости корпуса: нажатый, он не должен уйти за неё (z < 0 — и его не видно) */
+  transform: translateZ(3px);
+  transition: transform var(--t-press) ease-out, filter 0.4s;
+}
+.blank .front { cursor: default; filter: brightness(0.6); }
+.frontImg { object-fit: cover; }
+.bay[data-press] .front { transform: translateZ(0.5px); }
+/* пока выдвинут другой ящик, остальные фасады уходят в тень */
+.room:not([data-phase="A"]) .bay:not([data-open]) .front { filter: brightness(0.55); }
+.slip {
+  position: absolute;
+  left: 34.5%;
+  top: 23.5%;
+  width: 31%;
+  height: 19%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  background: linear-gradient(#efe6d0, #dccfae);
+  color: #211710;
+  text-align: center;
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.35);
+}
+.slip b { font: 500 calc(var(--dw) * 0.03) / 1.15 var(--bc-display), sans-serif; letter-spacing: 0.06em; text-transform: uppercase; }
+.slip small { font: calc(var(--dw) * 0.027) var(--bc-mono), monospace; color: #93201b; }
+
+/* 3. СОДЕРЖИМОЕ ЯЩИКА: карточки стоят на дне, язычки в трёх постоянных позициях (лево · центр · право) */
+.files {
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  top: 0;
+  height: calc(var(--dh) - 12px);
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+.card,
+.guide {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 3px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  pointer-events: auto;
+  transform-origin: 50% 100%;
+  transform-style: preserve-3d; /* язычок чуть впереди плоскости карточки — иначе сортировка 3D прячет его за соседней */
+}
+.card {
+  height: var(--ch);
+  transform: translateZ(var(--z)) translateY(var(--rise, 0px));
+  transition: transform var(--t-card) var(--soft);
+}
+.stock { object-fit: fill; }
+/* язычок: ровно треть ширины карточки, одна гарнитура и высота у всех */
+.tab {
+  position: absolute;
+  top: calc(-1 * var(--tabh) + 1px);
+  left: calc(var(--col) * 100% / 3 + 3px);
+  width: calc(100% / 3 - 6px);
+  height: var(--tabh);
+  display: grid;
+  place-items: center;
+  padding: 0 8px;
+  background: linear-gradient(#f2e8cf, #e4d6b2);
+  clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 100%, 0 100%);
+  font: 500 calc(var(--dw) * 0.036) / 1 var(--bc-display), sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #3b2a14;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transform: translateZ(1px);
+}
+.face {
+  position: absolute;
+  inset: 0;
+  transform: translateZ(1px);
+  padding: 4% 5%;
+  opacity: 0;
+  transition: opacity calc(var(--t-card) * 0.8);
+  pointer-events: none;
+}
+.face > span { display: block; }
+.faceHead { display: flex !important; justify-content: space-between; font: calc(var(--dw) * 0.025) var(--bc-mono), monospace; letter-spacing: 0.2em; text-transform: uppercase; color: #8b3a22; }
+.faceName { font: 400 calc(var(--dw) * 0.052) / 1.1 var(--bc-mono), monospace; color: #160f09; margin-top: 5px; }
+.faceAka { font: calc(var(--dw) * 0.032) / 1.3 var(--bc-mono), monospace; color: #3a2c1e; margin-top: 3px; }
+/* наведение: карточка чуть приподнимается */
+.bay[data-open] .card:not([data-active]):hover { --rise: -7px; }
+.card:focus-visible { outline: none; }
+.card:focus-visible .tab { outline: 2px solid #8b3a22; outline-offset: -3px; }
+/* 4. АКТИВНАЯ КАРТОЧКА: только она поднимается из стопки и показывает лицевую сторону */
+.card[data-active] { --rise: calc(var(--ch) * -0.5); }
+.card[data-active] .face { opacity: 1; }
+.bay:not([data-open]) .card,
+.bay:not([data-open]) .guide {
+  visibility: hidden;
+  transition: transform var(--t-card), visibility 0s var(--t-drawer);
+}
+/* в свёрнутых разделах у личных карточек язычков не видно — только у разделителей */
+.files[data-sectioned] .card[data-off] .tab { visibility: hidden; }
+
+/* направляющий разделитель большого ящика: выше карточек, плотный картон, язычок с диапазоном */
+.guide {
+  height: calc(var(--ch) + 12px);
+  transform: translateZ(var(--z)) rotateX(var(--tilt, 0deg)) translateY(var(--lift, 0px));
+  transition: transform var(--t-card) var(--soft);
+  background: linear-gradient(#cdb27a, #b89a5e);
+  box-shadow: inset 0 0 0 1px rgb(80 55 20 / 0.3);
+}
+.guide:hover { --lift: -5px; }
+.guide[data-open] { --tilt: -26deg; }
+.gt {
+  position: absolute;
+  top: calc(-1.5 * var(--tabh) + 1px);
+  left: calc(var(--col) * 100% / 3 + 3px);
+  width: calc(100% / 3 - 6px);
+  height: calc(1.5 * var(--tabh));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0 8px;
+  background: linear-gradient(#d6bc84, #c2a468);
+  clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 100%, 0 100%);
+  font: 500 calc(var(--dw) * 0.038) / 1.1 var(--bc-display), sans-serif;
+  letter-spacing: 0.06em;
+  color: #3b2a10;
+  white-space: nowrap;
+  transform: translateZ(1px);
+}
+.gt small { display: block; max-width: 100%; font: calc(var(--dw) * 0.027) var(--bc-mono), monospace; color: #5b3e16; overflow: hidden; text-overflow: ellipsis; }
+.guide:focus-visible { outline: none; }
+.guide:focus-visible .gt { outline: 2px solid #8b3a22; outline-offset: -3px; }
+
+.hint {
+  margin-top: 14px;
+  text-align: center;
+  font: 11px var(--bc-mono), monospace;
+  letter-spacing: 0.12em;
+  color: rgb(236 217 176 / 0.6);
+}
+/* опись дела — текстовая ссылка в строке подсказки */
+.all { padding: 6px 2px; border: 0; background: none; cursor: pointer; font: inherit; letter-spacing: inherit; color: #ecd9b0; transition: translate 0.2s; }
+.all::after { content: " →"; }
+.plain { padding: 6px 2px; border: 0; background: none; cursor: pointer; font: inherit; letter-spacing: inherit; color: inherit; transition: translate 0.2s; }
+.plain:hover { translate: 0 -1px; }
+.plain:focus-visible { outline: 2px solid #e7c27a; outline-offset: 2px; }
+.all:hover { translate: 3px 0; }
+.all:focus-visible { outline: 2px solid #e7c27a; outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* опись — лист со списком */
+.ledgerLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 3vh 3vw;
+  background: rgb(8 5 3 / 0.7);
+  animation: fade 0.3s both;
+}
+@keyframes fade { from { opacity: 0; } }
+.ledgerSheet {
+  position: relative;
+  width: min(860px, 94vw);
+  max-height: 88vh;
+  overflow: auto;
+  padding: 30px 36px;
+  color: #211710;
+  background: linear-gradient(200deg, #f1e8d4, #e0d3b5);
+  box-shadow: -20px 40px 40px rgb(0 0 0 / 0.5);
+  rotate: -0.6deg;
+}
+.ledgerSheet h3 { font: 500 21px var(--bc-display), sans-serif; letter-spacing: 0.18em; text-transform: uppercase; }
+.ledgerCols { columns: 3 200px; column-gap: 30px; margin-top: 14px; }
+.ledgerCols section { break-inside: avoid; margin-bottom: 14px; }
+.ledgerCols h4 { font: normal 10px var(--bc-mono), monospace; letter-spacing: 0.2em; text-transform: uppercase; color: #8b3a22; margin-bottom: 4px; }
+.ledgerCols button {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: 14px/1.6 var(--bc-mono), monospace;
+  transition: translate 0.15s;
+}
+.ledgerCols button span { color: #8a6a48; }
+.ledgerCols button:hover { translate: 4px 0; }
+.ledgerCols button:hover span { color: #93201b; }
+.ledgerCols button:focus-visible { outline: 2px solid #8b3a22; outline-offset: 2px; }
+.ledgerClose {
+  position: absolute;
+  right: 18px;
+  top: 16px;
+  padding: 6px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 11px var(--bc-mono), monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #3b2a14;
+}
+.ledgerClose:focus-visible { outline: 2px solid #8b3a22; }
+
+/* ---------- телефон: тот же механизм, два ящика в ряд ---------- */
+@media (max-width: 760px) {
+  .room {
+    --cols: 2;
+    --gap: 6px;
+    --dw: calc((100vw - 2 * clamp(16px, 5vw, 70px) - 24px - 18px) / 2);
+    --pull: calc(var(--dw) * 0.95);
+    --depth: calc(var(--dw) * 1.27);
+    --tabh: calc(var(--dw) * 0.1);
+    --persp: calc(var(--dw) * 7);
+  }
+  .scene { padding-top: 48px; }
+  .carcass { padding: 44px 12px 12px; }
+  .plaque { left: auto; right: 6px; translate: none; width: 150px; height: 38px; }
+  .plaque span { font-size: 9px; letter-spacing: 0.18em; }
+  .slip b { font-size: 7.5px; }
+  .slip small { font-size: 7px; }
+  .files { left: 6%; right: 6%; }
+  .tab { left: calc(var(--col) * 50% + 2px); width: calc(50% - 4px); font-size: 8.5px; padding: 0 5px; }
+  .gt { left: calc(var(--col) * 50% + 2px); width: calc(50% - 4px); font-size: 9px; }
+  .gt small { font-size: 7px; }
+  .faceName { font-size: 12px; }
+  .faceAka { display: none; }
+  .hint { font-size: 10px; letter-spacing: 0.06em; }
+  .ledgerSheet { padding: 46px 18px 22px; } /* место под «Положить на место» над заголовком */
+}
+@media (prefers-reduced-motion: reduce) {
+  .room { --t-drawer: 1ms; --t-card: 1ms; --t-press: 1ms; }
+  .ledgerLayer { animation: none; }
+}
