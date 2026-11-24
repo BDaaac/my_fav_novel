@@ -1,0 +1,419 @@
+/* Досье — свиток на столе летописца. Сцена (окно сверху, стол с тушечницей снизу) — одна картинка;
+   свиток — три среза: левый валик, бумага с каймой (повторяется), правый валик. */
+
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #0d0807;
+  font-family: var(--pv-text), Georgia, serif;
+  color: #2a1d15;
+}
+.scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.frame {
+  --h: min(66vh, 37.5vw, 760px);
+  --band: calc(var(--h) * 0.14); /* парчовая кайма сверху и снизу: 14% высоты картинки */
+  --gap: clamp(20px, 2.2vw, 40px);
+  position: relative;
+  display: flex;
+  width: min(97vw, calc(var(--h) * 2.63));
+  height: var(--h);
+  margin-top: 1vh;
+  filter: drop-shadow(0 26px 22px rgba(0, 0, 0, 0.6));
+}
+.rollL,
+.rollR {
+  flex: none;
+  height: 100%;
+  width: auto;
+  position: relative;
+  z-index: 2;
+}
+.sheet {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  margin: 0 -2px;
+  background: url(/art/passivki/scroll2-m.webp) left center / auto 100% repeat-x;
+}
+.paper {
+  height: 100%;
+  box-sizing: border-box;
+  padding: calc(var(--band) + var(--h) * 0.035) calc(var(--h) * 0.05) calc(var(--band) + var(--h) * 0.03);
+  display: flex;
+  gap: var(--gap);
+  container-type: size;
+}
+
+/* ── лицо свитка: портрет и имя ── */
+.face {
+  flex: none;
+  width: 23%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.portrait {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: 50% 100%;
+}
+.portrait i {
+  font: 400 42cqh/1 var(--pv-display), Georgia, serif;
+  font-style: normal;
+  color: rgba(70, 44, 30, 0.2);
+}
+.face h2 {
+  margin: 0.2em 0 0;
+  font: 400 clamp(22px, 7.4cqh, 44px) / 1.05 var(--pv-display), Georgia, serif;
+  color: #1f140e;
+  text-wrap: balance;
+}
+.aff {
+  margin: 0.3em 0 0;
+  font-style: italic;
+  font-size: clamp(13px, 3.4cqh, 19px);
+  color: #5c4636;
+}
+
+/* ── записи: колонки, по три на разворот ── */
+.pages {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.flow {
+  width: 100%;
+  height: 100%;
+  column-width: var(--colw, 300px);
+  column-gap: var(--gap);
+  column-fill: auto;
+  font-size: clamp(13px, 3.05cqh, 18px);
+  line-height: 1.42;
+  transform: translateX(calc(var(--page, 0) * -1 * (100% + var(--gap))));
+}
+.sec {
+  margin: 0 0 1.05em;
+}
+.sec h3 {
+  margin: 0 0 0.22em;
+  font: 400 1.62em/1.1 var(--pv-display), Georgia, serif;
+  color: #5d1a12;
+  break-after: avoid;
+}
+.sec p {
+  margin: 0 0 0.45em;
+  hyphens: auto;
+  orphans: 2;
+  widows: 2;
+}
+
+.link {
+  display: grid;
+  grid-template-columns: 2.7em 1fr;
+  gap: 0.65em;
+  align-items: start;
+  margin: 0 0 0.6em;
+  break-inside: avoid;
+}
+.link p {
+  margin: 0;
+}
+.link b,
+.skills b {
+  font-weight: 600;
+}
+.medal {
+  appearance: none;
+  width: 2.7em;
+  height: 2.7em;
+  padding: 0;
+  border: 2px solid #8a6a3c;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: #e9dcc0;
+  font-size: inherit;
+  transform-origin: 50% 110%;
+  transition: transform 0.25s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+button.medal {
+  cursor: pointer;
+}
+/* медальон приподнимают за край */
+button.medal:hover,
+button.medal:focus-visible {
+  transform: rotate(-9deg) translateY(-2px);
+}
+button.medal:focus-visible {
+  outline: 3px solid #6d1710;
+  outline-offset: 2px;
+}
+.medal > span {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+.medal img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 6%;
+}
+.medal i {
+  font: 400 1.35em/1 var(--pv-display), Georgia, serif;
+  font-style: normal;
+  color: #5c4636;
+}
+.medal[data-none] {
+  border-style: dashed;
+  border-color: rgba(138, 106, 60, 0.6);
+  background: none;
+}
+
+.feats {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.feats li {
+  position: relative;
+  padding-left: 1.35em;
+  margin: 0 0 0.42em;
+  break-inside: avoid;
+}
+/* мазок киновари */
+.feats li::before {
+  content: "";
+  position: absolute;
+  left: 0.1em;
+  top: 0.48em;
+  width: 0.58em;
+  height: 0.52em;
+  border-radius: 55% 45% 60% 40%;
+  background: #a32116;
+  transform: rotate(-12deg);
+}
+
+/* пассивные навыки Сюй Сяошоу — на красном поле, как сектор диска */
+.skills {
+  margin: 0.6em 0 0.2em;
+  padding: 0.65em 0.9em;
+  list-style: none;
+  background: #8f1d13 url(/art/passivki/slip.webp) center / 220% auto;
+  background-blend-mode: multiply;
+  color: #f6e3b4;
+  font-size: 0.93em;
+  line-height: 1.25;
+  break-inside: avoid;
+  box-shadow: 0 2px 5px rgba(60, 20, 10, 0.4);
+}
+.skills li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8em;
+  padding: 0.16em 0;
+}
+.skills span {
+  flex: none;
+  color: #f3cf86;
+}
+
+/* ── табличка на углу свитка ── */
+.slot {
+  position: absolute;
+  left: 0.6%;
+  bottom: -17%;
+  width: calc(var(--h) * 0.27);
+  z-index: 3;
+  pointer-events: none;
+  transform: rotate(-7deg);
+  filter: drop-shadow(8px 12px 9px rgba(0, 0, 0, 0.6));
+}
+
+/* ── листание: валики — кнопки ── */
+.prev,
+.next {
+  appearance: none;
+  position: absolute;
+  top: 0;
+  z-index: 4;
+  width: calc(var(--h) * 0.2);
+  height: 100%;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font: 400 calc(var(--h) * 0.16) / 1 var(--pv-display), Georgia, serif;
+  color: #5d1a12;
+  text-shadow: 0 1px 0 rgba(255, 240, 210, 0.6);
+}
+.prev {
+  left: 0;
+}
+.next {
+  right: 0;
+}
+.prev::before {
+  content: "\2039";
+  transition: transform 0.25s ease;
+}
+.next::before {
+  content: "\203A";
+  transition: transform 0.25s ease;
+}
+/* валик подаётся под рукой в ту сторону, куда покатится */
+.prev:hover:not(:disabled)::before {
+  transform: translateX(-18%);
+}
+.next:hover:not(:disabled)::before {
+  transform: translateX(18%);
+}
+.prev:disabled,
+.next:disabled {
+  cursor: default;
+}
+.prev:disabled::before,
+.next:disabled::before {
+  opacity: 0;
+}
+.prev:focus-visible,
+.next:focus-visible {
+  outline: 3px solid #f3e6c8;
+  outline-offset: -4px;
+}
+.pager,
+.close {
+  position: absolute;
+  margin: 0;
+  font: 400 clamp(15px, 1.25vw, 21px) / 1 var(--pv-display), Georgia, serif;
+  color: #f1e2bd;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
+}
+.pager {
+  left: 0;
+  right: 0;
+  text-align: center;
+  bottom: calc(var(--h) * -0.075);
+}
+.close {
+  appearance: none;
+  right: 4px;
+  top: calc(var(--h) * -0.1);
+  border: 0;
+  background: none;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.close:hover {
+  transform: translateX(-4px);
+}
+.close:focus-visible {
+  outline: 2px solid #f1e2bd;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prev::before,
+  .next::before,
+  .close,
+  .medal {
+    transition: none;
+  }
+}
+
+/* ── узкий экран: свиток висит вертикально и листается вниз, страниц нет ── */
+@media (max-width: 820px), (max-aspect-ratio: 4 / 5) {
+  .scene {
+    filter: brightness(0.5) blur(4px);
+  }
+  .frame {
+    --h: 100dvh;
+    width: 100vw;
+    height: 100dvh;
+    margin: 0;
+    filter: none;
+  }
+  .rollL,
+  .rollR,
+  .slot,
+  .prev,
+  .next,
+  .pager {
+    display: none;
+  }
+  .sheet {
+    margin: 0;
+    background: #eadfc6;
+  }
+  .paper {
+    display: block;
+    padding: 64px 22px 48px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    container-type: normal;
+  }
+  .face {
+    width: 100%;
+    margin-bottom: 26px;
+  }
+  .portrait {
+    flex: none;
+    height: 220px;
+  }
+  .portrait i {
+    font-size: 150px;
+  }
+  .face h2 {
+    font-size: 34px;
+  }
+  .aff {
+    font-size: 16px;
+  }
+  .pages {
+    height: auto;
+    overflow: visible;
+  }
+  .flow {
+    height: auto;
+    column-count: 1;
+    column-width: auto;
+    font-size: 16.5px;
+    transform: none;
+  }
+  .close {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    color: #4a1810;
+    text-shadow: none;
+    background: rgba(234, 223, 198, 0.92);
+    font-size: 17px;
+  }
+}

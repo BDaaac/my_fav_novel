@@ -1,0 +1,155 @@
+/* Стол сверху — по концепту. Все размеры в долях ширины окна (--u = 1% ширины): первый экран совпадает
+   с картинкой концепта (16:9), ниже столешница продолжается плиткой, по краям — вещи летописца. */
+
+.scroller {
+  --u: 1vw;
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #1c0b08 url(/art/passivki/desk-tile.webp) center top / calc(var(--u) * 58) auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(230, 200, 140, 0.4) transparent;
+}
+
+.desk {
+  /* замеры по концепту: шаг колонок 21.7, ширина таблички со шнуром 17, шаг рядов 23.7, первая табличка с 20.9 */
+  --cardw: calc(var(--u) * 17);
+  --pitch: calc(var(--u) * 21.7);
+  --rowh: calc(var(--u) * 23.7);
+  --gridw: calc(var(--pitch) * 2 + var(--cardw));
+  --left: calc(var(--u) * 20.9);
+  position: relative;
+  padding: calc(var(--u) * 0.9) 0 calc(var(--u) * 10);
+}
+/* картинка концепта без табличек: верх стола с окном, лампой, диском, тушечницей и свитком */
+.plate {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  /* нижний край растворяется в продолжении столешницы */
+  mask-image: linear-gradient(to bottom, #000 82%, transparent 100%);
+  pointer-events: none;
+}
+/* диск слева на картинке — кнопка возврата к выбору тома */
+.back {
+  appearance: none;
+  position: absolute;
+  left: 0;
+  top: calc(var(--u) * 16.5);
+  width: calc(var(--u) * 15.5);
+  height: calc(var(--u) * 17.5);
+  border: 0;
+  border-radius: 0 50% 50% 0;
+  background: none;
+  cursor: pointer;
+  z-index: 2;
+}
+.back:focus-visible {
+  outline: 3px solid #f3e6c8;
+  outline-offset: -4px;
+}
+
+.field {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--left) var(--gridw) minmax(0, 1fr);
+}
+.sideL,
+.sideR {
+  position: relative;
+  min-width: 0;
+}
+.sideL img,
+.sideR img {
+  position: absolute;
+  height: auto;
+  filter: drop-shadow(8px 14px 10px rgba(0, 0, 0, 0.55));
+  pointer-events: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, var(--cardw));
+  column-gap: calc(var(--pitch) - var(--cardw));
+  grid-auto-rows: var(--rowh);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.grid li {
+  transform: rotate(var(--tilt, 0deg));
+}
+.card {
+  --rx: 0deg;
+  --ry: 0deg;
+  appearance: none;
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 0.35s cubic-bezier(0.3, 1.2, 0.5, 1), filter 0.35s ease;
+  filter: drop-shadow(5px 9px 7px rgba(0, 0, 0, 0.6));
+}
+/* табличку приподняли: она ближе к глазу, тень под ней длиннее и мягче */
+.card:hover,
+.card:focus-visible {
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-8px) scale(1.035);
+  filter: drop-shadow(12px 22px 14px rgba(0, 0, 0, 0.5));
+  position: relative;
+  z-index: 3;
+}
+.card:focus-visible {
+  outline: 3px solid #f3e6c8;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}
+
+/* ── узкий экран: картинка концепта — шапкой, под ней две таблички в ряд ── */
+@media (max-width: 820px), (max-aspect-ratio: 4 / 5) {
+  .scroller {
+    background-size: 700px auto;
+  }
+  .desk {
+    --cardw: calc((100vw - 42px) / 2);
+    --pitch: calc(var(--cardw) + 14px);
+    --rowh: calc(var(--cardw) * 1.46);
+    --gridw: calc(100vw - 28px);
+    --left: 14px;
+    padding: 0 0 80px;
+  }
+  .plate {
+    position: relative;
+    display: block;
+    object-position: 0 0;
+    margin-bottom: 14px;
+  }
+  .back {
+    top: 29vw;
+    width: 16vw;
+    height: 18vw;
+  }
+  .field {
+    grid-template-columns: var(--left) var(--gridw) 0;
+  }
+  .sideL,
+  .sideR {
+    visibility: hidden;
+  }
+  .grid {
+    grid-template-columns: repeat(2, var(--cardw));
+  }
+}

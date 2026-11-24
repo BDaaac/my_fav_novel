@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, JetBrains_Mono, Inter, Caveat, Rubik_Glitch, Rubik_Wet_Paint, Old_Standard_TT, Kurale, Literata, Ma_Shan_Zheng } from "next/font/google";
+import { Cormorant_Garamond, JetBrains_Mono, Inter, Caveat, Rubik_Glitch, Rubik_Wet_Paint, Old_Standard_TT, Kurale, Literata, Ma_Shan_Zheng, Handjet } from "next/font/google";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -28,15 +28,18 @@ const kurale = Kurale({ variable: "--ff-kurale", subsets: ["latin", "cyrillic"],
 const literata = Literata({ variable: "--ff-literata", subsets: ["latin", "cyrillic"], style: ["normal", "italic"] });
 const brush = Ma_Shan_Zheng({ variable: "--ff-brush", subsets: ["latin"], weight: "400", preload: false });
 
+// VHS-меню: пиксельный шрифт экранных надписей кассетной деки
+const handjet = Handjet({ variable: "--ff-vhs-bit", subsets: ["latin", "cyrillic"], weight: ["500", "600", "700"] });
+
 export const metadata: Metadata = {
-  title: "Картотека",
+  title: "Архив новелл",
   description: "Картотека героев любимых новелл",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ru" className="dark">
-      <body className={`${cormorant.variable} ${jetbrains.variable} ${inter.variable} ${caveat.variable} ${glitch.variable} ${wet.variable} ${press.variable} ${kurale.variable} ${literata.variable} ${brush.variable} grain antialiased`}>
+      <body className={`${cormorant.variable} ${jetbrains.variable} ${inter.variable} ${caveat.variable} ${glitch.variable} ${wet.variable} ${press.variable} ${kurale.variable} ${literata.variable} ${brush.variable} ${handjet.variable} grain antialiased`}>
         {children}
       </body>
     </html>

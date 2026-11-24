@@ -1,0 +1,273 @@
+/* Vintage Sony Trinitron / PVM CRT Studio Monitor & VHS Archive Styles */
+
+.vhs-shell {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  overflow: hidden;
+  background: #040507;
+  color: #e8e4da;
+  font-family: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(6px, 1.3vw, 18px);
+}
+
+/* Outer matte monitor housing + recessed glass tube */
+.crt-chassis {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 40px;
+  overflow: hidden;
+  background: radial-gradient(ellipse 82% 76% at 50% 48%, #12141a 0%, #090a0d 62%, #050507 100%);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.08),
+    inset 0 0 70px rgba(0, 0, 0, 0.92),
+    inset 0 28px 60px rgba(255, 255, 255, 0.03),
+    0 0 0 2px #0b0c10,
+    0 24px 70px rgba(0, 0, 0, 0.95);
+  transition: filter 0.35s ease;
+}
+
+.crt-chassis[data-bw="true"] {
+  filter: grayscale(1) contrast(1.16) brightness(0.96);
+}
+
+/* Curved glass tube specular sheen + deep corner phosphor mask */
+.crt-glass-overlay {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 55;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 75% 42% at 50% -4%, rgba(255, 255, 255, 0.075) 0%, rgba(255, 255, 255, 0.015) 45%, transparent 72%),
+    radial-gradient(ellipse 96% 94% at 50% 50%, transparent 64%, rgba(0, 0, 0, 0.56) 91%, rgba(0, 0, 0, 0.88) 100%);
+  box-shadow:
+    inset 0 0 38px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+/* Pixelated VHS-OSD display title font (Handjet with full uniform Cyrillic) */
+.font-vhs-bit {
+  font-family: var(--ff-vhs-bit), var(--font-jetbrains), ui-monospace, monospace;
+}
+
+/* Authentic CRT RGB phosphor chromatic fringe & bloom */
+.phosphor-glow,
+.osd-text {
+  text-shadow:
+    rgba(236, 233, 225, 0.24) 0px 0px 6px,
+    rgba(255, 40, 70, 0.36) -0.65px 0px,
+    rgba(40, 150, 255, 0.36) 0.65px 0px;
+}
+
+/* Subtle CRT vertical scan roll bar */
+@keyframes vhs-crt-roll-anim {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(0, 500%, 0); }
+}
+
+.vhs-crt-roll {
+  position: absolute;
+  top: -25%;
+  left: 0;
+  right: 0;
+  height: 25%;
+  pointer-events: none;
+  z-index: 24;
+  background: linear-gradient(
+    transparent,
+    rgba(236, 233, 225, 0.012) 45%,
+    rgba(236, 233, 225, 0.032) 50%,
+    rgba(236, 233, 225, 0.012) 55%,
+    transparent
+  );
+  animation: 8s linear infinite vhs-crt-roll-anim;
+}
+
+.osd-amber {
+  color: #f0b354;
+  text-shadow:
+    0 0 8px rgba(240, 179, 84, 0.45),
+    0 1px 2px rgba(0, 0, 0, 0.95);
+}
+
+.osd-btn {
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  padding: 0.25rem 0.45rem;
+  color: rgba(232, 228, 218, 0.72);
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: color 0.15s ease, text-shadow 0.15s ease;
+}
+
+.osd-btn:hover,
+.osd-btn[data-active="true"] {
+  color: #f6f2e8;
+  text-shadow: 0 0 10px rgba(246, 242, 232, 0.45);
+}
+
+.osd-btn:focus-visible {
+  outline: 1px dashed #f0b354;
+  outline-offset: 3px;
+}
+
+/* CRT tracking shimmer on playback monitor frame */
+@keyframes crt-track-bar {
+  0% { transform: translateY(-10%); opacity: 0; }
+  8% { opacity: 0.18; }
+  45% { opacity: 0.08; }
+  100% { transform: translateY(115%); opacity: 0; }
+}
+
+.crt-tracking-line {
+  animation: crt-track-bar 7.5s linear infinite;
+}
+
+/* RF channel switch glitch burst */
+@keyframes vhs-glitch-slice-a {
+  0% { transform: translateX(0); opacity: 0.75; }
+  30% { transform: translateX(-14px) skewX(-6deg); opacity: 0.9; }
+  65% { transform: translateX(10px) skewX(4deg); opacity: 0.55; }
+  100% { transform: translateX(0); opacity: 0; }
+}
+
+@keyframes vhs-glitch-slice-b {
+  0% { transform: translateX(0); opacity: 0.65; }
+  40% { transform: translateX(16px) skewX(5deg); opacity: 0.85; }
+  80% { transform: translateX(-8px); opacity: 0.35; }
+  100% { transform: translateX(0); opacity: 0; }
+}
+
+@keyframes vhs-glitch-flash {
+  0% { opacity: 0.36; }
+  45% { opacity: 0.12; }
+  100% { opacity: 0; }
+}
+
+.vhs-glitch-a {
+  background: linear-gradient(
+    180deg,
+    transparent 12%,
+    rgba(255, 62, 62, 0.24) 14%,
+    transparent 24%,
+    transparent 56%,
+    rgba(70, 224, 255, 0.22) 59%,
+    transparent 67%
+  );
+  animation: vhs-glitch-slice-a 0.26s steps(4) forwards;
+}
+
+.vhs-glitch-b {
+  background: linear-gradient(
+    180deg,
+    transparent 32%,
+    rgba(240, 179, 84, 0.22) 36%,
+    transparent 42%,
+    transparent 74%,
+    rgba(255, 255, 255, 0.18) 77%,
+    transparent 84%
+  );
+  animation: vhs-glitch-slice-b 0.26s steps(4) forwards;
+}
+
+.vhs-glitch-flash {
+  background: radial-gradient(circle at 50% 50%, rgba(255, 250, 236, 0.34), rgba(20, 24, 34, 0.45));
+  animation: vhs-glitch-flash 0.26s ease-out forwards;
+}
+
+/* Playback card subtle CRT noise grain */
+.vhs-grain {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 0);
+  background-size: 3px 3px;
+}
+
+/* CRT Boot / Loading Overlay (Arc Marumo / FerrelHD VHS format) */
+.vhs-loader {
+  background-color: #050505;
+  transition: opacity 0.5s ease-out;
+}
+
+.vhs-loader.is-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.vhs-loader-ticks {
+  background: repeating-linear-gradient(
+    to right,
+    #ece9e1 0 1.5px,
+    transparent 0 4.5px
+  );
+}
+
+.vhs-loader-dashes {
+  background: repeating-linear-gradient(
+    to right,
+    rgba(236, 233, 225, 0.35) 0 5px,
+    transparent 0 9px
+  );
+}
+
+/* Masked staggered entrance reveal (slides smoothly up out of clip mask) */
+.rv {
+  clip-path: inset(0px -100vw);
+  display: block;
+}
+
+.rv:has(> .rv-in) {
+  clip-path: inset(-24px -100vw);
+  transition: clip-path 2.2s;
+}
+
+.rv-inline {
+  clip-path: inset(0px -100vw);
+  display: inline-flex;
+  vertical-align: bottom;
+}
+
+.rv-inline:has(> .rv-in) {
+  clip-path: inset(-24px -100vw);
+  transition: clip-path 2.2s;
+}
+
+.rv-i {
+  opacity: 0;
+  transform: translateY(110%);
+  transition:
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.rv-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 720px) {
+  .vhs-shell {
+    padding: 4px;
+  }
+  .crt-chassis {
+    border-radius: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-tracking-line,
+  .vhs-crt-roll,
+  .vhs-glitch-a,
+  .vhs-glitch-b,
+  .vhs-glitch-flash {
+    animation: none !important;
+  }
+}

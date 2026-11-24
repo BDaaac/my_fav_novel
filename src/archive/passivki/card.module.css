@@ -1,0 +1,122 @@
+/* Широкая поясная табличка. Окно портрета и поле подписи — в долях картинки (замеры: .passivki/art/process2.py). */
+.card {
+  position: relative;
+  display: block;
+  width: 100%;
+  container-type: inline-size;
+}
+.card[data-kind="a"] {
+  --wl: 23.3%;
+  --wt: 17.4%;
+  --ww: 72.3%;
+  --wh: 52.3%;
+  --lt: 71.2%;
+  --lh: 16.5%;
+  --ll: 21.3%;
+  --lw: 76.3%;
+}
+.card[data-kind="b"] {
+  --wl: 23.3%;
+  --wt: 19%;
+  --ww: 71.7%;
+  --wh: 50.5%;
+  --lt: 71.5%;
+  --lh: 14.5%;
+  --ll: 21.3%;
+  --lw: 75.7%;
+}
+.card[data-kind="c"] {
+  --wl: 21.7%;
+  --wt: 16%;
+  --ww: 75%;
+  --wh: 54%;
+  --lt: 71.5%;
+  --lh: 13.5%;
+  --ll: 19.7%;
+  --lw: 79%;
+}
+.card[data-kind="d"] {
+  --wl: 24%;
+  --wt: 17%;
+  --ww: 72%;
+  --wh: 51%;
+  --lt: 70.5%;
+  --lh: 16.5%;
+  --ll: 22%;
+  --lw: 76%;
+}
+.card[data-kind="dead"] {
+  --wl: 23.7%;
+  --wt: 18.3%;
+  --ww: 72%;
+  --wh: 50%;
+  --lt: 71%;
+  --lh: 16.5%;
+  --ll: 21.7%;
+  --lw: 76%;
+}
+.card[data-kind="iron"] {
+  --wl: 21.6%;
+  --wt: 14.8%;
+  --ww: 73.4%;
+  --wh: 53.9%;
+  --lt: 70%;
+  --lh: 22%;
+  --ll: 19.6%;
+  --lw: 77.4%;
+}
+.img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.window {
+  position: absolute;
+  left: var(--wl);
+  top: var(--wt);
+  width: var(--ww);
+  height: var(--wh);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.window img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 6%;
+}
+.window i {
+  font: 400 30cqw/1 var(--pv-display), Georgia, serif;
+  font-style: normal;
+  color: rgba(58, 38, 26, 0.4);
+}
+.label {
+  position: absolute;
+  left: var(--ll);
+  width: var(--lw);
+  top: var(--lt);
+  height: var(--lh);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9cqw;
+  text-align: center;
+  color: #f2e2bb;
+  text-shadow: 0 1px 2px rgba(30, 6, 4, 0.7);
+}
+.label b {
+  font: 500 8.2cqw/1.05 var(--pv-text), Georgia, serif;
+  text-wrap: balance;
+}
+.label i {
+  font: 400 4.7cqw/1.1 var(--pv-text), Georgia, serif;
+  font-style: normal;
+  color: #ead3a4;
+  text-wrap: balance;
+}
+.card[data-kind="iron"] .label,
+.card[data-kind="iron"] .label i {
+  color: #e2dccd;
+}

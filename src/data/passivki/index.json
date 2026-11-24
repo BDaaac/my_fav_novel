@@ -1,0 +1,361 @@
+[
+ {
+  "id": "xu-xiaoshou",
+  "name": "Сюй Сяошоу",
+  "affiliation": "Внешний двор",
+  "circle": "outer",
+  "tablet": "wood",
+  "fate": "alive",
+  "arcs": [
+   "a1",
+   "a2",
+   "a3",
+   "a4",
+   "a5",
+   "a6",
+   "a7"
+  ]
+ },
+ {
+  "id": "elder-sang",
+  "name": "Старейшина Сан",
+  "affiliation": "Павильон Духовных Сокровищ",
+  "circle": "elders",
+  "tablet": "wood",
+  "fate": "alive",
+  "arcs": [
+   "a1",
+   "a2",
+   "a3",
+   "a4",
+   "a5",
+   "a6",
+   "a7"
+  ]
+ },
+ {
+  "id": "mu-zixi",
+  "name": "Му Цзыси",
+  "affiliation": "Внутренний двор",
+  "circle": "inner",
+  "tablet": "wood",
+  "fate": "alive",
+  "arcs": [
+   "a2",
+   "a4",
+   "a5",
+   "a6",
+   "a7"
+  ]
+ },
+ {
+  "id": "su-qianqian",
+  "name": "Су Цяньцянь",
+  "affiliation": "Внутренний двор",
+  "circle": "inner",
+  "tablet": "wood",
+  "fate": "alive",
+  "arcs": [
+   "a1",
+   "a3",
+   "a4",
+   "a6"
+  ]
+ },
+ {
+  "id": "mo-mo",
+  "name": "Мо Мо",
+  "affiliation": "Внутренний двор",
+  "circle": "inner",
+  "tablet": "wood",
+  "fate": "gone",
+  "arcs": [
+   "a2",
+   "a5",
+   "a7"
+  ]
+ },
+ {
+  "id": "zhou-tiancan",
+  "name": "Чжоу Тяньцань",
+  "affiliation": "Внутренний двор",
+  "circle": "inner",
+  "tablet": "wood",
+  "fate": "alive",
+  "arcs": [
+   "a2",
+   "a3",
+   "a5",
+   "a7"
+  ]
+ },
+ {
+  "id": "ye-xiaotian",
+  "name": "Е Сяотянь",
+  "affiliation": "Глава Дворца",
+  "circle": "elders",
+  "tablet": "wood",
+  "fate": "alive",
+  "arcs": [
+   "a3",
+   "a4",
+   "a5",
+   "a6",
+   "a7"
+  ]
+ },
+ {
+  "id": "xiao-qixiu",
+  "name": "Сяо ЦиСю",
+  "affiliation": "Павильон Духовных Законов",
+  "circle": "elders",
+  "tablet": "wood",
+  "fate": "alive",
+  "arcs": [
+   "a1",
+   "a2",
+   "a3",
+   "a4",
+   "a5",
+   "a6",
+   "a7"
+  ]
+ },
+ {
+  "id": "qiao-qianzhi",
+  "name": "Цяо Цяньчжи",
+  "affiliation": "Павильон Духовных Дел",
+  "circle": "elders",
+  "tablet": "wood",
+  "fate": "alive",
+  "arcs": [
+   "a1",
+   "a4",
+   "a5",
+   "a6",
+   "a7"
+  ]
+ },
+ {
+  "id": "zhao-xidong",
+  "name": "Чжао Сидун",
+  "affiliation": "Павильон Духовных Законов",
+  "circle": "elders",
+  "tablet": "wood",
+  "fate": "alive",
+  "arcs": [
+   "a3",
+   "a4",
+   "a5",
+   "a6",
+   "a7"
+  ]
+ },
+ {
+  "id": "rao-yinyin",
+  "name": "Жао Иньинь",
+  "affiliation": "Внутренний двор",
+  "circle": "inner",
+  "tablet": "wood",
+  "fate": "alive",
+  "arcs": [
+   "a1",
+   "a3",
+   "a4",
+   "a6"
+  ]
+ },
+ {
+  "id": "lan-xinzi",
+  "name": "Лань Синьцзы",
+  "affiliation": "Внутренний двор",
+  "circle": "inner",
+  "tablet": "wood",
+  "fate": "alive",
+  "arcs": [
+   "a2",
+   "a4",
+   "a7"
+  ]
+ },
+ {
+  "id": "zhang-xinxiong",
+  "name": "Чжан Синьсюн",
+  "affiliation": "Внутренний двор",
+  "circle": "inner",
+  "tablet": "wood",
+  "fate": "dead",
+  "arcs": [
+   "a2",
+   "a3",
+   "a7"
+  ]
+ },
+ {
+  "id": "chao-qingteng",
+  "name": "Чао Цинтэн",
+  "affiliation": "Внутренний двор",
+  "circle": "inner",
+  "tablet": "wood",
+  "fate": "alive",
+  "arcs": [
+   "a1",
+   "a2",
+   "a5",
+   "a7"
+  ]
+ },
+ {
+  "id": "yuan-tou",
+  "name": "Юань Тоу",
+  "affiliation": "Внутренний двор",
+  "circle": "inner",
+  "tablet": "wood",
+  "fate": "dead",
+  "arcs": [
+   "a4",
+   "a5"
+  ]
+ },
+ {
+  "id": "chao-shu",
+  "name": "Чао Шу",
+  "affiliation": "Внутренний двор",
+  "circle": "inner",
+  "tablet": "wood",
+  "fate": "dead",
+  "arcs": [
+   "a4"
+  ]
+ },
+ {
+  "id": "wen-chong",
+  "name": "Вэнь Чун",
+  "affiliation": "Внешний двор",
+  "circle": "outer",
+  "tablet": "wood",
+  "fate": "dead",
+  "arcs": [
+   "a1"
+  ]
+ },
+ {
+  "id": "liu-zhen",
+  "name": "Лю Чжэнь",
+  "affiliation": "Внешний двор",
+  "circle": "outer",
+  "tablet": "wood",
+  "fate": "alive",
+  "arcs": [
+   "a1",
+   "a2"
+  ]
+ },
+ {
+  "id": "di-xiner",
+  "name": "Ди Синь’эр",
+  "affiliation": "Внешний двор",
+  "circle": "outer",
+  "tablet": "wood",
+  "fate": "alive",
+  "arcs": [
+   "a1"
+  ]
+ },
+ {
+  "id": "a-jie",
+  "name": "А Цзе",
+  "affiliation": "Врата Тяньсюань",
+  "circle": "other",
+  "tablet": "iron",
+  "fate": "alive",
+  "arcs": [
+   "a5",
+   "a7"
+  ]
+ },
+ {
+  "id": "luo-leilei",
+  "name": "Ло Лэйлэй",
+  "affiliation": "Святые Рабы",
+  "circle": "slaves",
+  "tablet": "iron",
+  "fate": "gone",
+  "arcs": [
+   "a5",
+   "a6"
+  ]
+ },
+ {
+  "id": "masked-man",
+  "name": "Человек в маске",
+  "affiliation": "Святые Рабы",
+  "circle": "slaves",
+  "tablet": "iron",
+  "fate": "gone",
+  "arcs": [
+   "a3",
+   "a6"
+  ]
+ },
+ {
+  "id": "lei-shuangxing",
+  "name": "Лэй Шуансин",
+  "affiliation": "Святые Рабы",
+  "circle": "slaves",
+  "tablet": "iron",
+  "fate": "gone",
+  "arcs": [
+   "a6"
+  ]
+ },
+ {
+  "id": "cen-qiaofu",
+  "name": "Цэнь Цяофу",
+  "affiliation": "Святые Рабы",
+  "circle": "slaves",
+  "tablet": "iron",
+  "fate": "gone",
+  "arcs": [
+   "a6"
+  ]
+ },
+ {
+  "id": "jiang-bianyan",
+  "name": "Цзян Бяньянь",
+  "affiliation": "Священный Зал",
+  "circle": "hall",
+  "tablet": "iron",
+  "fate": "gone",
+  "arcs": [
+   "a5",
+   "a6",
+   "a7"
+  ]
+ },
+ {
+  "id": "cheng-xingchu",
+  "name": "Чэн Синчу",
+  "affiliation": "Священный Зал",
+  "circle": "hall",
+  "tablet": "iron",
+  "fate": "gone",
+  "arcs": [
+   "a5",
+   "a7"
+  ]
+ },
+ {
+  "id": "yu-zhiwen",
+  "name": "Юй Чживэнь",
+  "affiliation": "Священный Зал",
+  "circle": "hall",
+  "tablet": "iron",
+  "fate": "gone",
+  "arcs": [
+   "a5",
+   "a6",
+   "a7"
+  ]
+ }
+]

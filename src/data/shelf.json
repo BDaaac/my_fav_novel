@@ -13,7 +13,8 @@
     ],
     "href": "/books/escape-hotel",
     "cover": "/art/books/escape-hotel-cover-key-title.jpg",
-    "scene": "/art/books/escape-hotel-bell.jpg",
+    "sleeve": "/art/vhs/escape-hotel.webp",
+    "scene": "/art/vhs/escape-hotel-still.webp",
     "spine": { "bg": "#1f2a5e", "band": "#c9a24a", "ink": "#f0dfb0" },
     "height": 372
   },
@@ -31,7 +32,8 @@
     ],
     "href": "/books/reverend-gu",
     "cover": "/art/books/reverend-gu-cover.jpg",
-    "scene": "/art/books/reverend-gu-scene.jpg",
+    "sleeve": "/art/vhs/reverend-gu.webp",
+    "scene": "/art/vhs/reverend-gu-still.webp",
     "spine": { "bg": "#1b2232", "band": "#a9b4c8", "ink": "#e6e9f0" },
     "height": 380
   },
@@ -49,8 +51,9 @@
     ],
     "href": "/books/my-house-of-horrors",
     "cover": "/art/books/my-house-of-horrors-cover-door.jpg",
+    "sleeve": "/art/vhs/my-house-of-horrors.webp",
     "coverPos": "bottom",
-    "scene": "/art/books/my-house-of-horrors-scene.jpg",
+    "scene": "/art/vhs/my-house-of-horrors-still.webp",
     "spine": { "bg": "#2a0d10", "band": "#b3262c", "ink": "#ecd9c4" },
     "height": 376
   },
@@ -68,8 +71,28 @@
     ],
     "href": "/books/baccano",
     "cover": "/art/books/baccano-cover.jpg",
-    "scene": "/art/books/baccano-scene.jpg",
+    "sleeve": "/art/vhs/baccano.webp",
+    "scene": "/art/vhs/baccano-still-anime.webp",
     "spine": { "bg": "#101a33", "band": "#c79a4b", "ink": "#efe4cc" },
     "height": 376
+  },
+  {
+    "slug": "passivki",
+    "title": "Пассивки",
+    "short": "Пассивки",
+    "blurb": "Сюй Сяошоу умирает в больнице и просыпается учеником Внешнего двора Духовного Дворца Тяньсан. В голове у него чёрный диск, и по ошибке включается не та система: она платит за чужие удары, насмешки и сомнения.",
+    "chapters": 2053,
+    "archive": "Стол летописца Духовного Дворца",
+    "facts": [
+      { "label": "табличек на столе", "value": "27" },
+      { "label": "том на столе", "value": "1" },
+      { "label": "глав в новелле", "value": "2053" }
+    ],
+    "href": "/books/passivki",
+    "cover": "/art/books/passivki-cover.jpg",
+    "sleeve": "/art/vhs/passivki-arena.webp",
+    "scene": "/art/vhs/passivki-still-lake.webp",
+    "spine": { "bg": "#2a0e0b", "band": "#c8402c", "ink": "#f1e2bd" },
+    "height": 378
   }
 ]

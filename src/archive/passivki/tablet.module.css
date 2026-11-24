@@ -1,0 +1,73 @@
+/* Поясная табличка. Окно портрета и поле имени заданы в долях картинки — замеры из .passivki/art/process.py. */
+.tablet {
+  position: relative;
+  display: block;
+  width: 100%;
+  container-type: inline-size;
+}
+.tablet[data-kind="wood"] {
+  --wl: 13.5%;
+  --wt: 28.4%;
+  --ww: 73.5%;
+  --wh: 28.6%;
+  --nt: 58.4%;
+  --nh: 13.6%;
+}
+.tablet[data-kind="dead"] {
+  --wl: 18.5%;
+  --wt: 29%;
+  --ww: 63%;
+  --wh: 30%;
+  --nt: 60.4%;
+  --nh: 12%;
+}
+.tablet[data-kind="iron"] {
+  --wl: 17%;
+  --wt: 27.2%;
+  --ww: 66%;
+  --wh: 34%;
+  --nt: 63%;
+  --nh: 19%;
+}
+.img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.window {
+  position: absolute;
+  left: var(--wl);
+  top: var(--wt);
+  width: var(--ww);
+  height: var(--wh);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.window img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 4%;
+}
+.window i {
+  font: 400 46cqw/1 var(--pv-display), Georgia, serif;
+  font-style: normal;
+  color: rgba(58, 38, 26, 0.45);
+}
+.name {
+  position: absolute;
+  left: 13%;
+  right: 13%;
+  top: var(--nt);
+  height: var(--nh);
+  display: grid;
+  place-items: center;
+  font: 400 14.2cqw/1.06 var(--pv-display), Georgia, serif;
+  text-align: center;
+  text-wrap: balance;
+  color: #ecd9ae;
+}
+.tablet[data-kind="iron"] .name {
+  color: #d9d2c4;
+}

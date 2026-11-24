@@ -1,0 +1,23 @@
+/* «Пассивки» — корень страницы: комната летописца и стол сверху лежат друг под другом, видна одна. */
+
+.root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #0d0807;
+  color: #f1e4c6;
+  font-family: var(--pv-text), Georgia, serif;
+  perspective: 1400px;
+}
+.room,
+.desk {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 78%; /* взгляд наклоняется к столешнице */
+  will-change: transform, opacity;
+}
+.root[data-view="start"] .desk,
+.root[data-view="desk"] .room {
+  visibility: hidden;
+  opacity: 0;
+}

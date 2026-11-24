@@ -2,30 +2,36 @@ import fs from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
 import shelf from "@/data/shelf.json";
-import { Shelf, type Book } from "@/shelf/Shelf";
+import type { Book } from "@/shelf/Shelf";
+import { VhsVault } from "@/vhs/VhsVault";
 
-export const metadata = { title: "Галерея новелл", description: "Архивы героев новелл" };
+export const metadata = { title: "Архив новелл", description: "Аналоговый CRT-монитор и 3D VHS-архив героев новелл" };
 
-const vitrineCovers = new Map<string, { modifiedAt: number; size: number; src: Promise<string | null> }>();
+const inlineArt = new Map<string, { modifiedAt: number; size: number; src: Promise<string | null> }>();
 
-async function getVitrineCover(cover: string) {
-  const file = path.join(process.cwd(), "public", cover);
+async function getInlineArt(asset: string | null, kind: "cover" | "scene") {
+  if (!asset) return null;
+  const file = path.join(process.cwd(), "public", asset);
+  const key = `${kind}:${file}`;
 
   try {
     const { mtimeMs, size } = await fs.promises.stat(file);
-    const cached = vitrineCovers.get(file);
+    const cached = inlineArt.get(key);
     if (cached?.modifiedAt === mtimeMs && cached.size === size) return cached.src;
 
-    // Keep the original proportions so the vitrine can apply the book's coverPos.
     const src = sharp(file)
       .autoOrient()
-      .resize({ width: 428, height: 600, fit: "outside", withoutEnlargement: true })
-      .webp({ quality: 80 })
+      .resize(
+        kind === "cover"
+          ? { width: 512, height: 820, fit: "outside", withoutEnlargement: true }
+          : { width: 960, withoutEnlargement: true },
+      )
+      .webp({ quality: 84 })
       .toBuffer()
       .then((image) => `data:image/webp;base64,${image.toString("base64")}`)
       .catch(() => null);
 
-    vitrineCovers.set(file, { modifiedAt: mtimeMs, size, src });
+    inlineArt.set(key, { modifiedAt: mtimeMs, size, src });
     return src;
   } catch {
     return null;
@@ -33,16 +39,18 @@ async function getVitrineCover(cover: string) {
 }
 
 export default async function Home() {
-  // обложки или картины может ещё не быть: тогда книга и сцена берут цвет корешка
   const has = (p?: string | null) => (p && fs.existsSync(path.join(process.cwd(), "public", p)) ? p : null);
-  const books = await Promise.all((shelf as Book[]).map(async (book) => {
-    const cover = has(book.cover);
-    return {
-      ...book,
-      cover,
-      vitrineCover: cover ? await getVitrineCover(cover) : null,
-      scene: has(book.scene),
-    };
-  }));
-  return <Shelf books={books} hallBg={has("/art/museum/hall-bg.jpg")} />;
+  const books = await Promise.all(
+    (shelf as Book[]).map(async (book) => {
+      const cover = has(book.cover);
+      const sleeve = has(book.sleeve);
+      const scene = has(book.scene);
+      const [vitrineCover, readingScene] = await Promise.all([
+        getInlineArt(sleeve ?? cover, "cover"),
+        getInlineArt(scene, "scene"),
+      ]);
+      return { ...book, cover, sleeve, scene, vitrineCover, readingScene };
+    }),
+  );
+  return <VhsVault books={books} />;
 }
