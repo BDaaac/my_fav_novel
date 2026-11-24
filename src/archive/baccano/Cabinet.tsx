@@ -115,13 +115,17 @@ export function Cabinet({
   const [below, setBelow] = useState(0);
   const busy = useRef(false);
 
-  /* досье раскрывается только когда его бумага и гарнитуры уже в памяти; грузим заранее, с открытия страницы */
+  /* досье раскрывается только когда его бумага и гарнитуры уже в памяти;
+     грузим по первому взаимодействию со шкафом (или сразу, если открыта прямая ссылка #id),
+     чтобы не отнимать канал у первого экрана дела */
   const roomRef = useRef<HTMLDivElement>(null);
   const assets = useSyncExternalStore<AssetState>(watchDossierAssets, dossierAssets, () => "idle");
   const loadAssets = useCallback(() => {
     if (roomRef.current) loadDossierAssets(roomRef.current);
   }, []);
-  useEffect(loadAssets, [loadAssets]);
+  useEffect(() => {
+    if (openId) loadAssets();
+  }, [openId, loadAssets]);
   const ready = assets === "ready";
   // пока досье не готово или не загрузилось, строка состояния под шкафом должна быть на экране
   const hintRef = useRef<HTMLParagraphElement>(null);
@@ -270,6 +274,7 @@ export function Cabinet({
   }, [openId, ledger, lower, closeDrawer]);
 
   const onFront = (gi: number) => {
+    loadAssets();
     const s = stRef.current;
     if (s.drawer === gi && s.phase !== "A") {
       if (s.phase === "C") {
@@ -378,7 +383,7 @@ export function Cabinet({
   }[phase];
 
   return (
-    <div ref={roomRef} className={k.room} data-phase={phase} style={{ "--wood": `url(${wood.src})` } as CSSProperties}>
+    <div ref={roomRef} className={k.room} data-phase={phase} onPointerEnter={loadAssets} style={{ "--wood": `url(${wood.src})` } as CSSProperties}>
       <div className={k.scene} ref={sceneRef} style={{ paddingBottom: below } as CSSProperties}>
         <div className={k.carcass} ref={carcassRef}>
           <div className={k.plaque} aria-hidden>

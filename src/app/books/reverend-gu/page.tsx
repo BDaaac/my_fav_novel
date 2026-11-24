@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import Link from "next/link";
+import { preload } from "react-dom";
 import { Scroll } from "@/archive/gu/Scroll";
 import type { Cultivator } from "@/data/gu/types";
 import { VOLUMES } from "@/data/gu/types";
@@ -50,6 +51,7 @@ function readVolume(dir: string): Record<string, Cultivator> {
 }
 
 export default function GuArchive() {
+  preload("/art/gu/bg.jpg", { as: "image", fetchPriority: "high" });
   const data = path.join(process.cwd(), "src/data/gu");
   const pics = path.join(process.cwd(), "public/art/gu");
   const vols = Object.fromEntries(VOLUMES.map(({ n }) => [n, readVolume(path.join(data, `v${n}`))]));
@@ -59,6 +61,7 @@ export default function GuArchive() {
       {/* возврат в музей: маленькая лакированная табличка с киноварной печатью 归 — «вернуться» */}
       <Link
         href="/"
+        prefetch={false}
         aria-label="Вернуться в зал музея"
         className="group fixed left-4 top-4 z-40 flex items-center gap-2.5 rounded-[3px] py-1.5 pl-1.5 pr-3.5 opacity-80 transition-[opacity,transform] duration-300 ease-out hover:-translate-y-0.5 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none md:left-6 md:top-6"
         style={{

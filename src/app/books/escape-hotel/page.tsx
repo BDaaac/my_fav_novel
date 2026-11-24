@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import Link from "next/link";
+import { preload } from "react-dom";
 import { People } from "@/archive/people/People";
 import type { Guest } from "@/archive/people/GuestCard";
 
@@ -71,10 +72,14 @@ export default function Catalogue() {
   // второй и третий этажи: карточка этажа целиком в одном файле src/data/guests/f2|f3/<id>.json
   const floors = { 1: first, 2: readFloor(path.join(data, "f2")), 3: readFloor(path.join(data, "f3")) };
   const art = { 1: ls(pics), 2: ls(path.join(pics, "f2")), 3: ls(path.join(pics, "f3")) };
+  for (const file of art[1].filter((f) => /\.(jpg|jpeg|webp)$/i.test(f)).slice(0, 4)) {
+    preload(`/art/people/${file}`, { as: "image", fetchPriority: "high" });
+  }
   return (
     <>
       <Link
         href="/"
+        prefetch={false}
         className="fixed left-5 top-5 z-40 font-system text-[11px] tracking-[0.3em] text-[#e9e1d0]/55 transition-colors hover:text-[#e9e1d0] focus-visible:text-[#e9e1d0] focus-visible:outline-none"
       >
         ← К ПОЛКЕ

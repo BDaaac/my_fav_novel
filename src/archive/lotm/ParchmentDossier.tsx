@@ -79,6 +79,19 @@ export function ParchmentDossier({ character, allCharacters, onClose }: Parchmen
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spread, onClose]);
 
+  useEffect(() => {
+    for (const art of character.artifacts) {
+      const src = ARTIFACT_ART_SRC[art.art];
+      if (!src) continue;
+      const im = new Image();
+      im.decoding = "async";
+      im.src = src;
+    }
+    const seal = new Image();
+    seal.decoding = "async";
+    seal.src = SEAL_SRC[character.group];
+  }, [character]);
+
   const activeLink: LotmLink | undefined = character.links[selectedLinkIdx] ?? character.links[0];
   const activeLinkedChar = activeLink ? charById.get(activeLink.to) : undefined;
 

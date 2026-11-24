@@ -64,6 +64,14 @@ export function LotmArchive({ characters }: LotmArchiveProps) {
     }
   };
 
+  const warmGallery = () => {
+    for (const c of characters.slice(0, 8)) {
+      const im = new Image();
+      im.decoding = "async";
+      im.src = c.cardImage;
+    }
+  };
+
   return (
     <div className="lotm-root">
       {/* Постоянный атмосферный фон сайта: Тинген, багровая луна, Серый Туман, астролябия */}
@@ -90,7 +98,7 @@ export function LotmArchive({ characters }: LotmArchiveProps) {
         /* ==================== ЭКРАН 1: МЕНЮ ВЫБОРА ТОМА (БЕЗ КАРТОЧЕК ПЕРСОНАЖЕЙ) ==================== */
         <main className="lotm-menu-screen">
           <header className="lotm-menu-header">
-            <Link href="/" className="lotm-back-link">
+            <Link href="/" prefetch={false} className="lotm-back-link">
               ← БИБЛИОТЕКА
             </Link>
             <div className="lotm-brand-center">
@@ -113,6 +121,8 @@ export function LotmArchive({ characters }: LotmArchiveProps) {
                 src="/art/lotm/vol1-grimoire.webp"
                 alt={`Том ${selectedVol.roman} · ${selectedVol.title}`}
                 className={`lotm-grimoire-img ${selectedVol.ready ? "" : "lotm-grimoire-img--sealed"}`}
+                fetchPriority="high"
+                decoding="async"
               />
               {!selectedVol.ready && (
                 <div className="lotm-sealed-overlay">
@@ -156,6 +166,8 @@ export function LotmArchive({ characters }: LotmArchiveProps) {
                   <button
                     type="button"
                     className="lotm-open-btn"
+                    onPointerEnter={warmGallery}
+                    onFocus={warmGallery}
                     onClick={() => openVolume(selectedVol)}
                   >
                     <span>ОТКРЫТЬ ТОМ {selectedVol.roman}</span>

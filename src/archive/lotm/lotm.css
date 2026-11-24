@@ -528,11 +528,11 @@
   justify-items: center;
 }
 
-/* ==================== БАРОЧНАЯ 3D КАРТА ТАРО (ФИЗИКА КАК В «ПАССИВКАХ», БЕЗ СВЕЧЕНИЯ) ==================== */
+/* ==================== КОЛЛЕКЦИОННАЯ АНИМЕ-КАРТА ТАРО (2:3, ФИЗИКА КАК В «ПАССИВКАХ», БЕЗ СВЕЧЕНИЯ) ==================== */
 
 .lotm-card3d-slot {
   width: 100%;
-  max-width: 308px;
+  max-width: 288px;
   transform: rotate(var(--rest-tilt, 0deg));
   animation: lotmCardEnter 520ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
   animation-delay: var(--stagger, 0ms);
@@ -546,22 +546,23 @@
   position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 2 / 3;
   padding: 0;
   border: none;
-  background: transparent;
+  border-radius: 12px;
+  background: #0b0a0e;
   cursor: pointer;
   outline: none;
   will-change: transform, filter;
   transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
   transition: transform 0.35s cubic-bezier(0.3, 1.2, 0.5, 1), filter 0.35s ease;
-  filter: drop-shadow(5px 10px 9px rgba(0, 0, 0, 0.68));
+  filter: drop-shadow(5px 12px 12px rgba(0, 0, 0, 0.72));
 }
 
 .lotm-card3d:hover,
 .lotm-card3d:focus-visible {
   transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-10px) scale(1.045);
-  filter: drop-shadow(12px 24px 18px rgba(0, 0, 0, 0.62));
+  filter: drop-shadow(12px 26px 20px rgba(0, 0, 0, 0.68));
   z-index: 4;
 }
 
@@ -579,39 +580,109 @@
   z-index: 1;
   width: 100%;
   height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0b0a0e;
+  box-shadow: inset 0 0 0 1px rgba(214, 184, 126, 0.24);
 }
 
 .lotm-card3d-art {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   display: block;
   user-select: none;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 260ms ease-out;
 }
 
-.lotm-card3d-ribbon-text {
+.lotm-card3d-art.is-loaded {
+  opacity: 1;
+}
+
+.lotm-card3d-footer-veil {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  bottom: 4.2%;
+  height: 20%;
+  pointer-events: none;
+  background: radial-gradient(ellipse 50% 50% at 50% 62%, rgba(11, 10, 14, 0.78) 0%, rgba(11, 10, 14, 0.36) 55%, transparent 100%);
+}
+
+.lotm-card3d-caption {
   position: absolute;
   z-index: 10;
-  left: 16%;
-  right: 16%;
-  bottom: 12.2%;
+  left: 11%;
+  right: 11%;
+  bottom: 5.4%;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+  gap: 2px;
+  text-align: center;
   pointer-events: none;
   transform: translate3d(var(--px), var(--py), 0);
   transition: transform 0.35s cubic-bezier(0.3, 1.2, 0.5, 1);
 }
 
+.lotm-card3d-roman {
+  font-family: var(--lotm-serif);
+  font-size: clamp(16px, 1.45vw, 21px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  color: #dec084;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+}
+
+.lotm-card3d-roman i {
+  font-style: normal;
+  font-size: 0.52em;
+  vertical-align: middle;
+  color: rgba(226, 196, 134, 0.78);
+}
+
+.lotm-card3d-arcana {
+  font-family: var(--lotm-serif);
+  font-size: clamp(13px, 1.15vw, 16px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #ead19a;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+}
+
+.lotm-card3d-subname {
+  font-family: var(--lotm-serif);
+  font-size: clamp(11.5px, 0.96vw, 13.5px);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: 0.05em;
+  color: rgba(224, 203, 161, 0.88);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+}
+
+.lotm-card3d-star {
+  font-size: 10px;
+  line-height: 1;
+  color: rgba(222, 192, 132, 0.72);
+  margin-bottom: 2px;
+}
+
 .lotm-card3d-name {
   font-family: var(--lotm-serif);
-  font-size: clamp(12.5px, 1.15vw, 15.5px);
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: clamp(13px, 1.12vw, 15.5px);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #1e150c;
-  text-shadow: 0 1px 0 rgba(255, 248, 230, 0.85);
+  color: #ebd29d;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.96);
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1728,13 +1799,24 @@
   .lotm-sections-stack {
     padding: 0 16px;
   }
-  .lotm-card3d-ribbon-text {
-    left: 15%;
-    right: 15%;
+  .lotm-card3d-caption {
+    left: 8%;
+    right: 8%;
+    bottom: 4.8%;
+  }
+  .lotm-card3d-roman {
+    font-size: 13px;
+  }
+  .lotm-card3d-arcana {
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+  }
+  .lotm-card3d-subname {
+    font-size: 9.8px;
   }
   .lotm-card3d-name {
-    font-size: 9.6px;
-    letter-spacing: 0.03em;
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
   }
   .lotm-dossier-backdrop {
     padding: 8px;
@@ -1751,7 +1833,7 @@
     animation: none !important;
   }
   .lotm-card3d,
-  .lotm-card3d-ribbon-text {
+  .lotm-card3d-caption {
     transition: none;
   }
 }

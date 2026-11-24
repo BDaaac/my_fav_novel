@@ -66,6 +66,24 @@ export function People({ art, floors }: { art: Record<Floor, string[]>; floors: 
   const [floor, setFloor] = useState<Floor>(1);
   const guests = floors[floor];
   const ready = ([1, 2, 3] as Floor[]).filter((f) => f === 1 || Object.keys(floors[f]).length > 0);
+  // В простое тихо прогреваем портреты 2–3 этажей, чтобы переключение этажей не мигало пустыми рамками
+  useEffect(() => {
+    const warm = () => {
+      for (const f of [2, 3] as Floor[]) {
+        for (const file of art[f] ?? []) {
+          if (!/\.(jpg|jpeg|webp)$/i.test(file)) continue;
+          const im = new window.Image();
+          im.decoding = "async";
+          im.src = `/art/people/f${f}/${file}`;
+        }
+      }
+    };
+    const id = typeof requestIdleCallback === "function" ? requestIdleCallback(warm, { timeout: 2000 }) : window.setTimeout(warm, 800);
+    return () => {
+      if (typeof cancelIdleCallback === "function") cancelIdleCallback(id as number);
+      else window.clearTimeout(id as number);
+    };
+  }, [art]);
   // портрет этажа; если его ещё нет, берётся ближайший снизу
   const has = (id: string) => {
     for (let f = floor; f >= 1; f--) if (art[f as Floor].includes(`${id}.jpg`)) return f === 1 ? `/art/people/${id}.jpg` : `/art/people/f${f}/${id}.jpg`;

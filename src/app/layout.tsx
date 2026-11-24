@@ -11,10 +11,10 @@ const jetbrains = JetBrains_Mono({
   variable: "--font-jetbrains",
   subsets: ["latin", "cyrillic"],
 });
-const caveat = Caveat({ variable: "--font-caveat", subsets: ["latin", "cyrillic"] });
-const glitch = Rubik_Glitch({ variable: "--ff-glitch", subsets: ["latin", "cyrillic"], weight: "400" });
-const wet = Rubik_Wet_Paint({ variable: "--ff-wet", subsets: ["latin", "cyrillic"], weight: "400" });
-const inter = Inter({ variable: "--font-sans", subsets: ["latin", "cyrillic"] });
+const caveat = Caveat({ variable: "--font-caveat", subsets: ["latin", "cyrillic"], preload: false });
+const glitch = Rubik_Glitch({ variable: "--ff-glitch", subsets: ["latin", "cyrillic"], weight: "400", preload: false });
+const wet = Rubik_Wet_Paint({ variable: "--ff-wet", subsets: ["latin", "cyrillic"], weight: "400", preload: false });
+const inter = Inter({ variable: "--font-sans", subsets: ["latin", "cyrillic"], preload: false });
 // полка: антиква XIX века для названий книг (стиль Stripe Press), подписи моноширинным
 const press = Old_Standard_TT({
   variable: "--ff-press",
@@ -24,12 +24,12 @@ const press = Old_Standard_TT({
 });
 
 // «Преподобный Гу»: каллиграфическая антиква для имён, книжный шрифт для текста, кисть для иероглифов кланов
-const kurale = Kurale({ variable: "--ff-kurale", subsets: ["latin", "cyrillic"], weight: "400" });
-const literata = Literata({ variable: "--ff-literata", subsets: ["latin", "cyrillic"], style: ["normal", "italic"] });
+const kurale = Kurale({ variable: "--ff-kurale", subsets: ["latin", "cyrillic"], weight: "400", preload: false });
+const literata = Literata({ variable: "--ff-literata", subsets: ["latin", "cyrillic"], style: ["normal", "italic"], preload: false });
 const brush = Ma_Shan_Zheng({ variable: "--ff-brush", subsets: ["latin"], weight: "400", preload: false });
 
 // VHS-меню: пиксельный шрифт экранных надписей кассетной деки
-const handjet = Handjet({ variable: "--ff-vhs-bit", subsets: ["latin", "cyrillic"], weight: ["500", "600", "700"] });
+const handjet = Handjet({ variable: "--ff-vhs-bit", subsets: ["latin", "cyrillic"], weight: ["500", "600", "700"], preload: false });
 
 export const metadata: Metadata = {
   title: "Архив новелл",

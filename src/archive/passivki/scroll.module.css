@@ -44,7 +44,7 @@
   flex: 1;
   min-width: 0;
   margin: 0 -2px;
-  background: url(/art/passivki/scroll2-m.webp) left center / auto 100% repeat-x;
+  background: #d8c39b url(/art/passivki/scroll2-m.webp) left center / auto 100% repeat-x;
 }
 .paper {
   height: 100%;

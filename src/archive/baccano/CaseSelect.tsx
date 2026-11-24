@@ -8,13 +8,13 @@ const ART = {
   "1930": {
     folder: "/art/baccano/folder-1930.webp",
     h: 1008,
-    photo: "/art/baccano/ny1930-street.webp",
+    photo: "/art/baccano/ny1930-thumb.webp",
     pos: "88% 50%",
   },
   "1931": {
     folder: "/art/baccano/folder-1931.webp",
     h: 1001,
-    photo: "/art/baccano/express-bridge-1931.webp",
+    photo: "/art/baccano/express-bridge-thumb.webp",
     pos: "70% 50%",
   },
 } as const;
@@ -33,6 +33,8 @@ export function CaseSelect({ cases }: { cases: (Case & { count: number })[] }) {
           alt=""
           fill
           priority
+          fetchPriority="high"
+          decoding="sync"
           sizes="100vw"
           className={s.cover}
         />
@@ -70,6 +72,9 @@ export function CaseSelect({ cases }: { cases: (Case & { count: number })[] }) {
                   alt=""
                   width={760}
                   height={art.h}
+                  priority
+                  fetchPriority="high"
+                  decoding="sync"
                   sizes="(max-width: 760px) 86vw, 380px"
                   className={s.folderBase}
                 />
@@ -85,6 +90,9 @@ export function CaseSelect({ cases }: { cases: (Case & { count: number })[] }) {
                       src={art.photo}
                       alt=""
                       fill
+                      priority
+                      fetchPriority="high"
+                      decoding="sync"
                       sizes="(max-width: 760px) 64vw, 280px"
                       className={s.cover}
                       style={{ objectPosition: art.pos }}
@@ -96,6 +104,8 @@ export function CaseSelect({ cases }: { cases: (Case & { count: number })[] }) {
                   alt=""
                   width={180}
                   height={174}
+                  priority
+                  decoding="sync"
                   className={s.clip}
                 />
                 <span className={s.slip}>

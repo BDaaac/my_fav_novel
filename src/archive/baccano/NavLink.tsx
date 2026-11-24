@@ -17,7 +17,7 @@ const Arrow = () => (
 
 export function NavLink({ href, children, back, label }: Common & { href: string }) {
   return (
-    <Link href={href} className={n.nav} data-back={back || undefined} aria-label={label}>
+    <Link href={href} prefetch={href === "/" ? false : undefined} className={n.nav} data-back={back || undefined} aria-label={label}>
       {back && <Arrow />}
       <span>{children}</span>
     </Link>

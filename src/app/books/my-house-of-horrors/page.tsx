@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { preload } from "react-dom";
 import { HorrorScene } from "@/archive/horror/scene/HorrorScene";
 import type { BoardCharacter, House } from "@/archive/horror/scene/types";
 
@@ -33,5 +34,13 @@ function load(): House[] {
 }
 
 export default function Page() {
-  return <HorrorScene houses={load()} />;
+  const houses = load();
+  // Предзагружаем фон доски, таблички и первые 8 портретов, чтобы на первом кадре не было пустых окон
+  preload("/art/horror/scene/scene.webp", { as: "image", fetchPriority: "high" });
+  preload("/art/horror/scene/tab-on.webp", { as: "image" });
+  preload("/art/horror/scene/tab-off.webp", { as: "image" });
+  for (const c of (houses[0]?.characters ?? []).slice(0, 8)) {
+    if (c.portrait) preload(c.portrait, { as: "image", fetchPriority: "high" });
+  }
+  return <HorrorScene houses={houses} />;
 }

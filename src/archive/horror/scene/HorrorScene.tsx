@@ -1,5 +1,5 @@
 "use client";
-import { useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Marck_Script } from "next/font/google";
 import { ARROWS, NARROW_SLOTS, NARROW_VIEW, SCENE } from "@/data/horror/board/geometry";
@@ -38,6 +38,31 @@ export function HorrorScene({ houses }: { houses: House[] }) {
     return () => window.removeEventListener("resize", set);
   }, []);
 
+  // В простое после первого кадра тихо прогреваем подложку досье и портреты следующих страниц/разделов
+  useEffect(() => {
+    const urls = new Set<string>(["/art/horror/plate-blank.webp"]);
+    for (const h of houses) {
+      for (const c of h.characters) {
+        if (c.portrait) urls.add(c.portrait);
+      }
+    }
+    let cancelled = false;
+    const warm = () => {
+      if (cancelled) return;
+      for (const u of urls) {
+        const im = new Image();
+        im.decoding = "async";
+        im.src = u;
+      }
+    };
+    const id = typeof requestIdleCallback === "function" ? requestIdleCallback(warm, { timeout: 1800 }) : window.setTimeout(warm, 600);
+    return () => {
+      cancelled = true;
+      if (typeof cancelIdleCallback === "function") cancelIdleCallback(id as number);
+      else window.clearTimeout(id as number);
+    };
+  }, [houses]);
+
   const narrow = vp.w < NARROW;
   const perPage = narrow ? 4 : 8;
   const slots = narrow ? NARROW_SLOTS : [0, 1, 2, 3, 4, 5, 6, 7];
@@ -70,7 +95,7 @@ export function HorrorScene({ houses }: { houses: House[] }) {
   return (
     <main className={`hs ${hand.variable}${narrow ? " narrow" : ""}${ready ? " ready" : ""}`}>
       <div className="hs-fill" aria-hidden />
-      <Link href="/" className="hs-home">
+      <Link href="/" prefetch={false} className="hs-home">
         ← К полке
       </Link>
       <div className="hs-view" style={{ width: view.w * s, height: view.h * s }}>

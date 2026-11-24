@@ -307,8 +307,13 @@ export function Dossier({ d, backHref }: { d: D; backHref: string }) {
           {/* пропуск с портретом просто лежит поверх правой части листа */}
           <div className="card-rig">
             <div className="card">
-              <div className="art" style={d.art.portrait ? { backgroundImage: `url(${d.art.portrait})` } : undefined}>
-                {!d.art.portrait && "портрет ещё не снят"}
+              <div className="art">
+                {d.art.portrait ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={d.art.portrait} alt={d.name} fetchPriority="high" decoding="sync" />
+                ) : (
+                  "портрет ещё не снят"
+                )}
               </div>
               <div className="plate" style={d.name.length > 10 ? { fontSize: 25 } : undefined}>
                 {d.name.toUpperCase()}

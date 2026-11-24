@@ -1,3 +1,4 @@
+import { preload } from "react-dom";
 import { notFound } from "next/navigation";
 import { CasePage } from "@/archive/baccano/CasePage";
 import { loadCase } from "@/archive/baccano/load";
@@ -17,5 +18,10 @@ export async function generateMetadata({ params }: { params: Promise<{ arc: stri
 export default async function Page({ params }: { params: Promise<{ arc: string }> }) {
   const c = caseBySlug((await params).arc);
   if (!c) notFound();
+  preload(c.arc === "1930" ? "/art/baccano/ny1930-street.webp" : "/art/baccano/express-1931.webp", {
+    as: "image",
+    fetchPriority: "high",
+  });
+  preload("/art/baccano/desk.webp", { as: "image" });
   return <CasePage data={c} dossiers={loadCase(c)} train={c.arc === "1931" ? TRAIN : undefined} />;
 }

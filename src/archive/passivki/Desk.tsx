@@ -21,6 +21,7 @@ type View = "start" | "desk";
 
 export function Desk({ dossiers, portraits = [] }: { dossiers: Dossier[]; portraits?: string[] }) {
   const [view, setView] = useState<View>("start");
+  const [deskReady, setDeskReady] = useState(false);
   const [open, setOpen] = useState<{ id: string; from: DOMRect | null } | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const shown = useRef<View>("start");
@@ -35,9 +36,11 @@ export function Desk({ dossiers, portraits = [] }: { dossiers: Dossier[]; portra
     const sync = () => {
       const h = decodeURIComponent(location.hash.slice(1));
       if (byId.has(h)) {
+        setDeskReady(true);
         setView("desk");
         setOpen((o) => (o?.id === h ? o : { id: h, from: null }));
       } else {
+        if (h === VOLUME) setDeskReady(true);
         setView(h === VOLUME ? "desk" : "start");
         setOpen(null);
       }
@@ -52,7 +55,16 @@ export function Desk({ dossiers, portraits = [] }: { dossiers: Dossier[]; portra
   }, [byId]);
 
   const go = useCallback((hash: string) => history.pushState(null, "", hash ? `#${hash}` : location.pathname + location.search), []);
+  const warmDesk = useCallback(() => {
+    setDeskReady(true);
+    for (const u of ["/art/passivki/desk-top.webp", "/art/passivki/bg.webp", "/art/passivki/scroll2-l.webp", "/art/passivki/scroll2-m.webp", "/art/passivki/scroll2-r.webp"]) {
+      const im = new Image();
+      im.decoding = "async";
+      im.src = u;
+    }
+  }, []);
   const enter = useCallback(() => {
+    setDeskReady(true);
     go(VOLUME);
     setView("desk");
   }, [go]);
@@ -64,6 +76,7 @@ export function Desk({ dossiers, portraits = [] }: { dossiers: Dossier[]; portra
   const show = useCallback(
     (id: string, from: DOMRect | null) => {
       if (!byId.has(id)) return;
+      setDeskReady(true);
       go(id);
       setView("desk");
       setOpen({ id, from });
@@ -109,10 +122,10 @@ export function Desk({ dossiers, portraits = [] }: { dossiers: Dossier[]; portra
   return (
     <div className={s.root} ref={root} data-view={view}>
       <div className={s.room} data-room aria-hidden={view !== "start"} inert={view !== "start"}>
-        <Start heroes={dossiers} has={has} onEnter={enter} onOpen={show} />
+        <Start heroes={dossiers} has={has} onEnter={enter} onWarm={warmDesk} onOpen={show} />
       </div>
       <div className={s.desk} data-desk aria-hidden={view !== "desk"} inert={view !== "desk" || !!open}>
-        <LongDesk heroes={dossiers} has={has} onOpen={show} onBack={leave} />
+        {deskReady && <LongDesk heroes={dossiers} has={has} onOpen={show} onBack={leave} />}
       </div>
       {open && byId.has(open.id) && (
         <Scroll d={byId.get(open.id)!} byId={byId} has={has} from={open.from} onClose={close} onGo={(id) => show(id, null)} onEnd={() => (readEnd.current = true)} />

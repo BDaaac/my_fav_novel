@@ -121,6 +121,15 @@ export function VhsVault({ books }: { books: Book[] }) {
     setIsLoaderFinished(true);
   }, []);
 
+  // Мягко прогреваем CRT-кадр активной кассеты, чтобы экран воспроизведения открывался без чёрной паузы
+  useEffect(() => {
+    const src = activeBook?.readingScene;
+    if (!src) return;
+    const im = new Image();
+    im.decoding = "async";
+    im.src = src;
+  }, [activeBook?.readingScene]);
+
   // Ticking broadcast timecode & local OSD clock
   useEffect(() => {
     const updateClock = () => {

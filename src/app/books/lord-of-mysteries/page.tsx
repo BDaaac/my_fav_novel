@@ -1,3 +1,4 @@
+import { preload } from "react-dom";
 import { LotmArchive } from "@/archive/lotm/LotmArchive";
 import { LOTM_V1_CHARACTERS } from "@/data/lotm/v1-characters";
 
@@ -8,5 +9,7 @@ export const metadata = {
 };
 
 export default function LordOfMysteriesPage() {
+  preload("/art/lotm/bg-tingen.webp", { as: "image", fetchPriority: "high" });
+  preload("/art/lotm/vol1-grimoire.webp", { as: "image", fetchPriority: "high" });
   return <LotmArchive characters={LOTM_V1_CHARACTERS} />;
 }

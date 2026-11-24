@@ -62,6 +62,7 @@ export function CasePage({
           alt=""
           fill
           priority
+          fetchPriority="high"
           sizes="100vw"
           className={s.heroScene}
         />

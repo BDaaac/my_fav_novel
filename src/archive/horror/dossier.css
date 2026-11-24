@@ -5,7 +5,7 @@
 .hd-fit{position:relative;z-index:1;margin:0 auto;width:calc(1200px * var(--s,1));height:calc(1600px * var(--s,1))}
 .hd{--ink:#2a2420;--red:#8e1016;--pen:#9c1118;
   position:absolute;left:0;top:0;width:1200px;height:1600px;transform:scale(var(--s,1));transform-origin:0 0;overflow:hidden;
-  background-size:1200px 1600px;box-shadow:0 0 120px 40px rgba(10,7,6,.9);color:var(--ink)}
+  background-color:#d6c8ad;background-size:1200px 1600px;box-shadow:0 0 120px 40px rgba(10,7,6,.9);color:var(--ink)}
 .hd *{box-sizing:border-box}
 .hd .ink{position:absolute;isolation:isolate;mix-blend-mode:multiply;filter:url(#hd-ink)}
 .hd .cb{display:inline-block;width:13px;height:13px;border:1.6px solid var(--ink);margin-right:6px;vertical-align:-2px;position:relative}
@@ -56,7 +56,8 @@
   box-shadow:0 1px 1px rgba(0,0,0,.55),0 3px 6px rgba(0,0,0,.35),6px 14px 22px rgba(0,0,0,.42),14px 30px 50px rgba(0,0,0,.25)}
 .hd .card::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
   background:radial-gradient(circle at 12% 88%,rgba(120,10,14,.55) 0 2px,transparent 3px),radial-gradient(circle at 18% 92%,rgba(120,10,14,.6) 0 4px,transparent 6px),radial-gradient(circle at 90% 10%,rgba(120,10,14,.45) 0 3px,transparent 5px),radial-gradient(ellipse 120% 100% at 50% 50%,transparent 55%,rgba(90,60,30,.45))}
-.hd .card .art{height:430px;background:#1a1716 center 14%/cover;filter:contrast(1.05) saturate(.85);box-shadow:inset 0 0 40px rgba(0,0,0,.6);display:grid;place-items:center;color:#8d8478;font:700 22px var(--font-caveat)}
+.hd .card .art{position:relative;overflow:hidden;height:430px;background:#1a1716;filter:contrast(1.05) saturate(.85);box-shadow:inset 0 0 40px rgba(0,0,0,.6);display:grid;place-items:center;color:#8d8478;font:700 22px var(--font-caveat)}
+.hd .card .art img{position:relative;width:100%;height:100%;object-fit:cover;object-position:center 14%;display:block}
 .hd .card .plate{position:relative;margin-top:12px;color:#f6ece0;font:700 34px/1 var(--hd-oswald);letter-spacing:.04em;padding:8px 12px 6px}
 .hd .card .plate::before{content:"";position:absolute;inset:0;background:var(--red);filter:url(#hd-brush);z-index:-1}
 .hd .card .plate small{display:block;font:500 13px var(--hd-oswald);letter-spacing:.16em;margin-top:4px;color:#f1c9c2}

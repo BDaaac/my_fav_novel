@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
+import { preload } from "react-dom";
 import { notFound } from "next/navigation";
 import { Dossier } from "@/archive/horror/Dossier";
 import type { Dossier as D } from "@/data/horror/dossier/types";
-
 
 const dir = () => path.join(process.cwd(), "src/data/horror/dossier");
 
@@ -30,5 +30,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const d = read((await params).id);
   if (!d) notFound();
+  // Предзагружаем подложку бланка и портрет пропуска с высшим приоритетом — без пустого фона на старте
+  preload(d.art.plate ?? "/art/horror/plate-blank.webp", { as: "image", fetchPriority: "high" });
+  if (d.art.portrait) {
+    preload(d.art.portrait, { as: "image", fetchPriority: "high" });
+  }
   return <Dossier d={d} backHref="/books/my-house-of-horrors" />;
 }

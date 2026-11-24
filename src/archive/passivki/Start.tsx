@@ -15,11 +15,13 @@ export function Start({
   heroes,
   has,
   onEnter,
+  onWarm,
   onOpen,
 }: {
   heroes: Dossier[];
   has: Set<string>;
   onEnter: () => void;
+  onWarm?: () => void;
   onOpen: (id: string, from: DOMRect | null) => void;
 }) {
   const wrap = useRef<HTMLDivElement>(null);
@@ -115,11 +117,11 @@ export function Start({
   return (
     <div className={s.wrap} ref={wrap}>
       <div className={s.stage}>
-        <img className={s.bg} src="/art/passivki/start-bg.webp" alt="" />
+        <img className={s.bg} src="/art/passivki/start-bg.webp" alt="" fetchPriority="high" decoding="async" />
 
         {/* выход в главное меню: красный ярлык у окна */}
-        <Link href="/" className={s.menu} aria-label="В главное меню">
-          <img src="/art/passivki/slip.webp" alt="" />
+        <Link href="/" prefetch={false} className={s.menu} aria-label="В главное меню">
+          <img src="/art/passivki/slip.webp" alt="" decoding="async" />
           <span>Главное меню</span>
         </Link>
 
@@ -129,8 +131,8 @@ export function Start({
         </header>
 
         {/* диск целиком — кнопка тома; пока том один */}
-        <button type="button" className={s.disk} onClick={onEnter} aria-label="Том первый, главы 1–248. Открыть стол с табличками героев" />
-        <button type="button" className={s.tag} onClick={onEnter} tabIndex={-1} aria-hidden="true">
+        <button type="button" className={s.disk} onClick={onEnter} onPointerEnter={onWarm} onFocus={onWarm} aria-label="Том первый, главы 1–248. Открыть стол с табличками героев" />
+        <button type="button" className={s.tag} onClick={onEnter} onPointerEnter={onWarm} tabIndex={-1} aria-hidden="true">
           <img src="/art/passivki/slip.webp" alt="" />
           <span>
             <b>Том первый</b>

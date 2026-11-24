@@ -21,16 +21,21 @@ export function CharacterPhoto({ c, at, slip, slipImg, i }: { c?: BoardCharacter
   const sx = W / 2 + dx * Math.cos(a) - dy * Math.sin(a);
   const sy = H / 2 + dx * Math.sin(a) + dy * Math.cos(a);
 
-  const delay = { animationDelay: `${i * 45}ms` };
+  const delay = { animationDelay: `${i * 18}ms` };
+  const warmDossier = () => {
+    const im = new Image();
+    im.decoding = "async";
+    im.src = c?.id === "zhang-ya" ? "/art/horror/zhang-ya/plate.webp" : "/art/horror/plate-blank.webp";
+  };
   const card = (
     <span className="hs-cardbox" style={{ left: cx - W / 2, top: cy - H / 2, width: W, height: H, transform: `rotate(${rot}deg)` }}>
       <span className={`hs-window${c?.portrait ? "" : " empty"}`} style={{ left: CARD_PAD.l, top: CARD_PAD.t, width: at.w, height: at.h, ...delay }}>
-        {c?.portrait && <img src={c.portrait} alt="" draggable={false} />}
+        {c?.portrait && <img src={c.portrait} alt="" draggable={false} decoding="sync" fetchPriority="high" />}
       </span>
-      <img className="hs-frame" src={`/art/horror/scene/frame${i}.webp`} alt="" draggable={false} />
+      <img className="hs-frame" src={`/art/horror/scene/frame${i}.webp`} alt="" draggable={false} decoding="sync" />
       {c && (
         <span className="hs-slip" style={{ left: sx - slip.w / 2, top: sy - slip.h / 2, width: slip.w, height: slip.h, transform: `rotate(${(slip.rot ?? 0) - rot}deg)`, ...delay }}>
-          <img src={`/art/horror/scene/slip${slipImg}.webp`} alt="" draggable={false} />
+          <img src={`/art/horror/scene/slip${slipImg}.webp`} alt="" draggable={false} decoding="sync" />
           <b style={c.name.length > 10 ? { fontSize: c.name.length > 16 ? 18 : 23 } : undefined}>{c.name}</b>
         </span>
       )}
@@ -44,7 +49,7 @@ export function CharacterPhoto({ c, at, slip, slipImg, i }: { c?: BoardCharacter
       </span>
     );
   return (
-    <Link href={`/books/my-house-of-horrors/${c.id}`} className="hs-card live" aria-label={`Досье: ${c.name}`}>
+    <Link href={`/books/my-house-of-horrors/${c.id}`} prefetch={false} onPointerEnter={warmDossier} onFocus={warmDossier} className="hs-card live" aria-label={`Досье: ${c.name}`}>
       {card}
     </Link>
   );
