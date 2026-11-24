@@ -113,5 +113,24 @@
     "scene": "/art/vhs/lord-of-mysteries-still.webp",
     "spine": { "bg": "#140e20", "band": "#b690f4", "ink": "#e8dcff" },
     "height": 382
+  },
+  {
+    "slug": "avatar-king",
+    "title": "Аватар короля",
+    "short": "Аватар короля",
+    "blurb": "Отстранённый от про-сцены легендарный капитан Е Сю устраивается ночным администратором в интернет-кафе «Счастье» и с первого уровня возвращается в «Славу» с Зонтом тысячи вероятностей.",
+    "chapters": 1728,
+    "archive": "Монитор C-47 · Клиент «Славы»",
+    "facts": [
+      { "label": "томов в хронике", "value": "7" },
+      { "label": "досье в Томе I", "value": "25" },
+      { "label": "глав в новелле", "value": "1728" }
+    ],
+    "href": "/books/avatar-king",
+    "cover": "/art/king/p1/ye-xiu.webp",
+    "sleeve": "/art/vhs/avatar-king.webp",
+    "scene": "/art/vhs/avatar-king-still.webp",
+    "spine": { "bg": "#0b1424", "band": "#c9ff2e", "ink": "#eef5ff" },
+    "height": 378
   }
 ]
