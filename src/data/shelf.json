@@ -94,5 +94,24 @@
     "scene": "/art/vhs/passivki-still-lake.webp",
     "spine": { "bg": "#2a0e0b", "band": "#c8402c", "ink": "#f1e2bd" },
     "height": 378
+  },
+  {
+    "slug": "lord-of-mysteries",
+    "title": "Повелитель тайн",
+    "short": "Повелитель тайн",
+    "blurb": "Чжоу Минжуй пробуждается в викторианском Тингене в теле Клейна Моретти, входит в пространство над Серым Туманом и под маской Шута собирает тайный Клуб Таро.",
+    "chapters": 1432,
+    "archive": "Оккультный архив томов и досье",
+    "facts": [
+      { "label": "томов в архиве", "value": "8" },
+      { "label": "досье в Томе I", "value": "20" },
+      { "label": "глав в новелле", "value": "1432" }
+    ],
+    "href": "/books/lord-of-mysteries",
+    "cover": "/art/books/lord-of-mysteries-cover.jpg",
+    "sleeve": "/art/vhs/lord-of-mysteries.webp",
+    "scene": "/art/vhs/lord-of-mysteries-still.webp",
+    "spine": { "bg": "#140e20", "band": "#b690f4", "ink": "#e8dcff" },
+    "height": 382
   }
 ]
