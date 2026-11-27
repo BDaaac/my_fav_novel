@@ -148,7 +148,7 @@
     "href": "/books/ghost-work",
     "cover": "/art/books/ghost-work-cover.jpg",
     "sleeve": "/art/vhs/ghost-work-sleeve.webp",
-    "scene": "/art/vhs/ghost-work-still.webp",
+    "scene": "/art/vhs/ghost-work-still-mask.webp",
     "spine": { "bg": "#1d2224", "band": "#9fe8c0", "ink": "#ece8de" },
     "height": 384
   }
