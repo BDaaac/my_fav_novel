@@ -1,0 +1,11 @@
+Day Dream CRT archive — «Даже если попадёшь в историю о призраках, всё равно придётся идти на работу»
+
+bundle.js includes cool-retro-term-renderer 1.0.1 (GPL-3.0), a port of cool-retro-term.
+Because of that this page (bundle.js and the sources in ./src) is distributed under the
+GNU General Public License v3.0: https://www.gnu.org/licenses/gpl-3.0.html
+
+Unminified sources of this page: ./src (main.js, horror.js, audio.js, dossiers-*.js, package.json).
+Rebuild: npm i && npx esbuild src/main.js --bundle --format=iife --outfile=bundle.js
+Other bundled libraries: three (MIT), gsap (GreenSock standard license).
+Sound is synthesized in the browser (audio.js); no sample files.
+Character portraits and frames are fan art made with an image model, not canon depictions.

@@ -132,5 +132,24 @@
     "scene": "/art/vhs/avatar-king-still.webp",
     "spine": { "bg": "#0b1424", "band": "#c9ff2e", "ink": "#eef5ff" },
     "height": 378
+  },
+  {
+    "slug": "ghost-work",
+    "title": "Даже если попадёшь в историю о призраках, всё равно придётся идти на работу",
+    "short": "Работа с призраками",
+    "blurb": "Ким Соль Ым, фанат «Записей исследований Тьмы», попадает в мир этих историй и устраивается в Day Dream Inc. — компанию, которая отправляет сотрудников в «Тьмы» за выгодой.",
+    "chapters": 387,
+    "archive": "Личные дела сотрудников Day Dream",
+    "facts": [
+      { "label": "личных дел", "value": "43" },
+      { "label": "тома на кассетах", "value": "2" },
+      { "label": "глав прочитано", "value": "371" }
+    ],
+    "href": "/books/ghost-work",
+    "cover": "/art/books/ghost-work-cover.jpg",
+    "sleeve": "/art/vhs/ghost-work.webp",
+    "scene": "/art/vhs/ghost-work-still.webp",
+    "spine": { "bg": "#1d2224", "band": "#9fe8c0", "ink": "#ece8de" },
+    "height": 384
   }
 ]

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Day Dream — кассеты v2</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#141210;font-family:"IBM Plex Mono",monospace}
+#stage{position:absolute;left:0;top:0;width:1440px;height:900px}
+.abs{position:absolute}
+/* room (placeholder until the painted background) */
+#room{position:absolute;left:-82px;top:-3px;width:1605px;height:903px;background:url(room-office.jpg) center/100% 100% no-repeat}
+/* TV rig: TV + VCR + tapes in their own coordinates, set on the filing cabinet */
+#rig{position:absolute;left:255px;top:209px;width:1440px;height:900px;transform:scale(.7);transform-origin:0 0}
+/* the painted cabinet top is the surface; contact shadow under the gear */
+#contact{position:absolute;left:20px;top:682px;width:1180px;height:18px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.55),transparent 70%)}
+/* TV — dark CRT in a thick black rubber bezel (reference #4, recreated) */
+#tv{left:40px;top:254px;width:560px;height:440px;border-radius:30px;
+  background:linear-gradient(160deg,#3a3b3e 0%,#252628 45%,#1a1b1c 100%);
+  box-shadow:0 30px 60px rgba(0,0,0,.6),inset 0 2px 0 rgba(255,255,255,.12),inset 0 -3px 0 rgba(0,0,0,.5)}
+#tv::before{content:"";position:absolute;inset:0;border-radius:30px;pointer-events:none;z-index:7;
+  background:linear-gradient(180deg,rgba(150,230,215,.16) 0%,transparent 14%),linear-gradient(90deg,rgba(220,80,60,.14) 0%,transparent 22%,transparent 80%,rgba(120,200,190,.08) 100%)}
+#glow{position:absolute;left:89px;top:612px;width:780px;height:180px;pointer-events:none;opacity:0;mix-blend-mode:screen;
+  background:radial-gradient(ellipse 50% 60% at 50% 30%,rgba(220,230,225,.20),transparent 70%)}
+#tv::after{content:"";position:absolute;inset:0;border-radius:30px;pointer-events:none;mix-blend-mode:overlay;opacity:.35;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+/* outer rim: hard plastic edge catching light on top */
+#rim{position:absolute;left:14px;top:12px;right:14px;bottom:40px;border-radius:64px/58px;
+  background:linear-gradient(180deg,#5b5d61 0%,#2c2d30 18%,#161718 70%,#2a2b2d 100%);
+  box-shadow:0 2px 4px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.25)}
+/* rubber gasket: thick, soft chamfer falling into the glass */
+#gasket{position:absolute;inset:9px;border-radius:56px/50px;
+  background:radial-gradient(ellipse 90% 80% at 50% 45%,#0b0b0c 62%,#1d1e20 80%,#0c0c0d 100%);
+  box-shadow:inset 0 10px 14px rgba(255,255,255,.07),inset 0 -12px 18px rgba(0,0,0,.95),inset 0 0 0 1px rgba(255,255,255,.04)}
+/* thin lip right at the glass */
+#lip{position:absolute;inset:22px 24px;border-radius:46px/42px;background:#000;
+  box-shadow:0 0 0 2px #232427,0 -1px 0 2px rgba(255,255,255,.08),inset 0 0 18px 6px #000}
+#crt{position:absolute;inset:4px;border-radius:42px/38px;overflow:hidden;background:#000}
+#crt canvas{display:block;width:100%!important;height:100%!important}
+/* glass: lamp reflections + curvature sheen, above the picture */
+#glass{position:absolute;inset:4px;border-radius:42px/38px;pointer-events:none;z-index:6;
+  background:radial-gradient(ellipse 120% 110% at 50% 50%,transparent 58%,rgba(0,0,0,.55) 100%),
+             radial-gradient(ellipse 60% 40% at 30% 18%,rgba(255,255,255,.05),transparent 70%)}
+#glass svg{position:absolute;inset:0;width:100%;height:100%}
+#flash{position:absolute;left:8%;right:8%;top:50%;height:3px;margin-top:-1px;background:#f6f8fa;opacity:0;z-index:5;border-radius:2px;
+  box-shadow:0 0 18px 6px rgba(230,236,240,.6),0 0 60px 16px rgba(200,210,220,.3)}
+#tvsticker{position:absolute;left:214px;bottom:9px;width:178px;padding:3px 6px 2px;background:#d9d1bb;color:#3a372f;transform:rotate(-1.4deg);
+  box-shadow:0 1px 1px rgba(0,0,0,.5);font-size:7.5px;line-height:1.25;letter-spacing:.2px;white-space:nowrap}
+#tvsticker b{display:block;font-weight:600}#tvsticker i{font-style:normal}
+#led{position:absolute;right:34px;bottom:15px;width:8px;height:8px;border-radius:50%;background:#2c3a2a}
+#led.on{background:#5ee05e;box-shadow:0 0 4px #5ee05e}
+#tvname{position:absolute;left:34px;bottom:12px;font-size:10px;letter-spacing:3px;color:#5d5f63}
+/* VCR */
+#vcr{left:640px;top:604px;width:520px;height:90px;border-radius:6px;background:linear-gradient(#35373a,#232527);
+  box-shadow:0 3px 0 #111,0 14px 18px rgba(0,0,0,.45);perspective:400px}
+#slot{position:absolute;left:46px;top:20px;width:250px;height:22px;background:#060708;border-radius:2px}
+#flap{position:absolute;inset:0;background:linear-gradient(#2c2e31,#1c1d1f);transform-origin:50% 0;border-radius:2px}
+#vcr.ready #slot{box-shadow:0 0 0 2px #3c3f43}
+#disp{position:absolute;left:330px;top:20px;width:150px;height:34px;border-radius:3px;background:#0b1411;
+  font:13px "Press Start 2P",monospace;color:#22322c;display:flex;align-items:center;justify-content:center}
+#disp.on{color:#9fe8c0}
+.btn{position:absolute;top:54px;width:38px;height:16px;border-radius:3px;background:#46494c}
+/* tapes */
+#tapes{position:absolute;left:0;top:0}
+.tape{position:absolute;left:0;top:0;width:236px;height:42px;cursor:grab;transform-style:preserve-3d}
+.tape.held{cursor:grabbing}
+.tape .spine{position:absolute;inset:0;border-radius:3px;background:linear-gradient(#2e2e31,#1c1c1f);
+  box-shadow:0 2px 0 #0a0a0b,0 6px 10px rgba(0,0,0,.45);display:flex;align-items:center;gap:14px;padding:0 22px}
+.tape .spine::before{content:"";position:absolute;left:12px;right:12px;top:8px;bottom:8px;background:#e3dcc8;border-radius:1px}
+.tape .spine span,.tape .spine b{position:relative;color:#2b2a26;font-size:11px;white-space:nowrap}
+.tape .spine b{font:10px "Press Start 2P",monospace}
+.tape .body{display:none}
+.tape.held .spine{box-shadow:0 2px 0 #0a0a0b,0 22px 26px rgba(0,0,0,.5)}
+/* while entering we see the top face */
+.tape.entering{height:132px;margin-top:-90px}
+.tape.entering .spine{display:none}
+.tape.entering .body{display:block;position:absolute;inset:0;border-radius:4px;background:linear-gradient(#28282c,#17171a)}
+.tape .win{position:absolute;left:58px;top:18px;width:120px;height:44px;background:#0c0c0d;border-radius:3px;box-shadow:inset 0 0 0 2px #333}
+.tape .win i{position:absolute;top:8px;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle,#555 0 4px,#2a2a2a 5px 12px,#3a2f28 13px)}
+.tape .win i:first-child{left:10px}.tape .win i:last-child{right:10px}
+.tape .sticker{position:absolute;left:22px;right:22px;bottom:14px;height:42px;white-space:nowrap;background:#e3dcc8;color:#2b2a26;display:flex;align-items:center;justify-content:center;gap:10px;font-size:11px}
+.tape .sticker b{font:11px "Press Start 2P",monospace}.tape .sticker em{font-style:normal;color:#6b665a}
+#hint{position:absolute;left:56px;top:300px;width:230px;color:#b9b2a6;text-shadow:0 1px 2px #000;font-size:13px;line-height:1.5}
+#help{position:fixed;left:16px;bottom:12px;color:#6f777c;font-size:12px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="room"></div>
+  <div id="rig"><div id="contact"></div>
+  <div id="tv" class="abs">
+    <div id="rim"><div id="gasket"><div id="lip">
+      <div id="crt"><div id="flash"></div></div>
+      <div id="glass"><svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <g fill="#dfe3e6" opacity=".26">
+          <polygon points="13,7 39,5 38.2,8.2 12.6,9.6"/><polygon points="15,12.5 37,11.4 36.6,13.6 14.8,14.5"/>
+          <polygon points="19,18 33,17.2 32.8,18.8 18.9,19.4"/>
+          <polygon points="60,5.6 88,4.4 85,8.4 58.2,9.4"/><polygon points="62,12 80,11.3 78.6,13.3 61.4,13.8"/>
+        </g></svg></div>
+    </div></div></div>
+    <div id="tvsticker"><b>DAY DREAM INC. · ИНВ. ■■■</b><i>см. отчёт об утилизации № C16548</i></div><div id="led"></div><div id="tvname">DAY DREAM INC.</div>
+  </div>
+  <div id="vcr" class="abs">
+    <div id="slot"><div id="flap"></div></div>
+    <div id="disp">--:--</div>
+    <div class="btn" style="left:46px"></div><div class="btn" style="left:92px"></div><div class="btn" style="left:138px"></div><div class="btn" style="left:184px"></div>
+  </div>
+  <div id="tapes"><div class="tape" data-i="0" style="transform:translate(790px,562px) rotate(-1deg)"><div class="body"><div class="win"><i></i><i></i></div><div class="sticker"><span>DAY DREAM</span><b>ТОМ I</b></div></div><div class="spine"><span>DAY DREAM</span><b>ТОМ I</b></div></div><div class="tape" data-i="1" style="transform:translate(798px,522px) rotate(1.2deg)"><div class="body"><div class="win"><i></i><i></i></div><div class="sticker"><span>DAY DREAM</span><b>ТОМ II</b></div></div><div class="spine"><span>DAY DREAM</span><b>ТОМ II</b></div></div></div>
+  </div>
+  <div id="glow"></div>
+  <div id="hint">Возьми кассету и вставь в видеомагнитофон. Каждая кассета — том.</div>
+</div>
+<div id="help">перетащи кассету в щель (или кликни) · ↑↓ Enter — досье · Esc — назад / достать кассету</div>
+<script src="bundle.js"></script>
+</body>
+</html>
